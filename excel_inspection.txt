@@ -1,0 +1,190 @@
+========== SHEET NAMES ==========
+[
+  "TEAM",
+  "SPORTS PROGRAM LIST",
+  "STAGE PROGRAM LIST",
+  "NON-STAGE PROGRAM LIST",
+  "MASTER LIST",
+  "PROGRAM_DIRECTORY",
+  "REGISTRATION_DESK"
+]
+
+============================================================
+SHEET: "TEAM"
+Range: A1:F294
+Rows: 294, Cols: 6
+
+Row 1: ["SI NO","AD NO","NAME","TEAM","CLASS","CATEGARY"]
+
+Row 2: [1,67,"MUHAMMED ABDUL SALEEM K","TEAM C",10,"ʿĀLIYAH"]
+
+Row 3: [2,68,"MUHAMMED SALIM K","TEAM A",10,"ʿĀLIYAH"]
+
+Row 4: [3,357,"MUHAMMED ANSAR PK","TEAM B",10,"ʿĀLIYAH"]
+
+Row 5: [4,71,"AAKHIL MUHAMMED K","TEAM A",10,"ʿĀLIYAH"]
+
+Row 6: [5,393,"MUHAMMED SALMAN OK","TEAM D",10,"ʿĀLIYAH"]
+
+Row 7: [6,78,"MUHAMMED FARHAN","TEAM B",10,"ʿĀLIYAH"]
+
+Row 8: [7,356,"SHIHAD TK","TEAM C",10,"ʿĀLIYAH"]
+
+--- Total rows: 294 ---
+Row 292: [291,485,"MUHAMMED KAISAN V","TEAM B",1,"BIDĀYAH"]
+Row 293: [292,486,"MUHAMMED MUNEES,K","TEAM C",1,"BIDĀYAH"]
+Row 294: [293,487,"RAHIL RAYAN P","TEAM C",1,"BIDĀYAH"]
+
+============================================================
+SHEET: "SPORTS PROGRAM LIST"
+Range: A1:R19
+Rows: 19, Cols: 18
+
+Row 1: ["SPORTS PROGRAM LIST"]
+
+Row 2: ["BIDĀYAH","","","ŪLĀ","","","THĀNIYAH","","","THĀNAWIYYAH","","","ʿĀLIYAH","","","KULLIYYAH"]
+
+Row 3: ["Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants"]
+
+Row 4: ["BSP1","100M Running",2,"USP1","100M Running",2,"TSP1","200M Running",2,"TWSP1","200M Running",2,"ASP1","400M Running",2,"KSP1","Football","7 (ALY +TWY)"]
+
+Row 5: ["BSP2","Long Jump",2,"USP2","Long Jump",2,"TSP2","Long Jump",2,"TWSP2","Long Jump",2,"ASP2","Long Jump",2,"KSP2","Volleyball","7( ALY +TWY)"]
+
+Row 6: ["BSP3","4 × 100M Relay",2,"USP3","4 × 100M Relay",2,"TSP3","4 × 100M Relay",2,"TWSP3","4 × 100M Relay",2,"ASP3","4 × 100M Relay",2,"KSP3","Cricket","6( ALY +TWY)"]
+
+Row 7: ["BSP4","Lemon & Spoon Race",2,"USP4","Sack Race",2,"TSP4","Sack Race",2,"TWSP4","Shootout",2,"ASP4","Shootout",2,"KSP4","Chess",1]
+
+Row 8: ["BSP5","Seed and Needle",2,"USP5","Lemon & Spoon Race",2,"TSP5","Shootout",2,"TWSP5","Push Up",2,"ASP5","Push Up",2]
+
+--- Total rows: 19 ---
+Row 17: ["BSP14","Frog Jump",2,"","","","TSP14","Footsall","1(4 persons )","TWSP14","Throw to stump",2,"ASP14","Biscuit eating",2]
+Row 18: ["","","","","","","","","","TWSP15","Arm wrestling",2]
+Row 19: ["","","","","","","","","","TWSP16","Crossbar Challenge",2]
+
+============================================================
+SHEET: "STAGE PROGRAM LIST"
+Range: A1:R29
+Rows: 29, Cols: 18
+
+Row 1: ["STAGE PROGRAM LIST"]
+
+Row 2: ["BIDĀYAH","","","ʾŪLĀ","","","THĀNIYAH","","","THĀNAWIYYAH","","","ʿĀLIYAH","","","KULLIYYAH"]
+
+Row 3: ["Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants"]
+
+Row 4: ["BS1","QIRA'ATH",1,"US1","QIRA'AH",2,"TS1","HIFZ & QIRA'AH",2,"TWS1","HIFZ & QIRA'AH",2,"AS1","KHUTBAH",2,"KS1","QAWWALI URD","1*7"]
+
+Row 5: ["BS2","HIFZ",1,"US2","HIFZ",2,"TS2","WA'Z",2,"TWS2","WA'Z",2,"AS2","WA'Z",2,"KS2","SAMA'","1*3"]
+
+Row 6: ["BS3","ADHAN",1,"US3","SONG MLM",2,"TS3","BHAKTHI GANAM",2,"TWS3","SONG URD",2,"AS3","LECTURING ENG",2,"KS3","MEHFILE ISHQ","1*7"]
+
+Row 7: ["BS4","SONG MLM",1,"US4","SONG ENG",2,"TS4","SONG ENG",2,"TWS4","NASHID ARB",2,"AS4","NASHEED ARB",2,"KS4","DEBATE ENGLISH","1*2"]
+
+Row 8: ["BS5","SONG ARB",1,"US5","SONG ARB",2,"TS5","SONG ARB",2,"TWS5","SPEECH URD",2,"AS5","MAPPILAPPATTU",2,"KS5","DEBATE URDU","1*4"]
+
+--- Total rows: 29 ---
+Row 27: ["","","","US24","CONVERSATION ARB","1*2","","","","","","","AS24","MOCK INTERVIEW ENG",2]
+Row 28: ["","","","US25","CONVERSATION URD","1*2","","","","","","","AS25","VARSITY TALENT",2]
+Row 29: ["","","","US26","GROUP SONG","1*3","","","","","","","AS26","MY PITCH","1*3"]
+
+============================================================
+SHEET: "NON-STAGE PROGRAM LIST"
+Range: A1:R36
+Rows: 36, Cols: 18
+
+Row 1: ["NON-STAGE PROGRAM LIST"]
+
+Row 2: ["BIDĀYAH","","","ʾŪLĀ","","","THĀNIYAH","","","THĀNAWIYYAH","","","ʿĀLIYAH","","","KULLIYYAH"]
+
+Row 3: ["Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants","Code","Programme Name","No. of Participants"]
+
+Row 4: ["BNS1","VOCABULARY",2,"UNS1","SUDOKU",2,"TNS1","SENTENCE TRANSLATION",2,"TWNS1","TRANSLATION TRILINGUAL",2,"ANS1","MR. TRANSLATOR",2,"KNS1","DIGITAL MAGAZINE","-"]
+
+Row 5: ["BNS2","GK QUIZ",2,"UNS2","MEMORY TEST",2,"TNS2","ACRYLIC PAINTING",2,"TWNS2","SCIENCE MASTER",2,"ANS2","AL 'ARABI",2,"KNS2","PHOTO ESSAY","-"]
+
+Row 6: ["BNS3","MEMORY TEST",2,"UNS3","VOCABULARY",2,"TNS3","ESSAY MLM",2,"TWNS3","MANIPULATION POSTER",2,"ANS3","ALLAME URDU",2,"KNS3","REEL MAKING","-"]
+
+Row 7: ["BNS4","POEM WRITING MLM",2,"UNS4","SCIENCE MASTER",2,"TNS4","ESSAY ENG",2,"TWNS4","DIGITAL TYPOGRAPHY MLM",2,"ANS4","MR. ENGLISH",2,"KNS4","AI VIDEO GENERATION","-"]
+
+Row 8: ["BNS5","PICTURE STORY MLM",2,"UNS5","HINDI VIDUAN",2,"TNS5","ESSAY ARB",2,"TWNS5","ESSAY MLM",2,"ANS5","MR. ESPAÑOL",2,"KNS5","WALL PAINTING","-"]
+
+--- Total rows: 36 ---
+Row 34: ["","","","","","","","","","","","","ANS31","ADVENTURE PHOTOGRAPHY",2]
+Row 35: ["","","","","","","","","","","","","ANS32","DIGITAL TABLOID ARB","1*5"]
+Row 36: ["","","","","","","","","","","","","ANS33","BROCHURE DESIGNNG","1*4"]
+
+============================================================
+SHEET: "MASTER LIST"
+Range: A1:AC294
+Rows: 294, Cols: 29
+
+Row 1: [" ","NAME","CLASS","CATEGORY","TEAM","STATUS","Non-Stage Count","ST Count","Sports Count","Individual Count","Group Count","Total Count","Bylaw Status","REG 1","REG 2","REG 3","REG 4","REG 5","REG 6","REG 7","REG 8","REG 9","REG 10","REG 11","REG 12","REG 13","REG 14","REG 15","REGISTERED PROGRAMS"]
+
+Row 2: [67,"MUHAMMED ABDUL SALEEM K",10,"ʿĀLIYAH","TEAM C","Active",0,0,0,0,0,0,"Min 1 Required (Stage & Non-Stage)"]
+
+Row 3: [68,"MUHAMMED SALIM K",10,"ʿĀLIYAH","TEAM A","Active",0,0,0,0,0,0,"Min 1 Required (Stage & Non-Stage)"]
+
+Row 4: [357,"MUHAMMED ANSAR PK",10,"ʿĀLIYAH","TEAM B","Active",0,0,0,0,0,0,"Min 1 Required (Stage & Non-Stage)"]
+
+Row 5: [71,"AAKHIL MUHAMMED K",10,"ʿĀLIYAH","TEAM A","Active",0,0,0,0,0,0,"Min 1 Required (Stage & Non-Stage)"]
+
+Row 6: [393,"MUHAMMED SALMAN OK",10,"ʿĀLIYAH","TEAM D","Active",0,0,0,0,0,0,"Min 1 Required (Stage & Non-Stage)"]
+
+Row 7: [78,"MUHAMMED FARHAN",10,"ʿĀLIYAH","TEAM B","Active",0,0,0,0,0,0,"Min 1 Required (Stage & Non-Stage)"]
+
+Row 8: [356,"SHIHAD TK",10,"ʿĀLIYAH","TEAM C","Active",0,0,0,0,0,0,"Min 1 Required (Stage & Non-Stage)"]
+
+--- Total rows: 294 ---
+Row 292: [485,"MUHAMMED KAISAN V",1,"BIDĀYAH","TEAM B","Active",0,0,0,0,0,0,"Min 1 Required (Stage & Non-Stage)"]
+Row 293: [486,"MUHAMMED MUNEES,K",1,"BIDĀYAH","TEAM C","Active",0,0,0,0,0,0,"Min 1 Required (Stage & Non-Stage)"]
+Row 294: [487,"RAHIL RAYAN P",1,"BIDĀYAH","TEAM C","Active",0,0,0,0,0,0,"Min 1 Required (Stage & Non-Stage)"]
+
+============================================================
+SHEET: "PROGRAM_DIRECTORY"
+Range: A1:J334
+Rows: 334, Cols: 10
+
+Row 1: ["Code","Name","Category","Type","Format","Quota","Group Size","Max Participants","Eligible Category","Status"]
+
+Row 2: ["BS1","QIRA'ATH","BIDĀYAH","Stage","Individual",1,1,1,"BIDĀYAH","Active"]
+
+Row 3: ["BS2","HIFZ","BIDĀYAH","Stage","Individual",1,1,1,"BIDĀYAH","Active"]
+
+Row 4: ["BS3","ADHAN","BIDĀYAH","Stage","Individual",1,1,1,"BIDĀYAH","Active"]
+
+Row 5: ["BS4","SONG MLM","BIDĀYAH","Stage","Individual",1,1,1,"BIDĀYAH","Active"]
+
+Row 6: ["BS5","SONG ARB","BIDĀYAH","Stage","Individual",1,1,1,"BIDĀYAH","Active"]
+
+Row 7: ["BS6","SONG URD","BIDĀYAH","Stage","Individual",1,1,1,"BIDĀYAH","Active"]
+
+Row 8: ["BS7","SPEECH MLM","BIDĀYAH","Stage","Individual",1,1,1,"BIDĀYAH","Active"]
+
+--- Total rows: 334 ---
+Row 332: ["KSP2","Volleyball","KULLIYYAH","Sports","Group",7,7,7,"ʿĀLIYAH + THĀNAWIYYAH","Active"]
+Row 333: ["KSP3","Cricket","KULLIYYAH","Sports","Group",6,6,6,"ʿĀLIYAH + THĀNAWIYYAH","Active"]
+Row 334: ["KSP4","Chess","KULLIYYAH","Sports","Individual",1,1,1,"KULLIYYAH","Active"]
+
+============================================================
+SHEET: "REGISTRATION_DESK"
+Range: A1:CB44
+Rows: 44, Cols: 80
+
+Row 1: ["Category","THĀNIYAH","","TOTAL STUDENTS","COMPLIANT","MIN 1 REQ","OVER QUOTA","TOTAL REG"]
+
+Row 2: ["Program Type","All Programs","",17,0,17,0,0]
+
+Row 3: ["Team","TEAM C","","Active in Team","Meets All Bylaws","Pending","Violations","Team Total"]
+
+Row 4: ["Active Student Count",17]
+
+Row 5: ["","","","","","","TS1","TS2","TS3","TS4","TS5","TS6","TS7","TS8","TS9","TS10","TS11","TS12","TS13","TS14","TS15","TS16","TS17","TS18","TS19","TS20","TS21","TS22","TS23","TNS1","TNS2","TNS3","TNS4","TNS5","TNS6","TNS7","TNS8","TNS9","TNS10","TNS11","TNS12","TNS13","TNS14","TNS15","TNS16","TNS17","TNS18","TNS19","TNS20","TNS21","TNS22","TNS23","TNS24","TSP1","TSP2","TSP3","TSP4","TSP5","TSP6","TSP7","TSP8","TSP9","TSP10","TSP11","TSP12","TSP13","TSP14"]
+
+Row 6: ["AD NO","STUDENT NAME","CLASS","CATEGORY","TEAM","BYLAW STATUS","HIFZ & QIRA'AH (2)","WA'Z (2)","BHAKTHI GANAM (2)","SONG ENG (2)","SONG ARB (2)","SONG URD (2)","SPEECH MLM (2)","SPEECH ENG (2)","SPEECH ARB (2)","SPEECH URD (2)","PADHYAPARAYANAM (2)","HISTORY TALK ENG (2)","ORU NIMISHAM (2)","NEWS WRITING AND READING MLM (2)","SPELLING BEE (2)","GK QUIZ (2)","SCIENCE MASTER (2)","GRAMMAR QUIZ (2)","MATHS TALENT (2)","SWARF IQ (2)","PADAPPATTU (2)","SPEECH & SONG MLM (1*3)","GROUP SONG (1*4)","SENTENCE TRANSLATION (2)","ACRYLIC PAINTING (2)","ESSAY MLM (2)","ESSAY ENG (2)","ESSAY ARB (2)","ESSAY URD (2)","ESSAY HINDI (2)","POEM MLM (2)","POEM ENG (2)","POEM ARB (2)","POEM URD (2)","SHORT STORY MLM (2)","SHORT STORY ENG (2)","SHORT STORY ARB (2)","SHORT STORY URD (2)","TEXT TORNADO (2)","CARTOON (2)","DICTIONARY MAKING HINDI (2)","EXCEL MASTER (2)","POSTER DESIGNING (2)","VIDEO EDITING (2)","IMAGE ELABORATION ENG (2)","INSTANT CHILDREN'S MAGAZINE MLM (1*5)","INSTANT NEWSPAPER MLM (1*5)","200M Running (2)","Long Jump (2)","4 × 100M Relay (2)","Sack Race (2)","Shootout (2)","Badminton (2)","Plank (2)","Juggling (2)","Throw to stump (2)","Pot breaking (2)","Slow Race (2)","Water Filling Group (2)","Arm wrestling (2)","Footsall (1*4)"]
+
+Row 7: [290,"AHAMMED RAZAN K",5,"THĀNIYAH","TEAM C","Min 1 Required (Stage & Non-Stage)"]
+
+Row 8: [251,"MUHAMMED SHAFIN KP",5,"THĀNIYAH","TEAM C","Min 1 Required (Stage & Non-Stage)"]
+
+--- Total rows: 44 ---
+Row 44: ["","","","","","","","","","                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "]

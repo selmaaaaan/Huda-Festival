@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Team {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  code     String    @unique
+  isActive Boolean   @default(true)
+  students Student[]
+  users    User[]
+}
+
+model User {
+  id                 Int       @id @default(autoincrement())
+  username           String    @unique
+  passwordHash       String
+  displayName        String
+  role               String    @default("TEAM_LEADER") // ADMIN or TEAM_LEADER
+  teamId             Int?
+  team               Team?     @relation(fields: [teamId], references: [id])
+  isActive           Boolean   @default(true)
+  mustChangePassword Boolean   @default(true)
+  permissions        String    @default("{}") // JSON string of permissions
+  lastLoginAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  auditLogs          AuditLog[]
+}
+
+model Student {
+  id            Int            @id @default(autoincrement())
+  adNo          Int            @unique
+  name          String
+  class         Int
+  category      String
+  teamId        Int?
+  team          Team?          @relation(fields: [teamId], references: [id])
+  status        String         @default("Active")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  registrations Registration[]
+
+  @@index([teamId])
+  @@index([category])
+  @@index([teamId, category])
+}
+
+model Program {
+  id               Int            @id @default(autoincrement())
+  code             String         @unique
+  name             String
+  category         String
+  type             String         // Stage, Non-Stage, Sports
+  format           String         // Individual, Group
+  quota            String         // "2", "1*7", "-"
+  groupSize        Int            @default(1)
+  maxParticipants  Int            @default(1)
+  eligibleCategory String
+  status           String         @default("Active")
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  registrations    Registration[]
+
+  @@index([category])
+  @@index([type])
+  @@index([category, type])
+}
+
+model Registration {
+  id                Int      @id @default(autoincrement())
+  studentId         Int
+  student           Student  @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  programId         Int
+  program           Program  @relation(fields: [programId], references: [id], onDelete: Restrict)
+  registrationValue String   @default("1") // "1" = registered
+  createdBy         Int?     // userId
+  updatedBy         Int?     // userId
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([studentId, programId])
+  @@index([studentId])
+  @@index([programId])
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String   // REGISTER, UNREGISTER, CHANGE_TEAM, LOGIN, etc.
+  entityType String   // Student, Registration, User, etc.
+  entityId   String?
+  details    String   @default("{}") // JSON: { oldValue, newValue, studentAdNo, programCode, etc. }
+  ipAddress  String?
+  timestamp  DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+}

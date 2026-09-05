@@ -1,0 +1,189 @@
+========== PROGRAM_DIRECTORY ==========
+Total programs: 333
+
+Programs by Category:
+{
+  "BIDĀYAH": 51,
+  "ʾŪLĀ": 59,
+  "THĀNIYAH": 61,
+  "THĀNAWIYYAH": 66,
+  "ʿĀLIYAH": 73,
+  "KULLIYYAH": 23
+}
+
+Programs by Type:
+{
+  "Stage": 126,
+  "Non-Stage": 132,
+  "Sports": 75
+}
+
+Programs by Format:
+{
+  "Individual": 305,
+  "Group": 28
+}
+
+Unique Eligible Categories:
+[
+  "BIDĀYAH",
+  "KULLIYYAH",
+  "THĀNAWIYYAH",
+  "THĀNIYAH",
+  "ʾŪLĀ",
+  "ʿĀLIYAH",
+  "ʿĀLIYAH + THĀNAWIYYAH"
+]
+
+Unique Quota values:
+[
+  "-",
+  "1",
+  "1*2",
+  "1*3",
+  "1*4",
+  "1*5",
+  "1*6",
+  "1*7",
+  "2",
+  "3",
+  "6",
+  "7"
+]
+
+Unique Group Size values:
+[
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7"
+]
+
+--- Sample programs per category ---
+
+BIDĀYAH:
+{"Code":"BS1","Name":"QIRA'ATH","Category":"BIDĀYAH","Type":"Stage","Format":"Individual","Quota":1,"Group Size":1,"Max Participants":1,"Eligible Category":"BIDĀYAH","Status":"Active"}
+{"Code":"BS2","Name":"HIFZ","Category":"BIDĀYAH","Type":"Stage","Format":"Individual","Quota":1,"Group Size":1,"Max Participants":1,"Eligible Category":"BIDĀYAH","Status":"Active"}
+{"Code":"BS3","Name":"ADHAN","Category":"BIDĀYAH","Type":"Stage","Format":"Individual","Quota":1,"Group Size":1,"Max Participants":1,"Eligible Category":"BIDĀYAH","Status":"Active"}
+
+ʾŪLĀ:
+{"Code":"US1","Name":"QIRA'AH","Category":"ʾŪLĀ","Type":"Stage","Format":"Individual","Quota":2,"Group Size":1,"Max Participants":2,"Eligible Category":"ʾŪLĀ","Status":"Active"}
+{"Code":"US2","Name":"HIFZ","Category":"ʾŪLĀ","Type":"Stage","Format":"Individual","Quota":2,"Group Size":1,"Max Participants":2,"Eligible Category":"ʾŪLĀ","Status":"Active"}
+{"Code":"US3","Name":"SONG MLM","Category":"ʾŪLĀ","Type":"Stage","Format":"Individual","Quota":2,"Group Size":1,"Max Participants":2,"Eligible Category":"ʾŪLĀ","Status":"Active"}
+
+THĀNIYAH:
+{"Code":"TS1","Name":"HIFZ & QIRA'AH","Category":"THĀNIYAH","Type":"Stage","Format":"Individual","Quota":2,"Group Size":1,"Max Participants":2,"Eligible Category":"THĀNIYAH","Status":"Active"}
+{"Code":"TS2","Name":"WA'Z","Category":"THĀNIYAH","Type":"Stage","Format":"Individual","Quota":2,"Group Size":1,"Max Participants":2,"Eligible Category":"THĀNIYAH","Status":"Active"}
+{"Code":"TS3","Name":"BHAKTHI GANAM","Category":"THĀNIYAH","Type":"Stage","Format":"Individual","Quota":2,"Group Size":1,"Max Participants":2,"Eligible Category":"THĀNIYAH","Status":"Active"}
+
+THĀNAWIYYAH:
+{"Code":"TWS1","Name":"HIFZ & QIRA'AH","Category":"THĀNAWIYYAH","Type":"Stage","Format":"Individual","Quota":2,"Group Size":1,"Max Participants":2,"Eligible Category":"THĀNAWIYYAH","Status":"Active"}
+{"Code":"TWS2","Name":"WA'Z","Category":"THĀNAWIYYAH","Type":"Stage","Format":"Individual","Quota":2,"Group Size":1,"Max Participants":2,"Eligible Category":"THĀNAWIYYAH","Status":"Active"}
+{"Code":"TWS3","Name":"SONG URD","Category":"THĀNAWIYYAH","Type":"Stage","Format":"Individual","Quota":2,"Group Size":1,"Max Participants":2,"Eligible Category":"THĀNAWIYYAH","Status":"Active"}
+
+ʿĀLIYAH:
+{"Code":"AS1","Name":"KHUTBAH","Category":"ʿĀLIYAH","Type":"Stage","Format":"Individual","Quota":2,"Group Size":1,"Max Participants":2,"Eligible Category":"ʿĀLIYAH","Status":"Active"}
+{"Code":"AS2","Name":"WA'Z","Category":"ʿĀLIYAH","Type":"Stage","Format":"Individual","Quota":2,"Group Size":1,"Max Participants":2,"Eligible Category":"ʿĀLIYAH","Status":"Active"}
+{"Code":"AS3","Name":"LECTURING ENG","Category":"ʿĀLIYAH","Type":"Stage","Format":"Individual","Quota":2,"Group Size":1,"Max Participants":2,"Eligible Category":"ʿĀLIYAH","Status":"Active"}
+
+KULLIYYAH:
+{"Code":"KS1","Name":"QAWWALI URD","Category":"KULLIYYAH","Type":"Stage","Format":"Group","Quota":"1*7","Group Size":7,"Max Participants":7,"Eligible Category":"KULLIYYAH","Status":"Active"}
+{"Code":"KS2","Name":"SAMA'","Category":"KULLIYYAH","Type":"Stage","Format":"Group","Quota":"1*3","Group Size":3,"Max Participants":3,"Eligible Category":"KULLIYYAH","Status":"Active"}
+{"Code":"KS3","Name":"MEHFILE ISHQ","Category":"KULLIYYAH","Type":"Stage","Format":"Group","Quota":"1*7","Group Size":7,"Max Participants":7,"Eligible Category":"KULLIYYAH","Status":"Active"}
+
+
+========== TEAM DATA ==========
+Total students: 293
+
+Students per team:
+{
+  "TEAM C": 73,
+  "TEAM A": 73,
+  "TEAM B": 72,
+  "TEAM D": 72,
+  "COORDINATOR": 3
+}
+
+Students per team per category:
+{
+  "TEAM C": {
+    "ʿĀLIYAH": 20,
+    "THĀNAWIYYAH": 14,
+    "THĀNIYAH": 17,
+    "ʾŪLĀ": 15,
+    "BIDĀYAH": 7
+  },
+  "TEAM A": {
+    "ʿĀLIYAH": 20,
+    "THĀNAWIYYAH": 15,
+    "THĀNIYAH": 16,
+    "ʾŪLĀ": 15,
+    "BIDĀYAH": 7
+  },
+  "TEAM B": {
+    "ʿĀLIYAH": 20,
+    "THĀNAWIYYAH": 14,
+    "THĀNIYAH": 16,
+    "ʾŪLĀ": 15,
+    "BIDĀYAH": 7
+  },
+  "TEAM D": {
+    "ʿĀLIYAH": 20,
+    "THĀNAWIYYAH": 14,
+    "THĀNIYAH": 16,
+    "ʾŪLĀ": 14,
+    "BIDĀYAH": 8
+  },
+  "COORDINATOR": {
+    "COORDINATOR": 3
+  }
+}
+
+
+========== MASTER LIST ==========
+Total rows (incl header): 294
+Headers: [" ","NAME","CLASS","CATEGORY","TEAM","STATUS","Non-Stage Count","ST Count","Sports Count","Individual Count","Group Count","Total Count","Bylaw Status","REG 1","REG 2","REG 3","REG 4","REG 5","REG 6","REG 7","REG 8","REG 9","REG 10","REG 11","REG 12","REG 13","REG 14","REG 15","REGISTERED PROGRAMS"]
+Students with registrations: 0
+
+Unique Bylaw Statuses:
+[
+  "Min 1 Required (Stage & Non-Stage)",
+  "Inactive Student"
+]
+
+
+========== REGISTRATION_DESK ==========
+Total rows: 44
+
+Row 1 (Category): ["Category","THĀNIYAH","TOTAL STUDENTS","COMPLIANT","MIN 1 REQ","OVER QUOTA","TOTAL REG"]
+Row 2 (Program Type): ["Program Type","All Programs",17,0,17,0,0]
+Row 3 (Team): ["Team","TEAM C","Active in Team","Meets All Bylaws","Pending","Violations","Team Total"]
+Row 4 (Active Count): ["Active Student Count",17]
+
+Program codes in desk: 61
+First 20: ["TS1","TS2","TS3","TS4","TS5","TS6","TS7","TS8","TS9","TS10","TS11","TS12","TS13","TS14","TS15","TS16","TS17","TS18","TS19","TS20"]
+Last 10: ["TSP5","TSP6","TSP7","TSP8","TSP9","TSP10","TSP11","TSP12","TSP13","TSP14"]
+
+Program name headers count: 61
+
+Student rows:
+Row 7: [290,"AHAMMED RAZAN K",5,"THĀNIYAH","TEAM C","Min 1 Required (Stage & Non-Stage)"]
+Row 8: [251,"MUHAMMED SHAFIN KP",5,"THĀNIYAH","TEAM C","Min 1 Required (Stage & Non-Stage)"]
+Row 9: [272,"MUHAMMED DHANISH TV",5,"THĀNIYAH","TEAM C","Min 1 Required (Stage & Non-Stage)"]
+Row 10: [266,"MUHAMMAD ADNAN",5,"THĀNIYAH","TEAM C","Min 1 Required (Stage & Non-Stage)"]
+
+Total non-empty registration cells in desk: 123
+
+
+========== ALL CATEGORIES ==========
+[
+  "BIDĀYAH",
+  "COORDINATOR",
+  "THĀNAWIYYAH",
+  "THĀNIYAH",
+  "ʾŪLĀ",
+  "ʿĀLIYAH"
+]
