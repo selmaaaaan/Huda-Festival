@@ -1,0 +1,22 @@
+const express = require('express');
+const router = express.Router({ mergeParams: true });
+const { 
+    savePendingResults, 
+    savePendingResultsBulk,
+} = require('../controllers/resultController.js');
+const { protect } = require('../middlewares/authMiddleware.js');
+
+const certificateRouter = require('./certificateRoutes.js');
+
+// This route now correctly handles GET, POST, and DELETE for a programme's results
+router.route('/')
+    .get(getProgrammeResults)
+    .post(protect, savePendingResults)
+
+router.post('/bulk', protect, savePendingResultsBulk);
+
+// Nested route for certificates remains the same
+router.use('/:id/certificate', certificateRouter);
+
+module.exports = router;
+
