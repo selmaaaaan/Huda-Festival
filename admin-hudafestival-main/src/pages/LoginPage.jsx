@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 import Logo from '../components/Logo';
+import Button from '../components/Button';
 import { User, Lock, Eye, EyeOff } from 'lucide-react';
 
 const LoginPage = ({ onLoginSuccess }) => {
@@ -22,7 +23,6 @@ const LoginPage = ({ onLoginSuccess }) => {
     }
 
     try {
-      // NOTE: Using the original login logic as requested
       const { data } = await api.post('/auth/login', { userName, password });
       localStorage.setItem('userInfo', JSON.stringify(data));
       onLoginSuccess();
@@ -42,25 +42,25 @@ const LoginPage = ({ onLoginSuccess }) => {
   const showDemoButton = import.meta.env.MODE !== 'production' || import.meta.env.VITE_SHOW_DEMO_LOGIN === 'true';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F5F0EA]">
-      <div className="w-full max-w-md p-10 space-y-8 bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] text-[var(--color-text-heading)]">
+      <div className="w-full max-w-md p-10 space-y-8 bg-[var(--color-surface)] rounded-2xl shadow-2xl border border-[var(--color-border)]">
         <div className="flex flex-col items-center">
           <Logo size="large" />
-          <h2 className="text-2xl font-bold text-gray-900 mt-6">Admin Portal</h2>
-          <p className="text-sm text-gray-500 mt-1">Secure Access Management</p>
+          <h2 className="text-2xl font-bold mt-6">Admin Console</h2>
+          <p className="text-sm text-[var(--color-text-muted)] mt-1">Secure Operations Access</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           {error && (
-            <p className="p-3 text-sm font-medium text-red-800 bg-red-50 rounded-lg border border-red-200">
+            <div className="p-3 text-sm font-medium text-red-400 bg-red-900/20 rounded-lg border border-red-800/40">
               {error}
-            </p>
+            </div>
           )}
 
           <div className="space-y-4">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <User size={18} className="text-gray-400" />
+                <User size={18} className="text-[var(--color-text-muted)]" />
               </div>
               <input
                 type="text"
@@ -68,13 +68,13 @@ const LoginPage = ({ onLoginSuccess }) => {
                 placeholder="Username"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E8A317] focus:border-transparent transition-all"
+                className="w-full pl-10 pr-4 py-3 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)] transition-all"
               />
             </div>
 
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock size={18} className="text-gray-400" />
+                <Lock size={18} className="text-[var(--color-text-muted)]" />
               </div>
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -82,12 +82,12 @@ const LoginPage = ({ onLoginSuccess }) => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E8A317] focus:border-transparent transition-all"
+                className="w-full pl-10 pr-10 py-3 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)] transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-text-heading)] transition-colors"
                 tabIndex="-1"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -95,22 +95,18 @@ const LoginPage = ({ onLoginSuccess }) => {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full px-4 py-3 text-sm font-semibold text-white bg-[#E8A317] hover:bg-[#D49215] rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-sm"
-          >
-            {loading ? 'Logging in...' : 'Log In'}
-          </button>
+          <Button type="submit" loading={loading} className="w-full justify-center py-3">
+            {loading ? 'Authenticating...' : 'Initialize Session'}
+          </Button>
         </form>
 
         {showDemoButton && (
           <div className="text-center mt-6">
             <button
               onClick={handleDemoFill}
-              className="text-xs text-gray-400 hover:text-gray-600 underline decoration-gray-300 underline-offset-2 transition-colors"
+              className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-heading)] underline decoration-[var(--color-border)] underline-offset-2 transition-colors"
             >
-              Use demo credentials
+              Load test credentials
             </button>
           </div>
         )}

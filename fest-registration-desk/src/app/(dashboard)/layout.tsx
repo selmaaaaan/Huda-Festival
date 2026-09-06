@@ -1,7 +1,7 @@
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LogOut, LayoutDashboard, UserCheck, Users } from "lucide-react";
+import { LogOut, LayoutDashboard, UserCheck, Users, BookOpen } from "lucide-react";
 import LogoutButton from "./LogoutButton";
 
 export default async function DashboardLayout({
@@ -12,10 +12,7 @@ export default async function DashboardLayout({
   const session = await getSession();
 
   if (!session.isLoggedIn) {
-    // If login page doesn't exist yet, we could render a basic message, but redirection is standard.
-    // For now we just mock or allow. Actually, redirect('/login') is proper.
-    // We'll redirect.
-    // redirect("/login");
+    redirect("/"); // Changed to / since login is at root
   }
 
   return (
@@ -27,13 +24,6 @@ export default async function DashboardLayout({
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
           <Link
-            href="/"
-            className="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
-          >
-            <LayoutDashboard size={20} />
-            <span className="font-medium">Dashboard</span>
-          </Link>
-          <Link
             href="/registration-desk"
             className="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
           >
@@ -41,13 +31,22 @@ export default async function DashboardLayout({
             <span className="font-medium">Registration Desk</span>
           </Link>
           {session.role === "ADMIN" && (
-            <Link
-              href="/admin/teams"
-              className="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
-            >
-              <Users size={20} />
-              <span className="font-medium">Admin Panel</span>
-            </Link>
+            <>
+              <Link
+                href="/topics"
+                className="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
+              >
+                <BookOpen size={20} />
+                <span className="font-medium">Manage Topics</span>
+              </Link>
+              <Link
+                href="/admin/teams"
+                className="flex items-center gap-3 px-3 py-2 text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
+              >
+                <Users size={20} />
+                <span className="font-medium">Admin Panel</span>
+              </Link>
+            </>
           )}
         </nav>
         <div className="p-4 border-t border-gray-200">

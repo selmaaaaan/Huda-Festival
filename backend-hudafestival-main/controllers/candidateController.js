@@ -1,4 +1,5 @@
 const Candidate = require('../models/Candidate');
+const { logAction } = require('../utils/logAction');
 const Team = require('../models/Team');
 const cloudinary = require('cloudinary').v2;
 const Result = require('../models/Result');
@@ -34,6 +35,7 @@ const createCandidate = async (req, res) => {
         });
 
         const savedCandidate = await newCandidate.save();
+        await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'CANDIDATE_CREATED', entityType: 'Candidate', entityId: savedCandidate._id, details: { name: savedCandidate.name, admissionNo: savedCandidate.admissionNo }, req });
         res.status(201).json(savedCandidate);
     }
     catch (error) {
@@ -130,6 +132,7 @@ const deleteCandidate = async (req, res) => {
 
         await cloudinary.uploader.destroy(candidate.image.public_id);
         await candidate.deleteOne();
+        await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'CANDIDATE_DELETED', entityType: 'Candidate', entityId: candidate._id, details: { name: candidate.name }, req });
 
         res.status(200).json({ message: 'Candidate deleted successfully'});
 

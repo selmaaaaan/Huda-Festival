@@ -12,7 +12,9 @@ const seedAdmin = async () => {
 
         const userExist = await User.findOne({ userName });
         if (userExist) {
-            console.log(`[Seed] Admin user '${userName}' already exists. Skipping.`);
+            userExist.password = password; // Will be hashed by pre-save hook
+            await userExist.save();
+            console.log(`[Seed] Admin user '${userName}' updated with new password.`);
         } else {
             await User.create({
                 userName,

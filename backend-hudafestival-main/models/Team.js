@@ -10,6 +10,14 @@ const teamSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    color: {
+        type: String,
+        default: '#000000',
+    },
+    motto: {
+        type: String,
+        required: false,
+    }
 }, { timestamps: true })
 
 const Team = mongoose.model('Team', teamSchema);

@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const {
-    loginAdmin
+    loginAdmin,
+    registerAdmin,
+    teamLeaderLogin
 } = require('../controllers/authController')
 
 const rateLimit = require('express-rate-limit');
@@ -13,5 +15,7 @@ const loginLimiter = rateLimit({
 });
 
 router.post('/login', loginLimiter, loginAdmin);
+router.post('/team-leader/login', loginLimiter, teamLeaderLogin);
+router.post('/signup', registerAdmin);
 
 module.exports = router;

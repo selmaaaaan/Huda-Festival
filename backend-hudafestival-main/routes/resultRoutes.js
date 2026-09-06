@@ -3,6 +3,8 @@ const router = express.Router({ mergeParams: true });
 const { 
     savePendingResults, 
     savePendingResultsBulk,
+    getProgrammeResults,
+    approvePendingResults
 } = require('../controllers/resultController.js');
 const { protect } = require('../middlewares/authMiddleware.js');
 

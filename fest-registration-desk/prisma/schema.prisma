@@ -63,13 +63,27 @@ model Program {
   maxParticipants  Int            @default(1)
   eligibleCategory String
   status           String         @default("Active")
+  topicMode        String         @default("NONE") // "NONE", "FIXED_LIST", "FREE_TEXT"
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   registrations    Registration[]
+  topics           Topic[]
 
   @@index([category])
   @@index([type])
   @@index([category, type])
+}
+
+model Topic {
+  id         Int      @id @default(autoincrement())
+  programId  Int
+  program    Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  label      String
+  isActive   Boolean  @default(true)
+  maxUses    Int?     // null means unlimited
+  createdAt  DateTime @default(now())
+
+  @@index([programId])
 }
 
 model Registration {
@@ -79,6 +93,7 @@ model Registration {
   programId         Int
   program           Program  @relation(fields: [programId], references: [id], onDelete: Restrict)
   registrationValue String   @default("1") // "1" = registered
+  topic             String?  // null if topicMode is NONE, otherwise stores chosen label or free text
   createdBy         Int?     // userId
   updatedBy         Int?     // userId
   createdAt         DateTime @default(now())

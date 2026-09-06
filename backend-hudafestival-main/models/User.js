@@ -13,8 +13,13 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['admin', 'judge', 'volunteer'],
+        enum: ['admin', 'judge', 'volunteer', 'team_leader'],
         default: 'admin'
+    },
+    team: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Team',
+        required: function() { return this.role === 'team_leader'; }
     }
 }, { timestamps: true });
 

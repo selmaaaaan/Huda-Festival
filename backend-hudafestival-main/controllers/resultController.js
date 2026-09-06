@@ -1,4 +1,5 @@
 const Result = require('../models/Result.js');
+const { logAction } = require('../utils/logAction');
 const Programme = require('../models/Programme.js');
 const Candidate = require('../models/Candidate.js');
 const Team = require('../models/Team.js');
@@ -38,46 +39,74 @@ const savePendingResults = async (req, res) => {
     }
 };
 
+const approveForProgramme = async (programmeId, user) => {
+    const programme = await Programme.findById(programmeId);
+    if (!programme) throw new Error(`Programme not found: ${programmeId}`);
+
+    const pendingResults = await Result.find({ programme: programmeId, status: 'pending' });
+    if (pendingResults.length === 0) {
+        return { programmeId, success: false, message: 'No pending results to approve.' };
+    }
+    
+    let settings = await Settings.findOne();
+    if (!settings) settings = await new Settings().save();
+    const gradePointsMap = settings.gradePoints;
+
+    for (const result of pendingResults) {
+        const pointsFromRank = result.rank ? (rankPointsMap[programme.type]?.[result.rank] || 0) : 0;
+        const pointsFromGrade = result.grade ? (gradePointsMap.get(result.grade) || 0) : 0;
+        const totalPoints = pointsFromRank + pointsFromGrade;
+
+        result.pointsFromRank = pointsFromRank;
+        result.pointsFromGrade = pointsFromGrade;
+        result.totalPoints = totalPoints;
+        result.status = 'approved';
+        await result.save();
+
+        await Candidate.updateOne({ _id: result.candidate }, { $inc: { totalPoints: totalPoints } });
+        const candidate = await Candidate.findById(result.candidate);
+        if (candidate) {
+             await Team.updateOne({ _id: candidate.team }, { $inc: { totalPoints: totalPoints } });
+        }
+    }
+    
+    programme.isResultPublished = true;
+    await programme.save();
+    return { programmeId, success: true, count: pendingResults.length };
+};
+
 // @desc    Approve pending results and calculate points
 const approvePendingResults = async (req, res) => {
     const { id: programmeId } = req.params;
     try {
-        const programme = await Programme.findById(programmeId);
-        if (!programme) return res.status(404).json({ message: 'Programme not found' });
-
-        const pendingResults = await Result.find({ programme: programmeId, status: 'pending' });
-        if (pendingResults.length === 0) {
-            return res.status(400).json({ message: 'No pending results to approve for this programme.' });
+        const result = await approveForProgramme(programmeId, req.user);
+        if (!result.success) {
+            return res.status(400).json({ message: result.message });
         }
-        
-        let settings = await Settings.findOne();
-        if (!settings) settings = await new Settings().save();
-        const gradePointsMap = settings.gradePoints;
-
-        for (const result of pendingResults) {
-            const pointsFromRank = result.rank ? (rankPointsMap[programme.type]?.[result.rank] || 0) : 0;
-            const pointsFromGrade = result.grade ? (gradePointsMap.get(result.grade) || 0) : 0;
-            const totalPoints = pointsFromRank + pointsFromGrade;
-
-            result.pointsFromRank = pointsFromRank;
-            result.pointsFromGrade = pointsFromGrade;
-            result.totalPoints = totalPoints;
-            result.status = 'approved';
-            await result.save();
-
-            await Candidate.updateOne({ _id: result.candidate }, { $inc: { totalPoints: totalPoints } });
-            const candidate = await Candidate.findById(result.candidate);
-            if (candidate) {
-                 await Team.updateOne({ _id: candidate.team }, { $inc: { totalPoints: totalPoints } });
-            }
-        }
-        
-        programme.isResultPublished = true;
-        await programme.save();
+        await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'RESULT_PUBLISHED', entityType: 'Result', details: { programmeId }, req });
         res.status(200).json({ message: 'Results approved and published successfully!' });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Server error while approving results.' });
     }
+};
+
+const publishBatch = async (req, res) => {
+  const { programmeIds } = req.body;
+  if (!Array.isArray(programmeIds) || programmeIds.length === 0) {
+    return res.status(400).json({ message: 'programmeIds array is required' });
+  }
+  const results = [];
+  try {
+      for (const pid of programmeIds) {
+        results.push(await approveForProgramme(pid, req.user));
+      }
+      await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'RESULT_BULK_PUBLISHED', entityType: 'Result', details: { programmeIds, results }, req });
+      res.status(200).json({ message: `Published ${programmeIds.length} programmes`, results });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error while bulk publishing results.' });
+  }
 };
 
 // @desc    Get all results for a specific programme
@@ -120,11 +149,11 @@ const savePendingResultsBulk = async (req, res) => {
         if (bulkOps.length > 0) {
             await Result.bulkWrite(bulkOps);
         }
-        
+        await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'RESULT_SAVED', entityType: 'Result', details: { programmeId, count: results.length }, req });
         res.status(201).json({ message: 'Results saved as pending in bulk.' });
     } catch (error) {
         res.status(500).json({ message: 'Server error while saving bulk pending results.' });
     }
 };
 
-module.exports = { savePendingResults, savePendingResultsBulk, approvePendingResults, getProgrammeResults };
+module.exports = { savePendingResults, savePendingResultsBulk, approvePendingResults, getProgrammeResults, publishBatch };

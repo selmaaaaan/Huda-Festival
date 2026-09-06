@@ -1,8 +1,8 @@
 import React from 'react';
 
-const StatCard = ({ icon: Icon, label, value, color = 'bg-blue-50 text-blue-600' }) => {
+const StatCard = ({ icon: Icon, label, value, color = 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]' }) => {
   return (
-    <div className="bg-white rounded-xl border border-[var(--color-border)] p-5 flex items-center gap-4">
+    <div className="bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] p-5 flex items-center gap-4">
       <div className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center`}>
         <Icon size={22} />
       </div>

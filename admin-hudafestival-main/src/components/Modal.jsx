@@ -7,10 +7,10 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl border border-[var(--color-border)] w-full max-w-lg mx-4 shadow-xl">
+      <div className="relative bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] w-full max-w-lg mx-4 shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
           <h3 className="text-lg font-semibold text-[var(--color-text-heading)]">{title}</h3>

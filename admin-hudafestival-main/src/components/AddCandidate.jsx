@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 
-const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName }) => {
-  const [formData, setFormData] = useState({ admissionNo: '', name: '' });
+const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName, teams = [], categories = [] }) => {
+  const [formData, setFormData] = useState({ 
+    admissionNo: '', 
+    name: '',
+    selectedTeam: teamId || '',
+    selectedCategory: categoryName || ''
+  });
   const [imageFile, setImageFile] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -13,14 +18,14 @@ const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName }) 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!imageFile || !formData.admissionNo || !formData.name) {
-      setError('Please fill all fields and select an image.');
+    if (!imageFile || !formData.admissionNo || !formData.name || !formData.selectedTeam || !formData.selectedCategory) {
+      setError('Please fill all fields, select team/category, and select an image.');
       return;
     }
     setLoading(true);
     const submissionData = new FormData();
-    submissionData.append('team', teamId);
-    submissionData.append('category', categoryName);
+    submissionData.append('team', formData.selectedTeam);
+    submissionData.append('category', formData.selectedCategory);
     submissionData.append('admissionNo', formData.admissionNo);
     submissionData.append('name', formData.name);
     submissionData.append('image', imageFile);
@@ -38,6 +43,28 @@ const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName }) 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error && <p className="p-3 text-sm font-medium text-red-800 bg-red-50 rounded-xl border border-red-200">{error}</p>}
+
+      {!teamId && (
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium text-[var(--color-text-heading)]">Team</label>
+          <select name="selectedTeam" value={formData.selectedTeam} onChange={handleChange} required
+            className="w-full px-4 py-2.5 border border-[var(--color-border)] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition">
+            <option value="">Select Team</option>
+            {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+          </select>
+        </div>
+      )}
+
+      {!categoryName && (
+        <div className="space-y-1.5">
+          <label className="block text-sm font-medium text-[var(--color-text-heading)]">Category</label>
+          <select name="selectedCategory" value={formData.selectedCategory} onChange={handleChange} required
+            className="w-full px-4 py-2.5 border border-[var(--color-border)] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition">
+            <option value="">Select Category</option>
+            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+      )}
 
       <div className="space-y-1.5">
         <label className="block text-sm font-medium text-[var(--color-text-heading)]">Admission Number</label>

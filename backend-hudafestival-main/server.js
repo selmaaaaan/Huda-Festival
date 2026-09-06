@@ -13,6 +13,8 @@ const settingsRoutes = require('./routes/settingsRoutes')
 const authRoutes = require('./routes/authRoutes');
 const allResultsRoutes = require('./routes/allResultsRoutes');
 const pointAdjustmentRoutes = require('./routes/pointAdjustmentRoutes.js');
+const registrationRoutes = require('./routes/registrationRoutes');
+const auditLogRoutes = require('./routes/auditLogRoutes');
 
 connectDB();
 const app = express();
@@ -32,6 +34,8 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/results', allResultsRoutes)
 app.use('/api/point-adjustments', pointAdjustmentRoutes);
+app.use('/api/registrations', registrationRoutes);
+app.use('/api/audit-logs', auditLogRoutes);
 
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 

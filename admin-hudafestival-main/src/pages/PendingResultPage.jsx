@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import EmptyState from '../components/EmptyState';
+import Button from '../components/Button';
 import { Clock } from 'lucide-react';
 
 const PendingResultsPage = () => {
@@ -47,16 +48,14 @@ const PendingResultsPage = () => {
       {pendingProgrammes.length > 0 ? (
         <div className="space-y-3">
           {pendingProgrammes.map(prog => (
-            <div key={prog._id} className="p-5 bg-white rounded-xl border border-[var(--color-border)] flex justify-between items-center">
+            <div key={prog._id} className="p-5 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] flex justify-between items-center transition-colors hover:border-[var(--color-primary)]">
               <div>
                 <h2 className="text-base font-semibold text-[var(--color-text-heading)]">{prog.name}</h2>
-                <span className="text-xs font-medium text-[var(--color-text-body)] bg-gray-100 px-2.5 py-1 rounded-full">{prog.category}</span>
+                <span className="text-xs font-medium text-[var(--color-text-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] px-2.5 py-1 rounded-full mt-2 inline-block">{prog.category}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <button onClick={() => handleDeny(prog._id)}
-                  className="px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-xl hover:bg-red-50 transition">Deny</button>
-                <button onClick={() => handleApprove(prog._id)}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-xl transition">Approve</button>
+              <div className="flex items-center gap-3">
+                <Button size="sm" variant="danger" onClick={() => handleDeny(prog._id)}>Deny</Button>
+                <Button size="sm" variant="primary" onClick={() => handleApprove(prog._id)}>Approve</Button>
               </div>
             </div>
           ))}

@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   const { session } = authResult;
 
   const body = await request.json();
-  const { studentId, programId, action } = body; // action: 'REGISTER' or 'UNREGISTER'
+  const { studentId, programId, action, topic } = body; // action: 'REGISTER' or 'UNREGISTER'
 
   if (!studentId || !programId || !action) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Bylaw and Quota Validation
-    const validationError = await validateRegistration(studentId, programId, student.teamId!);
+    const validationError = await validateRegistration(studentId, programId, student.teamId!, topic);
     if (validationError) {
       return NextResponse.json({ error: validationError }, { status: 400 });
     }
@@ -55,13 +55,14 @@ export async function POST(request: NextRequest) {
     try {
       const reg = await prisma.$transaction(async (tx) => {
         // Re-check quota inside transaction
-        const vError = await validateRegistration(studentId, programId, student.teamId!);
+        const vError = await validateRegistration(studentId, programId, student.teamId!, topic);
         if (vError) throw new Error(vError);
 
         return await tx.registration.create({
           data: {
             studentId,
             programId,
+            topic: topic || null,
             createdBy: session.userId,
           },
         });
@@ -71,6 +72,7 @@ export async function POST(request: NextRequest) {
       await createAuditLog(session.userId, 'REGISTER', 'Registration', String(reg.id), {
         studentAdNo: student.adNo,
         programCode: program.code,
+        topic: topic || null,
       });
 
       return NextResponse.json({ success: true, registration: reg });

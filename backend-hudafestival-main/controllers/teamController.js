@@ -6,7 +6,7 @@ const Candidate = require('../models/Candidate');
 // @access Private/Admin
 
 const createTeam = async (req, res) => {
-    const { name } = req.body;
+    const { name, color, motto } = req.body;
 
     if(!name) {
         return res.status(400).json({ message: 'Team name is required' });
@@ -19,6 +19,8 @@ const createTeam = async (req, res) => {
 
         const team = new Team({
             name,
+            color,
+            motto
         })
         const createdTeam = await team.save();
         res.status(201).json(createdTeam);
@@ -64,7 +66,7 @@ const getTeamById = async (req, res) => {
 // @route PUT /api/teams/:id
 // @access Private/Admin
 const updateTeamById = async (req, res) => {
-    const { name } = req.body;
+    const { name, color, motto } = req.body;
 
     try {
         const team = await Team.findById(req.params.id);
@@ -72,6 +74,8 @@ const updateTeamById = async (req, res) => {
             return res.status(404).json({ message: 'Team not found.'})
         }
         team.name = name || team.name;
+        if (color !== undefined) team.color = color;
+        if (motto !== undefined) team.motto = motto;
         const updatedTeam = await team.save()
         res.status(200).json(updatedTeam)
     }

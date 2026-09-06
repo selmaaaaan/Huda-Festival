@@ -15,11 +15,19 @@ router.route('/')
   .post(protect, createProgramme);
 
 // --- Approve Route (Admin Only) ---
+const { authorize } = require('../middlewares/authMiddleware.js');
+const { publishBatch } = require('../controllers/resultController.js');
+
+router.post('/publish-batch', protect, authorize('admin'), publishBatch);
+
 router.route('/:id/approve')
-  .post(protect, approvePendingResults);
+  .post(protect, authorize('admin'), approvePendingResults);
 
 // --- Nested Result Routes ---
 router.use('/:id/results', resultRouter);
+
+const { getProgrammeRegistrations } = require('../controllers/registrationController.js');
+router.get('/:id/registrations', protect, getProgrammeRegistrations);
 
 // --- Specific Programme Routes (by ID) ---
 // GET is now public, PUT and DELETE remain protected

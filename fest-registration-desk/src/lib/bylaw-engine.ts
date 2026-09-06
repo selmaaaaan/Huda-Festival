@@ -107,7 +107,8 @@ export function isEligible(studentCategory: string, eligibleCategory: string): b
 export async function validateRegistration(
   studentId: number,
   programId: number,
-  teamId: number
+  teamId: number,
+  topic?: string
 ): Promise<string | null> {
   // Fetch student + program
   const [student, program] = await Promise.all([
@@ -120,6 +121,32 @@ export async function validateRegistration(
   if (student.status !== 'Active') return 'Student is inactive';
   if (program.status !== 'Active') return 'Program is inactive';
   if (student.teamId !== teamId) return 'Student does not belong to your team';
+
+  // Topic validation
+  if (program.topicMode !== 'NONE') {
+    if (!topic || topic.trim() === '') {
+      return 'This programme requires a topic to be selected';
+    }
+
+    if (program.topicMode === 'FIXED_LIST') {
+      const activeTopic = await prisma.topic.findFirst({
+        where: { programId, label: topic, isActive: true },
+      });
+      if (!activeTopic) {
+        return 'Invalid topic selected';
+      }
+
+      if (activeTopic.maxUses !== null) {
+        const topicCount = await prisma.registration.count({
+          where: { programId, topic: activeTopic.label },
+        });
+        if (topicCount >= activeTopic.maxUses) {
+          return 'This topic has reached its participant limit';
+        }
+      }
+    }
+    // FREE_TEXT just needs non-empty, which is checked above
+  }
 
   // Category eligibility
   if (!isEligible(student.category, program.eligibleCategory)) {
@@ -148,3 +175,4 @@ export async function validateRegistration(
 
   return null; // Valid
 }
+

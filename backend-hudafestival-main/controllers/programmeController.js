@@ -1,4 +1,5 @@
 const Programme = require('../models/Programme');
+const { logAction } = require('../utils/logAction');
 const Result = require('../models/Result');
 const Team = require('../models/Team');
 const Candidate = require('../models/Candidate');
@@ -23,6 +24,7 @@ const createProgramme = async (req, res) => {
         })
        
         const savedProgramme = await newProgramme.save();
+        await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'PROGRAMME_CREATED', entityType: 'Programme', entityId: savedProgramme._id, details: { name: savedProgramme.name }, req });
         res.status(201).json(savedProgramme);
     }
     catch (error) {
@@ -121,6 +123,7 @@ const deleteProgramme = async (req, res) => {
         await Result.deleteMany({ programme: programme._id });
 
         await programme.deleteOne();
+        await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'PROGRAMME_DELETED', entityType: 'Programme', entityId: programme._id, details: { name: programme.name }, req });
         res.status(200).json({ message: 'Programme removed successfully'});
     }
     catch (error) {

@@ -38,21 +38,23 @@ const DashboardPage = () => {
         <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">
           Welcome back, {userInfo?.userName || 'Admin'}
         </h1>
-        <p className="text-sm text-[var(--color-text-body)] mt-1">Here's what's happening with your festival.</p>
+        <p className="text-sm text-[var(--color-text-body)] mt-1">Operations dashboard overview.</p>
       </div>
 
       {loading ? (
-        <p className="text-[var(--color-text-body)]">Loading stats...</p>
+        <p className="text-[var(--color-text-body)]">Loading metrics...</p>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <StatCard icon={Users} label="Teams" value={stats.teams} color="bg-blue-50 text-blue-600" />
-            <StatCard icon={Calendar} label="Programmes" value={stats.programmes} color="bg-purple-50 text-purple-600" />
-            <StatCard icon={Trophy} label="Candidates" value={stats.candidates} color="bg-orange-50 text-orange-600" />
-            <StatCard icon={BarChart3} label="Published" value={stats.published} color="bg-green-50 text-green-600" />
+            <StatCard icon={Users} label="Active Teams" value={stats.teams} color="bg-blue-500/10 text-blue-400" />
+            <StatCard icon={Calendar} label="Programmes" value={stats.programmes} color="bg-purple-500/10 text-purple-400" />
+            <StatCard icon={Trophy} label="Candidates" value={stats.candidates} color="bg-orange-500/10 text-orange-400" />
+            <StatCard icon={BarChart3} label="Published Results" value={stats.published} color="bg-green-500/10 text-green-400" />
           </div>
 
-          <GettingStartedCard counts={stats} />
+          <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl p-6">
+            <GettingStartedCard counts={stats} />
+          </div>
         </>
       )}
     </div>

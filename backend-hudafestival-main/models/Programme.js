@@ -23,6 +23,19 @@ const programmeSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    format: {
+        type: String,
+        enum: ['Individual', 'Group'],
+        default: 'Individual',
+    },
+    groupSize: {
+        type: Number,
+        default: 1,
+    },
+    maxParticipants: {
+        type: Number,
+        default: Infinity,
+    },
 }, { timestamps: true })
 
 const Programme = mongoose.model('Programme', programmeSchema);

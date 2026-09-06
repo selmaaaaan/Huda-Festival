@@ -36,7 +36,7 @@ const getLeaderboards = async (req, res) => {
                             totalPoints: "$totalPoints",
                             image: "$image",
                             // Now we push the populated team object
-                            team: { _id: "$teamInfo._id", name: "$teamInfo.name" }
+                            team: { _id: "$teamInfo._id", name: "$teamInfo.name", color: "$teamInfo.color", motto: "$teamInfo.motto" }
                         }
                     }
                 }
@@ -54,7 +54,7 @@ const getLeaderboards = async (req, res) => {
         const overallTopStudents = await Candidate.find({})
             .sort({ totalPoints: -1 })
             .limit(10)
-            .populate('team', 'name');
+            .populate('team', 'name color motto');
         
         res.status(200).json({
             teamLeaderboard,
