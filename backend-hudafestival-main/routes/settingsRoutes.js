@@ -6,12 +6,12 @@ const {
     getBylawRules,
 } = require('../controllers/settingsController')
 
-const { protect, admin } = require('../middlewares/authMiddleware');
+const { protect, authorize } = require('../middlewares/authMiddleware');
 
 router.get('/bylaw-rules', getBylawRules);
 
 router.route('/')
     .get(getSettings)
-    .patch(protect, admin, updateSettings);
+    .patch(protect, authorize('admin', 'judge'), updateSettings);
 
 module.exports = router;
