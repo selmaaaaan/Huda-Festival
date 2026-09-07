@@ -13,8 +13,39 @@ const programmeSchema = new mongoose.Schema({
      category: {
         type: String,
         required: true,
-        enum: ['BIDAYA', 'ULA', 'THANIYYAH', 'THANAWIYYAH', 'ALIYA', 'GENERAL'],
+        enum: ['BIDAYA', 'ULA', 'THANIYYAH', 'THANAWIYYAH', 'ALIYA', 'GENERAL', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'],
      },
+    code: {
+        type: String,
+        required: true,
+        unique: true,
+        uppercase: true,
+    },
+    stageType: {
+        type: String,
+        required: true,
+        enum: ['stage', 'non-stage'],
+    },
+    participantsRaw: {
+        type: String,
+        required: true,
+    },
+    isStarred: {
+        type: Boolean,
+        default: false,
+    },
+    requiresRegistration: {
+        type: Boolean,
+        default: false,
+    },
+    curbGroup: {
+        type: String,
+        default: null,
+    },
+    curbLimit: {
+        type: Number,
+        default: null,
+    },
     date: { 
         type: Date,
          required: true,

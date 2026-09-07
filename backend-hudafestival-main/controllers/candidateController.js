@@ -49,7 +49,11 @@ const createCandidate = async (req, res) => {
 // @access Public
 const getAllCandidates = async (req, res) => {
     try {
-        const candidates = await Candidate.find({}).populate('team', 'name');
+        const filter = {};
+        if (req.teamScope) {
+            filter.team = req.teamScope;
+        }
+        const candidates = await Candidate.find(filter).populate('team', 'name color');
         res.status(200).json(candidates);
     }
     catch (error) {

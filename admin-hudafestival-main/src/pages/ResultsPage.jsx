@@ -301,7 +301,13 @@ const ResultsPage = () => {
                                             <tr key={candidate._id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-elevated)] transition-colors">
                                                 <td className="py-3 px-4">
                                                     <div className="font-medium text-[var(--color-text-heading)]">{candidate.name}</div>
-                                                    <div className="text-xs text-[var(--color-text-muted)] mt-0.5">{candidate.admissionNo} • {candidate.team?.name || 'No Team'}</div>
+                                                    <div className="text-xs text-[var(--color-text-muted)] mt-0.5 flex items-center gap-1.5">
+                                                        <span>{candidate.admissionNo} •</span>
+                                                        {candidate.team && (
+                                                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: candidate.team.color || '#ccc' }} title={candidate.team.name}></span>
+                                                        )}
+                                                        <span>{candidate.team?.name || 'No Team'}</span>
+                                                    </div>
                                                 </td>
                                                 <td className="py-3 px-4 text-center">
                                                     <div className="flex justify-center gap-3">

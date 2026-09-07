@@ -25,10 +25,13 @@ const candidateSchema = new mongoose.Schema({
         ref: 'Team',
         required: true,
     },
+    classLevel: {
+        type: String,
+    },
     category: {
         type: String,
         required: true,
-        enum: ['BIDAYA', 'ULA', 'THANIYYAH', 'THANAWIYYAH', 'ALIYA'],
+        enum: ['BIDAYA', 'ULA', 'THANIYYAH', 'THANAWIYYAH', 'ALIYA', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'],
     },
     totalPoints: {
         type: Number,

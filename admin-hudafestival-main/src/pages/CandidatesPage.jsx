@@ -4,7 +4,7 @@ import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import AddCandidateForm from '../components/AddCandidate';
 import Button from '../components/Button';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Users } from 'lucide-react';
 
 const CandidatesPage = () => {
   const [teams, setTeams] = useState([]);
@@ -16,6 +16,9 @@ const CandidatesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const categories = ['BIDAYA', 'ULA', 'THANIYYAH', 'THANAWIYYAH', 'ALIYA'];
 
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+  const isTeamLeader = userInfo?.role === 'team_leader';
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -23,6 +26,10 @@ const CandidatesPage = () => {
         const [teamsRes, candidatesRes] = await Promise.all([api.get('/teams'), api.get('/candidates')]);
         setTeams(teamsRes.data);
         setCandidates(candidatesRes.data);
+
+        if (isTeamLeader && teamsRes.data.length === 1) {
+          setSelectedTeam(teamsRes.data[0]);
+        }
       } catch (err) {
         setError('Failed to fetch initial data.');
       } finally {
@@ -30,7 +37,7 @@ const CandidatesPage = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [isTeamLeader]);
 
   const handleFormSubmit = () => { setIsModalOpen(false); api.get('/candidates').then(res => setCandidates(res.data)); };
   const handleDelete = async (id) => {
@@ -39,22 +46,52 @@ const CandidatesPage = () => {
     }
   };
 
-  const filteredCandidates = selectedTeam ? candidates.filter(c => c.team?._id === selectedTeam._id && c.category === selectedCategory) : [];
+  // If team_leader, filter locally just in case backend doesn't filter perfectly, though backend should.
+  // Actually, backend filters candidates if team_leader.
+  let filteredCandidates = candidates;
+  if (!isTeamLeader && selectedTeam) {
+    filteredCandidates = filteredCandidates.filter(c => c.team?._id === selectedTeam._id);
+  }
+  if (selectedCategory) {
+    filteredCandidates = filteredCandidates.filter(c => c.category === selectedCategory);
+  }
+
   const headers = ['Image', 'Admission No', 'Name', 'Points', 'Actions'];
   const renderRow = (candidate) => (
     <tr key={candidate._id} className="hover:bg-[var(--color-surface-elevated)] transition">
-      <td className="px-6 py-4"><img src={candidate.image.url} alt={candidate.name} className="w-10 h-10 rounded-full object-cover bg-[var(--color-surface)] border border-[var(--color-border)]" /></td>
+      <td className="px-6 py-4"><img src={candidate.image?.url || `https://ui-avatars.com/api/?name=${candidate.name}`} alt={candidate.name} className="w-10 h-10 rounded-full object-cover bg-[var(--color-surface)] border border-[var(--color-border)]" /></td>
       <td className="px-6 py-4 text-sm text-[var(--color-text-heading)]">{candidate.admissionNo}</td>
-      <td className="px-6 py-4 text-sm font-medium text-[var(--color-text-heading)]">{candidate.name}</td>
-      <td className="px-6 py-4 text-sm font-semibold text-[var(--color-text-heading)]">{candidate.totalPoints}</td>
-      <td className="px-6 py-4 text-sm"><button onClick={() => handleDelete(candidate._id)} className="text-red-400 hover:text-red-300 transition text-sm font-medium">Delete</button></td>
+      <td className="px-6 py-4 text-sm font-medium text-[var(--color-text-heading)]">
+        <div className="flex items-center gap-2">
+          {candidate.team && (
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: candidate.team.color || '#ccc' }} title={candidate.team.name}></span>
+          )}
+          {candidate.name}
+        </div>
+      </td>
+      <td className="px-6 py-4 text-sm font-semibold text-[var(--color-text-heading)]">{candidate.totalPoints || 0}</td>
+      <td className="px-6 py-4 text-sm">
+        {!isTeamLeader && (
+          <button onClick={() => handleDelete(candidate._id)} className="text-red-400 hover:text-red-300 transition text-sm font-medium">Delete</button>
+        )}
+      </td>
     </tr>
   );
 
   const Breadcrumbs = () => (
     <div className="text-sm mb-6 text-[var(--color-text-body)] flex items-center gap-2">
-      <span onClick={() => { setSelectedTeam(null); setSelectedCategory(null); }} className="hover:text-[var(--color-primary)] cursor-pointer transition">Teams</span>
-      {selectedTeam && <><ChevronRight size={14} /><span onClick={() => setSelectedCategory(null)} className="hover:text-[var(--color-primary)] cursor-pointer transition">{selectedTeam.name}</span></>}
+      {!isTeamLeader && (
+        <span onClick={() => { setSelectedTeam(null); setSelectedCategory(null); }} className="hover:text-[var(--color-primary)] cursor-pointer transition">Teams</span>
+      )}
+      {selectedTeam && (
+        <>
+          {!isTeamLeader && <ChevronRight size={14} />}
+          <span onClick={() => setSelectedCategory(null)} className="hover:text-[var(--color-primary)] cursor-pointer transition flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: selectedTeam.color || '#ccc' }}></span>
+            {selectedTeam.name}
+          </span>
+        </>
+      )}
       {selectedCategory && <><ChevronRight size={14} /><span className="font-medium text-[var(--color-text-heading)]">{selectedCategory}</span></>}
     </div>
   );
@@ -65,19 +102,20 @@ const CandidatesPage = () => {
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Candidates</h1>
-        <Button onClick={() => setIsModalOpen(true)}>+ Add Candidate</Button>
+        <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">{isTeamLeader ? 'My Team Candidates' : 'Candidates'}</h1>
+        {!isTeamLeader && <Button onClick={() => setIsModalOpen(true)}>+ Add Candidate</Button>}
       </div>
 
-      {!selectedTeam ? (
+      {!selectedTeam && !isTeamLeader ? (
         <div>
           <h2 className="text-xl font-bold text-[var(--color-text-heading)] mb-4">Select a Team</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {teams.map(team => (
               <div key={team._id} onClick={() => setSelectedTeam(team)}
-                className="p-5 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] hover:border-[var(--color-primary)] cursor-pointer transition group">
-                <h2 className="text-lg font-semibold text-[var(--color-text-heading)] group-hover:text-[var(--color-primary)] transition">{team.name}</h2>
-                <p className="text-sm text-[var(--color-text-body)] mt-1">Total Points: {team.totalPoints}</p>
+                className="relative p-5 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] hover:border-[var(--color-primary)] cursor-pointer transition group overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-1.5" style={{ backgroundColor: team.color || 'var(--color-primary)' }}></div>
+                <h2 className="text-lg font-semibold text-[var(--color-text-heading)] group-hover:text-[var(--color-primary)] transition ml-2">{team.name}</h2>
+                <p className="text-sm text-[var(--color-text-body)] mt-1 ml-2">Total Points: {team.totalPoints || 0}</p>
               </div>
             ))}
           </div>

@@ -58,7 +58,7 @@ const SearchPage = () => {
                     <h3 className="text-base font-semibold text-[var(--color-text-heading)] truncate">{candidate.name}</h3>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs font-medium bg-gray-100 text-[var(--color-text-body)] px-2 py-0.5 rounded-full">{candidate.admissionNo}</span>
-                      {candidate.team?.name && <span className="text-xs font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">{candidate.team.name}</span>}
+                      {candidate.team?.name && <span className="text-xs font-medium px-2 py-0.5 rounded-full border" style={{ borderColor: candidate.team?.color || '#3b82f6', color: candidate.team?.color || '#1d4ed8', backgroundColor: `${candidate.team?.color || '#3b82f6'}10` }}>{candidate.team.name}</span>}
                     </div>
                   </div>
                   <span className="text-lg font-bold text-[var(--color-primary)]">{candidate.totalPoints || 0}</span>
@@ -78,7 +78,7 @@ const SearchPage = () => {
         <img src={selectedCandidate.image.url} alt={selectedCandidate.name} className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-lg mx-auto" />
         <h1 className="text-2xl font-bold text-[var(--color-text-heading)] mt-4">{selectedCandidate.name}</h1>
         <div className="flex justify-center gap-2 mt-2">
-          {selectedCandidate.team?.name && <span className="text-xs font-medium bg-blue-50 text-blue-700 px-3 py-1 rounded-full">{selectedCandidate.team.name}</span>}
+          {selectedCandidate.team?.name && <span className="text-xs font-medium px-3 py-1 rounded-full border" style={{ borderColor: selectedCandidate.team?.color || '#3b82f6', color: selectedCandidate.team?.color || '#1d4ed8', backgroundColor: `${selectedCandidate.team?.color || '#3b82f6'}10` }}>{selectedCandidate.team.name}</span>}
           <span className="text-xs font-medium bg-gray-100 text-[var(--color-text-body)] px-3 py-1 rounded-full">{selectedCandidate.category}</span>
         </div>
       </div>

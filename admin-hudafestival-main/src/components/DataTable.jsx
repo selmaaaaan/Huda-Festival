@@ -19,7 +19,20 @@ const DataTable = ({ headers, data, renderRow, emptyState }) => {
         </thead>
         <tbody className="divide-y divide-[var(--color-border)]">
           {data.length > 0 ? (
-            data.map(renderRow)
+            data.map((item, index) => {
+              const row = renderRow(item, index);
+              // Safely handle cases where renderRow might not return a standard React element
+              if (React.isValidElement(row)) {
+                return React.cloneElement(row, {
+                  style: {
+                    ...row.props.style,
+                    animationDelay: `${index * 0.05}s`
+                  },
+                  className: `${row.props.className || ''} animate-row-fade`
+                });
+              }
+              return row;
+            })
           ) : (
             <tr>
               <td colSpan={headers.length}>

@@ -46,15 +46,13 @@ const DashboardPage = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <StatCard icon={Users} label="Active Teams" value={stats.teams} color="bg-blue-500/10 text-blue-400" />
-            <StatCard icon={Calendar} label="Programmes" value={stats.programmes} color="bg-purple-500/10 text-purple-400" />
-            <StatCard icon={Trophy} label="Candidates" value={stats.candidates} color="bg-orange-500/10 text-orange-400" />
-            <StatCard icon={BarChart3} label="Published Results" value={stats.published} color="bg-green-500/10 text-green-400" />
+            <StatCard icon={Users} label="Active Teams" value={stats.teams} color="bg-primary/10 text-primary" />
+            <StatCard icon={Calendar} label="Programmes" value={stats.programmes} color="bg-accent-programmes/10 text-accent-programmes" />
+            <StatCard icon={Trophy} label="Candidates" value={stats.candidates} color="bg-accent-candidates/10 text-accent-candidates" />
+            <StatCard icon={BarChart3} label="Published Results" value={stats.published} color="bg-accent-results/10 text-accent-results" />
           </div>
 
-          <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl p-6">
-            <GettingStartedCard counts={stats} />
-          </div>
+          <GettingStartedCard counts={stats} />
         </>
       )}
     </div>

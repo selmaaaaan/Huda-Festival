@@ -71,7 +71,14 @@ const ResultsPage = () => {
                   <img src={result.candidate.image.url} alt={result.candidate.name} className="w-10 h-10 rounded-full object-cover mr-4 border flex-shrink-0" style={{ width: '40px', height: '40px' }} />
                   {result.candidate.name}
                 </td>
-                <td className="px-6 py-4 text-sm text-[var(--color-text-body)]">{result.candidate.team.name}</td>
+                <td className="px-6 py-4 text-sm">
+                  {result.candidate.team?.name && (
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border bg-white shadow-sm" style={{ borderColor: result.candidate.team.color || '#e5e7eb', color: result.candidate.team.color || '#374151' }}>
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: result.candidate.team.color || '#6B7280' }}></span>
+                      <span className="font-medium">{result.candidate.team.name}</span>
+                    </span>
+                  )}
+                </td>
                 <td className="px-6 py-4"><span className="text-sm font-semibold text-[var(--color-primary)]">{result.grade}</span></td>
               </tr>
             ))}
@@ -82,7 +89,14 @@ const ResultsPage = () => {
                   <img src={result.candidate.image.url} alt={result.candidate.name} className="w-10 h-10 rounded-full object-cover mr-4 border flex-shrink-0" style={{ width: '40px', height: '40px' }} />
                   {result.candidate.name}
                 </td>
-                <td className="px-6 py-4 text-sm text-[var(--color-text-body)]">{result.candidate.team.name}</td>
+                <td className="px-6 py-4 text-sm">
+                  {result.candidate.team?.name && (
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border bg-white shadow-sm" style={{ borderColor: result.candidate.team.color || '#e5e7eb', color: result.candidate.team.color || '#374151' }}>
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: result.candidate.team.color || '#6B7280' }}></span>
+                      <span className="font-medium">{result.candidate.team.name}</span>
+                    </span>
+                  )}
+                </td>
                 <td className="px-6 py-4"><span className="text-sm font-semibold text-[var(--color-primary)]">{result.grade}</span></td>
               </tr>
             ))}

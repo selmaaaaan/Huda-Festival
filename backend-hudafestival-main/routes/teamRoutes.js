@@ -6,16 +6,16 @@ const {
     deleteTeamById,
     getTeamById,
     updateTeamById,
-
 } = require('../controllers/teamController');
-const {protect} = require('../middlewares/authMiddleware');
+const { protect, authorize } = require('../middlewares/authMiddleware');
 
 router.route('/')
     .get(getAllTeams)
-    .post(protect ,createTeam);
+    .post(protect, authorize('admin'), createTeam);
 
 router.route('/:id')
     .get(getTeamById)
-    .put(protect, updateTeamById)
-    .delete(protect ,deleteTeamById);
+    .put(protect, authorize('admin'), updateTeamById)
+    .delete(protect, authorize('admin'), deleteTeamById);
+
 module.exports = router;

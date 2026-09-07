@@ -1,21 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ImageModal from '../components/ImageModal';
+import api from '../services/api';
 
 const GalleryPage = () => {
   const [selectedIndex, setSelectedIndex] = useState(null);
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // MOCK DATA: Replace with API call once gallery endpoint exists
-  const images = [
-    { id: 1, url: 'https://withr-2k25.vercel.app/assets/img226-IvMT2MNz.jpg', day: 'Day 1' },
-    { id: 2, url: 'https://withr-2k25.vercel.app/assets/img224-CjeW7xUZ.jpg', day: 'Day 1' },
-    { id: 3, url: 'https://withr-2k25.vercel.app/assets/img219-DNTC6DNy.jpg', day: 'Day 1' },
-    { id: 4, url: 'https://withr-2k25.vercel.app/assets/img226-IvMT2MNz.jpg', day: 'Day 2' },
-    { id: 5, url: 'https://withr-2k25.vercel.app/assets/img219-DNTC6DNy.jpg', day: 'Day 2' },
-    { id: 6, url: 'https://withr-2k25.vercel.app/assets/img224-CjeW7xUZ.jpg', day: 'Day 2' },
-    { id: 7, url: 'https://withr-2k25.vercel.app/assets/img224-CjeW7xUZ.jpg', day: 'Day 3' },
-    { id: 8, url: 'https://withr-2k25.vercel.app/assets/img226-IvMT2MNz.jpg', day: 'Day 3' },
-    { id: 9, url: 'https://withr-2k25.vercel.app/assets/img219-DNTC6DNy.jpg', day: 'Day 3' },
-  ];
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const response = await api.get('/gallery');
+        setImages(response.data);
+      } catch (error) {
+        console.error('Failed to fetch gallery:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGallery();
+  }, []);
 
   const handleNavigate = (direction) => {
     if (direction === 'prev') {
@@ -36,7 +40,7 @@ const GalleryPage = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {images.map((img, index) => (
             <div 
-              key={img.id} 
+              key={img._id} 
               className="relative aspect-square rounded-xl overflow-hidden cursor-pointer group shadow-sm hover:shadow-md transition-shadow bg-white"
               onClick={() => setSelectedIndex(index)}
             >

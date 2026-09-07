@@ -12,10 +12,10 @@ const {
 } = require('../controllers/candidateController');
 
 const upload = require('../config/cloudinary');
-const { protect } = require('../middlewares/authMiddleware');
+const { protect, optionalProtect, scopeToOwnTeam } = require('../middlewares/authMiddleware');
 
 router.route('/')
-    .get(getAllCandidates)
+    .get(optionalProtect, scopeToOwnTeam, getAllCandidates)
     .post(protect, upload.single('image'), createCandidate);
 
 router.route('/search').get(searchCandidates);

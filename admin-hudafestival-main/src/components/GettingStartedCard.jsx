@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircle, Circle } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const GettingStartedCard = ({ counts }) => {
   const items = [
@@ -12,7 +13,11 @@ const GettingStartedCard = ({ counts }) => {
   const completed = items.filter(i => i.done).length;
 
   return (
-    <div className="bg-white rounded-xl border border-[var(--color-border)] p-6">
+    <motion.div 
+      whileHover={{ scale: 1.01, y: -2 }}
+      transition={{ duration: 0.2 }}
+      className="bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] p-6 hover:shadow-lg hover:shadow-black/5"
+    >
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-[var(--color-text-heading)]">Getting Started</h3>
         <span className="text-sm text-[var(--color-text-body)]">{completed}/{items.length} completed</span>
@@ -46,7 +51,7 @@ const GettingStartedCard = ({ counts }) => {
           </div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

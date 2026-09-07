@@ -12,7 +12,7 @@ const teamSchema = new mongoose.Schema({
     },
     color: {
         type: String,
-        default: '#000000',
+        default: '#6B7280',
     },
     motto: {
         type: String,

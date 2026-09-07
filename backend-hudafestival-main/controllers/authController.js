@@ -39,6 +39,39 @@ const registerAdmin = async (req, res) => {
     }
 }
 
+// @desc Create team leader
+// @route POST /api/auth/create-team-leader
+// @access Private/Admin
+const createTeamLeader = async (req, res) => {
+    const { userName, password, team } = req.body;
+    if (!userName || !password || !team) {
+        return res.status(400).json({ message: 'Please provide userName, password, and team' });
+    }
+    try {
+        const userExist = await User.findOne({ userName });
+        if (userExist) {
+            return res.status(400).json({ message: 'User already exists' });
+        }
+
+        const user = await User.create({
+            userName,
+            password,
+            role: 'team_leader',
+            team
+        });
+
+        res.status(201).json({
+            _id: user._id,
+            userName: user.userName,
+            role: user.role,
+            team: user.team
+        });
+    } catch (error) {
+        console.error(`Error while creating team leader: ${error.message}`);
+        res.status(500).json({ message: 'Server Error' });
+    }
+}
+
 // @desc Auth user & get token
 // @route POST /api/auth/login
 // @access Public
@@ -92,4 +125,5 @@ module.exports = {
     loginAdmin,
     registerAdmin,
     teamLeaderLogin,
+    createTeamLeader,
 }

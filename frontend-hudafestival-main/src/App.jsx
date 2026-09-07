@@ -14,6 +14,7 @@ import ControllersPage from './pages/ControllersPage';
 import SchedulePage from './pages/SchedulePage';
 import GalleryPage from './pages/GalleryPage';
 import LoadingScreen from './components/LoadingScreen';
+import NotificationBanner from './components/NotificationBanner';
 import { useState } from 'react';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
       {/* This main div acts as the container for our entire application */}
       <div className={`bg-[var(--color-public-bg)] font-sans min-h-screen ${!loadingComplete ? 'hidden' : ''}`}>
         <Navbar />
+        <NotificationBanner />
         <main>
           <Routes>
             <Route path="/" element={<HomePage />} />

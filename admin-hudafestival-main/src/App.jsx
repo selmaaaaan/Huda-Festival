@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import CandidatePage from './pages/CandidatesPage';
@@ -8,6 +9,7 @@ import PendingResultsPage from './pages/PendingResultPage';
 import PointAdjustmentPage from './pages/PointAdjustmentPage';
 import Sidebar from './components/Sidebar';
 import Breadcrumbs from './components/Breadcrumbs';
+import SettingsPage from './pages/SettingsPage';
 import { Search, Bell } from 'lucide-react';
 
 import TeamLeaderDashboard from './pages/TeamLeaderDashboard';
@@ -20,7 +22,7 @@ function App() {
   
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialInfo);
   const [userInfo, setUserInfo] = useState(initialInfo);
-  const [activePage, setActivePage] = useState('dashboard');
+  const [activePage, setActivePage] = useState(initialInfo?.role === 'team_leader' ? 'candidates' : 'dashboard');
 
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
@@ -34,29 +36,57 @@ function App() {
   };
 
   const renderPage = () => {
-    if (userInfo?.role === 'team_leader') {
-      return <TeamLeaderDashboard />;
-    }
+    let pageContent = null;
+    let pageKey = activePage;
 
     switch (activePage) {
+      case 'team_dashboard':
+        pageContent = <TeamLeaderDashboard />;
+        break;
+      case 'settings':
+        pageContent = <SettingsPage />;
+        break;
       case 'candidates':
-        return <CandidatePage />;
+        pageContent = <CandidatePage />;
+        break;
       case 'programmes':
-        return <ProgrammesPage />;
+        pageContent = <ProgrammesPage />;
+        break;
       case 'registration_review':
-        return <RegistrationReviewPage />;
+        pageContent = <RegistrationReviewPage />;
+        break;
       case 'results':
-        return <ResultsPage />;
+        pageContent = <ResultsPage />;
+        break;
       case 'pending results':
-        return <PendingResultsPage />;
+        pageContent = <PendingResultsPage />;
+        break;
       case 'adjustments':
-        return <PointAdjustmentPage />;
+        pageContent = <PointAdjustmentPage />;
+        break;
       case 'logs':
-        return <ActivityLogsPage />;
+        pageContent = <ActivityLogsPage />;
+        break;
       case 'dashboard':
       default:
-        return <DashboardPage />;
+        pageContent = <DashboardPage />;
+        break;
     }
+
+    return (
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={pageKey}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+          className="h-full"
+        >
+          {pageContent}
+        </motion.div>
+      </AnimatePresence>
+    );
   };
 
   if (!isAuthenticated) {
@@ -105,13 +135,12 @@ function App() {
 
       {/* Body */}
       <div className="flex flex-1 overflow-hidden">
-        {userInfo?.role !== 'team_leader' && (
-          <Sidebar
-            activePage={activePage}
-            setActivePage={setActivePage}
-            onLogout={handleLogout}
-          />
-        )}
+        <Sidebar
+          activePage={activePage}
+          setActivePage={setActivePage}
+          onLogout={handleLogout}
+          userInfo={userInfo}
+        />
         <main className="flex-1 overflow-y-auto bg-[var(--color-bg)]">
           {renderPage()}
         </main>

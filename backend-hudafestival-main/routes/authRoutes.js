@@ -3,8 +3,11 @@ const router = express.Router();
 const {
     loginAdmin,
     registerAdmin,
-    teamLeaderLogin
+    teamLeaderLogin,
+    createTeamLeader
 } = require('../controllers/authController')
+
+const { protect, authorize } = require('../middlewares/authMiddleware');
 
 const rateLimit = require('express-rate-limit');
 
@@ -17,5 +20,6 @@ const loginLimiter = rateLimit({
 router.post('/login', loginLimiter, loginAdmin);
 router.post('/team-leader/login', loginLimiter, teamLeaderLogin);
 router.post('/signup', registerAdmin);
+router.post('/create-team-leader', protect, authorize('admin'), createTeamLeader);
 
 module.exports = router;

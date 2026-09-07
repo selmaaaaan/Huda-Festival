@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Users, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
 import Logo from './Logo';
 
 const navItems = [
@@ -11,10 +11,20 @@ const navItems = [
   { key: 'pending results', label: 'Pending Results', icon: Clock },
   { key: 'adjustments', label: 'Point Adjustments', icon: Sliders },
   { key: 'logs', label: 'Activity Logs', icon: Activity },
+  { key: 'settings', label: 'Settings', icon: Settings },
 ];
 
-const Sidebar = ({ activePage, setActivePage, onLogout }) => {
+const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
   const [collapsed, setCollapsed] = useState(false);
+
+  const isTeamLeader = userInfo?.role === 'team_leader';
+
+  const visibleNavItems = isTeamLeader 
+    ? [
+        { key: 'candidates', label: 'My Team', icon: Users },
+        { key: 'team_dashboard', label: 'Programme Registration', icon: Calendar }
+      ]
+    : navItems;
 
   return (
     <aside className={`${collapsed ? 'w-20' : 'w-64'} flex flex-col bg-[var(--color-surface)] border-r border-[var(--color-border)] transition-all duration-300`}>
@@ -25,7 +35,7 @@ const Sidebar = ({ activePage, setActivePage, onLogout }) => {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-2 space-y-1 overflow-hidden">
-        {navItems.map(({ key, label, icon: Icon }) => {
+        {visibleNavItems.map(({ key, label, icon: Icon }) => {
           const isActive = activePage === key;
           return (
             <button

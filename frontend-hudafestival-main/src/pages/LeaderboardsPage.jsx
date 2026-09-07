@@ -132,7 +132,10 @@ const LeaderboardsPage = () => {
                     <div className="flex items-center space-x-4">
                         <RankNumber index={index} />
                         <div>
-                            <h3 className="text-lg font-bold text-gray-800">{team.name}</h3>
+                            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: team.color || '#6B7280' }}></span>
+                                {team.name}
+                            </h3>
                             {index < 3 && (
                                 <p className="text-sm font-semibold text-gray-600 capitalize">
                                     {index === 0 ? 'Champion Team' : index === 1 ? 'Silver Medal Team' : 'Bronze Medal Team'}
