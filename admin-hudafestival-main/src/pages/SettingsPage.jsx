@@ -169,12 +169,12 @@ const SettingsPage = () => {
               <div className="text-sm text-[var(--color-text-muted)] text-center py-4">No team leaders found.</div>
             ) : (
               teamLeaders.map(leader => {
-                const leaderTeam = teams.find(t => t._id === leader.team);
+                const leaderTeamName = leader.team?.name || teams.find(t => t._id === leader.team)?.name || 'None';
                 return (
                   <div key={leader._id} className="flex items-center justify-between p-3 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg">
                     <div>
                       <div className="font-medium text-[var(--color-text-heading)]">{leader.userName}</div>
-                      <div className="text-xs text-[var(--color-text-muted)]">Team: {leaderTeam?.name || leader.team || 'None'}</div>
+                      <div className="text-xs text-[var(--color-text-muted)]">Team: {leaderTeamName}</div>
                     </div>
                   </div>
                 )
@@ -185,7 +185,7 @@ const SettingsPage = () => {
       </div>
 
       {/* Team Modal */}
-      <Modal open={showTeamModal} onClose={() => setShowTeamModal(false)} title={editingTeam ? 'Edit Team' : 'Add Team'}>
+      <Modal isOpen={showTeamModal} onClose={() => setShowTeamModal(false)} title={editingTeam ? 'Edit Team' : 'Add Team'}>
         <form onSubmit={handleSaveTeam} className="space-y-4">
           {error && <div className="text-sm text-red-400 bg-red-900/20 p-2 rounded">{error}</div>}
           
@@ -219,7 +219,7 @@ const SettingsPage = () => {
       </Modal>
 
       {/* Leader Modal */}
-      <Modal open={showLeaderModal} onClose={() => setShowLeaderModal(false)} title="Add Team Leader">
+      <Modal isOpen={showLeaderModal} onClose={() => setShowLeaderModal(false)} title="Add Team Leader">
         <form onSubmit={handleSaveLeader} className="space-y-4">
           {error && <div className="text-sm text-red-400 bg-red-900/20 p-2 rounded">{error}</div>}
           

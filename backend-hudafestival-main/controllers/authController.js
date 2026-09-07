@@ -121,9 +121,25 @@ const teamLeaderLogin = async (req, res) => {
     }
 }
 
+// @desc Get all team leaders
+// @route GET /api/auth/team-leaders
+// @access Private/Admin
+const getAllTeamLeaders = async (req, res) => {
+    try {
+        const teamLeaders = await User.find({ role: 'team_leader' })
+            .populate('team', 'name color')
+            .select('-password');
+        res.status(200).json(teamLeaders);
+    } catch (error) {
+        console.error(`Error fetching team leaders: ${error.message}`);
+        res.status(500).json({ message: 'Server Error' });
+    }
+}
+
 module.exports = {
     loginAdmin,
     registerAdmin,
     teamLeaderLogin,
     createTeamLeader,
+    getAllTeamLeaders,
 }

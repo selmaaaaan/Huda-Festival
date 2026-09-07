@@ -8,20 +8,30 @@ const Candidate = require('../models/Candidate');
 // @route POST /api/programmes
 // @access Private/Admin
 const createProgramme = async (req, res) => {
-    const { name, type, date, category } = req.body;
+    const { name, type, date, category, code, stageType, participantsRaw } = req.body;
     if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({ message: 'Request body is missing' });
     }
-    if( !name || !type || !date || !category) {
-        return res.status(400).json({ message: 'Please provide name, type and date for the programme' });
-    }
+    
+    // Check specific fields and return explicit error messages
+    if (!name) return res.status(400).json({ message: 'Please provide programme name' });
+    if (!type) return res.status(400).json({ message: 'Please provide programme type' });
+    if (!date) return res.status(400).json({ message: 'Please provide programme date' });
+    if (!category) return res.status(400).json({ message: 'Please provide programme category' });
+    if (!code) return res.status(400).json({ message: 'Please provide programme code' });
+    if (!stageType) return res.status(400).json({ message: 'Please provide programme stageType' });
+    if (!participantsRaw) return res.status(400).json({ message: 'Please provide programme participantsRaw' });
+
     try {
         const newProgramme = new Programme({
             name,
             type,
             date,
             category,
-        })
+            code,
+            stageType,
+            participantsRaw
+        });
        
         const savedProgramme = await newProgramme.save();
         await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'PROGRAMME_CREATED', entityType: 'Programme', entityId: savedProgramme._id, details: { name: savedProgramme.name }, req });

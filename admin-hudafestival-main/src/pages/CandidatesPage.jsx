@@ -14,7 +14,7 @@ const CandidatesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const categories = ['BIDAYA', 'ULA', 'THANIYYAH', 'THANAWIYYAH', 'ALIYA'];
+  const categories = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const isTeamLeader = userInfo?.role === 'team_leader';

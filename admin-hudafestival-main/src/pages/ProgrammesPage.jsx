@@ -13,7 +13,7 @@ const ProgrammesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const categories = ['BIDAYA', 'ULA', 'THANIYYAH', 'THANAWIYYAH', 'ALIYA'];
+  const categories = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
   const fetchProgrammes = async () => { try { setLoading(true); const { data } = await api.get('/programmes'); setProgrammes(data); } catch { setError('Failed to fetch programmes.'); } finally { setLoading(false); } };
   useEffect(() => { fetchProgrammes(); }, []);
