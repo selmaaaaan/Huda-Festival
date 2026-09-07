@@ -8,6 +8,18 @@ const settingsSchema = new mongoose.Schema({
             'A': 5, 'B': 3
         }
     },
+    isRegistrationOpen: {
+        type: Boolean,
+        default: true
+    },
+    maintenanceMode: {
+        type: Boolean,
+        default: false
+    },
+    maintenanceMessage: {
+        type: String,
+        default: "We'll be back soon."
+    }
 }, { timestamps: true })
 
 const Settings = mongoose.model('Settings', settingsSchema);

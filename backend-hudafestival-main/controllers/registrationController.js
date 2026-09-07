@@ -1,11 +1,17 @@
 const Registration = require('../models/Registration');
 const Programme = require('../models/Programme');
 const Candidate = require('../models/Candidate');
+const Settings = require('../models/Settings');
 const { logAction } = require('../utils/logAction');
 
 const createRegistration = async (req, res) => {
     const { programmeId, teamId, candidateIds } = req.body;
     try {
+        const settings = await Settings.findOne();
+        if (settings && settings.isRegistrationOpen === false) {
+            return res.status(403).json({ message: 'Registration is closed by Fest Admins' });
+        }
+
         if (!programmeId || !teamId || !candidateIds || !Array.isArray(candidateIds)) {
             return res.status(400).json({ message: 'Missing required fields' });
         }

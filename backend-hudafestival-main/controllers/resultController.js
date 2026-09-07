@@ -5,11 +5,7 @@ const Candidate = require('../models/Candidate.js');
 const Team = require('../models/Team.js');
 const Settings = require('../models/Settings.js');
 
-const rankPointsMap = {
-    'Stage': { 1: 5, 2: 3, 3: 1 }, 'Non-Stage': { 1: 5, 2: 3, 3: 1 },
-    'Starred': { 1: 7, 2: 5, 3: 3 }, 'Group': { 1: 7, 2: 5, 3: 3 },
-    'General': { 1: 10, 2: 7, 3: 5 }, 'Special': { 1: 15, 2: 10, 3: 7 },
-};
+
 
 // @desc    Save results as 'pending'
 const savePendingResults = async (req, res) => {
@@ -48,13 +44,22 @@ const approveForProgramme = async (programmeId, user) => {
         return { programmeId, success: false, message: 'No pending results to approve.' };
     }
     
-    let settings = await Settings.findOne();
-    if (!settings) settings = await new Settings().save();
-    const gradePointsMap = settings.gradePoints;
+    const { POSITION_POINTS, GRADE_POINTS } = require('../config/bylawRules');
+    
+    let tier = 'individual';
+    if (programme.category === 'KULLIYYAH') {
+        tier = 'kulliyyah';
+    } else if (programme.isStarred) {
+        tier = 'starred';
+    } else if (programme.format === 'Group') {
+        tier = 'group';
+    }
+
+    let gradeTier = (programme.isStarred || programme.format === 'Group' || programme.category === 'KULLIYYAH') ? 'starred' : 'standard';
 
     for (const result of pendingResults) {
-        const pointsFromRank = result.rank ? (rankPointsMap[programme.type]?.[result.rank] || 0) : 0;
-        const pointsFromGrade = result.grade ? (gradePointsMap.get(result.grade) || 0) : 0;
+        const pointsFromRank = result.rank ? (POSITION_POINTS[tier]?.[result.rank] || 0) : 0;
+        const pointsFromGrade = result.grade ? (GRADE_POINTS[gradeTier]?.[result.grade] || 0) : 0;
         const totalPoints = pointsFromRank + pointsFromGrade;
 
         result.pointsFromRank = pointsFromRank;

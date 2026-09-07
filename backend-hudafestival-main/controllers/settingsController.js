@@ -21,7 +21,7 @@ const getSettings = async (req, res) => {
 }
 
 const updateSettings = async (req, res) => {
-    const { gradePoints } = req.body;
+    const { gradePoints, isRegistrationOpen, maintenanceMode, maintenanceMessage } = req.body;
 
     try {
         let settings = await Settings.findOne();
@@ -33,6 +33,18 @@ const updateSettings = async (req, res) => {
             // Mongoose Maps can be updated directly like this
             settings.gradePoints = new Map(Object.entries(gradePoints));
         }
+        
+        if (typeof isRegistrationOpen !== 'undefined') {
+            settings.isRegistrationOpen = isRegistrationOpen;
+        }
+
+        if (typeof maintenanceMode !== 'undefined') {
+            settings.maintenanceMode = maintenanceMode;
+        }
+
+        if (typeof maintenanceMessage !== 'undefined') {
+            settings.maintenanceMessage = maintenanceMessage;
+        }
 
         const updatedSettings = await settings.save();
         res.status(200).json(updatedSettings)
@@ -43,7 +55,13 @@ const updateSettings = async (req, res) => {
     }
 }
 
+const getBylawRules = (req, res) => {
+    const { POSITION_POINTS, GRADE_POINTS, CATEGORIES } = require('../config/bylawRules');
+    res.status(200).json({ POSITION_POINTS, GRADE_POINTS, CATEGORIES });
+};
+
 module.exports = {
     getSettings,
     updateSettings,
+    getBylawRules,
 }

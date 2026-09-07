@@ -13,7 +13,7 @@ module.exports = {
     starred:  { A: 7, B: 5, C: 3 },
   },
 
-  // Section VI — max individual ARTS items per category, split between stage/non-stage.
+  // Section VI - max individual ARTS items per category, split between stage/non-stage.
   // Group items and Kulliyyah items are NOT counted against these caps.
   CATEGORY_ITEM_LIMITS: {
     "BIDĀYAH":      { total: 12, stage: 4, nonStage: 8 },
@@ -26,7 +26,7 @@ module.exports = {
   MINIMUM_PARTICIPATION: {
     minStageItems: 1,
     minNonStageItems: 1,
-    // penalty amount/type is not specified numerically in the bylaw document —
+    // penalty amount/type is not specified numerically in the bylaw document
     // leave as a manual admin decision, do not invent a number here.
   },
 
@@ -36,10 +36,10 @@ module.exports = {
     "two participants.",
 
   PROCEDURAL_FEES: {
-    substitutionFormFee: 10,       // ₹ per substitution form
-    lateSubmissionFeePerUnit: 10,  // ₹ per 20-minute block late
+    substitutionFormFee: 10,       // ₹1 per substitution form
+    lateSubmissionFeePerUnit: 10,  // ₹1 per 20-minute block late
     lateSubmissionUnitMinutes: 20,
-    appealDeposit: 50,             // ₹, refunded if appeal is upheld, forfeited if not
+    appealDeposit: 50,             // ₹1, refunded if appeal is upheld, forfeited if not
   },
 
   DEADLINES_NOTE: {
