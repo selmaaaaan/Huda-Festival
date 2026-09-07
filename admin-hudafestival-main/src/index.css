@@ -3,9 +3,9 @@
 
 @theme {
   /* Backgrounds */
-  --color-bg: #FAFAFA;
-  --color-surface: #FFFFFF;
-  --color-surface-elevated: #FFFFFF;
+  --color-bg: #0A0A0B;
+  --color-surface: #121214;
+  --color-surface-elevated: #1C1C1F;
 
   /* Accent colors */
   --color-primary: #3B82F6; /* brand */
@@ -16,34 +16,29 @@
   --color-accent-adjustments: #EC4899;
 
   /* Borders */
-  --color-border: #E5E7EB;
-  --color-border-subtle: #F3F4F6;
+  --color-border: #27272A;
+  --color-border-subtle: #18181B;
 
   /* Text */
-  --color-text-heading: #111827;
-  --color-text-body: #4B5563;
+  --color-text-heading: #F8FAFC;
+  --color-text-body: #D1D5DB;
   --color-text-muted: #9CA3AF;
 
   /* Status — ONLY for status states, never decoration */
-  --color-status-approved: #059669;
-  --color-status-approved-bg: #D1FAE5;
-  --color-status-pending: #D97706;
-  --color-status-pending-bg: #FEF3C7;
-  --color-status-rejected: #DC2626;
-  --color-status-rejected-bg: #FEE2E2;
+  --color-status-approved: #10B981;
+  --color-status-approved-bg: rgba(16, 185, 129, 0.1);
+  --color-status-pending: #F59E0B;
+  --color-status-pending-bg: rgba(245, 158, 11, 0.1);
+  --color-status-rejected: #EF4444;
+  --color-status-rejected-bg: rgba(239, 68, 68, 0.1);
   --color-status-published: #4F46E5;
-  --color-status-published-bg: #E0E7FF;
+  --color-status-published-bg: rgba(79, 70, 229, 0.1);
 
   /* Legacy aliases (used in existing components — map to new values) */
-  --color-admin-bg: #FAFAFA;
-  --color-sidebar-bg: #FFFFFF;
-  --color-card-bg: #FFFFFF;
-  --color-header-bar: #3B82F6;
-  --color-text-heading: #111827;
-  --color-text-body: #4B5563;
-  --color-border: #E5E7EB;
-  --color-primary: #3B82F6;
-  --color-primary-hover: #2563EB;
+  --color-admin-bg: var(--color-bg);
+  --color-sidebar-bg: var(--color-surface);
+  --color-card-bg: var(--color-surface);
+  --color-header-bar: var(--color-primary);
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 }
 

@@ -23,6 +23,9 @@ export default function RegistrationReviewPage() {
   const [assignSubmitting, setAssignSubmitting] = useState(false);
   const [assignError, setAssignError] = useState('');
   const [teamCandidates, setTeamCandidates] = useState([]);
+  const [assignCategoryFilter, setAssignCategoryFilter] = useState('ALL');
+
+  const CATEGORIES = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const isAdminOrJudge = ['admin', 'judge'].includes(userInfo.role);
@@ -40,6 +43,7 @@ export default function RegistrationReviewPage() {
 
   // Fetch candidates for selected team in the form
   useEffect(() => {
+    setAssignCategoryFilter('ALL');
     if (assignForm.teamId) {
       api.get(`/candidates?team=${assignForm.teamId}`)
          .then(r => setTeamCandidates(r.data))
@@ -240,23 +244,25 @@ export default function RegistrationReviewPage() {
                               <span className="text-xs text-[var(--color-text-muted)] mr-2">{reg.rejectionReason}</span>
                             )}
                             {isAdminOrJudge && (
-                              <>
-                                <button 
+                              <div className="flex gap-2 items-center">
+                                <Button 
+                                  size="sm"
+                                  variant="secondary"
                                   onClick={() => reg.status !== 'approved' && openAssignModal('edit', reg)}
                                   disabled={reg.status === 'approved'}
-                                  title={reg.status === 'approved' ? "Cannot edit an approved registration" : "Edit"}
-                                  className={`p-1 rounded transition ${reg.status === 'approved' ? 'opacity-50 cursor-not-allowed text-[var(--color-text-muted)]' : 'text-blue-500 hover:bg-blue-500/10'}`}
+                                  title={reg.status === 'approved' ? "Cannot edit approved registration" : "Edit"}
                                 >
                                   <Edit2 size={16} />
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="danger"
                                   onClick={() => setDeleteDialog({ open: true, id: reg._id })}
                                   title="Delete"
-                                  className="p-1 rounded text-red-500 hover:bg-red-500/10 transition"
                                 >
                                   <Trash2 size={16} />
-                                </button>
-                              </>
+                                </Button>
+                              </div>
                             )}
                           </div>
                         </td>
@@ -341,19 +347,30 @@ export default function RegistrationReviewPage() {
 
           {assignForm.teamId && assignForm.programmeId && (
             <div>
-              {(() => {
-                const prog = programmes.find(p => p._id === assignForm.programmeId);
-                const reqCands = prog?.format === 'Group' ? (prog?.groupSize || 1) : 1;
-                return (
-                  <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">
-                    Select {reqCands} Candidate(s) <span className="text-[var(--color-primary)]">{assignForm.candidateIds.length}/{reqCands}</span>
-                  </label>
-                );
-              })()}
+              <div className="flex items-center justify-between mb-2">
+                {(() => {
+                  const prog = programmes.find(p => p._id === assignForm.programmeId);
+                  const reqCands = prog?.format === 'Group' ? (prog?.groupSize || 1) : 1;
+                  return (
+                    <label className="block text-xs font-medium text-[var(--color-text-muted)]">
+                      Select {reqCands} Candidate(s) <span className="text-[var(--color-primary)]">{assignForm.candidateIds.length}/{reqCands}</span>
+                    </label>
+                  );
+                })()}
+                <select
+                  value={assignCategoryFilter}
+                  onChange={e => setAssignCategoryFilter(e.target.value)}
+                  className="text-xs px-2 py-1 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
+                >
+                  {['ALL', ...CATEGORIES].map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
               <div className="max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg">
-                {teamCandidates.length === 0 ? (
-                  <div className="p-4 text-center text-xs text-[var(--color-text-muted)]">No candidates found for this team.</div>
-                ) : teamCandidates.map(c => (
+                {teamCandidates.filter(c => assignCategoryFilter === 'ALL' || c.category === assignCategoryFilter).length === 0 ? (
+                  <div className="p-4 text-center text-xs text-[var(--color-text-muted)]">No candidates found for this team in the selected category.</div>
+                ) : teamCandidates.filter(c => assignCategoryFilter === 'ALL' || c.category === assignCategoryFilter).map(c => (
                   <label key={c._id} className="flex items-center gap-3 px-3 py-2 hover:bg-[var(--color-surface-elevated)] cursor-pointer border-b border-[var(--color-border)] last:border-0">
                     <input type="checkbox" checked={assignForm.candidateIds.includes(c._id)} onChange={() => handleCandidateToggle(c._id)} className="rounded" />
                     <div>

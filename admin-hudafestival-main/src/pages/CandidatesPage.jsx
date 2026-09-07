@@ -14,7 +14,9 @@ const CandidatesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const categories = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
+  const [editingCandidate, setEditingCandidate] = useState(null);
+  
+  const categories = ['ALL', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const isTeamLeader = userInfo?.role === 'team_leader';
@@ -39,7 +41,17 @@ const CandidatesPage = () => {
     fetchData();
   }, [isTeamLeader]);
 
-  const handleFormSubmit = () => { setIsModalOpen(false); api.get('/candidates').then(res => setCandidates(res.data)); };
+  const handleFormSubmit = () => { 
+    setIsModalOpen(false); 
+    setEditingCandidate(null);
+    api.get('/candidates').then(res => setCandidates(res.data)); 
+  };
+  
+  const handleEdit = (candidate) => {
+    setEditingCandidate(candidate);
+    setIsModalOpen(true);
+  };
+
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this candidate?')) {
       try { await api.delete(`/candidates/${id}`); api.get('/candidates').then(res => setCandidates(res.data)); } catch { setError('Failed to delete candidate.'); }
@@ -70,10 +82,13 @@ const CandidatesPage = () => {
         </div>
       </td>
       <td className="px-6 py-4 text-sm font-semibold text-[var(--color-text-heading)]">{candidate.totalPoints || 0}</td>
-      <td className="px-6 py-4 text-sm">
-        {!isTeamLeader && (
-          <button onClick={() => handleDelete(candidate._id)} className="text-red-400 hover:text-red-300 transition text-sm font-medium">Delete</button>
-        )}
+      <td className="px-6 py-4">
+        <div className="flex gap-2">
+          <Button variant="secondary" size="sm" onClick={() => handleEdit(candidate)}>Edit</Button>
+          {!isTeamLeader && (
+            <Button variant="danger" size="sm" onClick={() => handleDelete(candidate._id)}>Delete</Button>
+          )}
+        </div>
       </td>
     </tr>
   );
@@ -140,9 +155,9 @@ const CandidatesPage = () => {
         </div>
       )}
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={selectedTeam && selectedCategory ? `Add Candidate to ${selectedTeam.name} (${selectedCategory})` : 'Add Candidate'}>
+      <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingCandidate(null); }} title={editingCandidate ? 'Edit Candidate' : (selectedTeam && selectedCategory ? `Add Candidate to ${selectedTeam.name} (${selectedCategory})` : 'Add Candidate')}>
         <div className="text-[var(--color-text-body)]">
-           <AddCandidateForm onFormSubmit={handleFormSubmit} onFormCancel={() => setIsModalOpen(false)} teamId={selectedTeam?._id} categoryName={selectedCategory} teams={teams} categories={categories} />
+           <AddCandidateForm onFormSubmit={handleFormSubmit} onFormCancel={() => { setIsModalOpen(false); setEditingCandidate(null); }} teamId={selectedTeam?._id} categoryName={selectedCategory} teams={teams} categories={categories} initialData={editingCandidate} />
         </div>
       </Modal>
     </div>

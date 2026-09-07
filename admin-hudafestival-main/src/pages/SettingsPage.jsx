@@ -8,12 +8,14 @@ import ConfirmDialog from '../components/ConfirmDialog';
 const SettingsPage = () => {
   const [teams, setTeams] = useState([]);
   const [teamLeaders, setTeamLeaders] = useState([]);
+  const [settings, setSettings] = useState({ isRegistrationOpen: true, maintenanceMode: false, maintenanceMessage: '' });
   const [loading, setLoading] = useState(true);
 
   // Modals state
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [showLeaderModal, setShowLeaderModal] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [showConfirmToggleReg, setShowConfirmToggleReg] = useState(false);
   
   const [editingTeam, setEditingTeam] = useState(null);
   const [deletingTeam, setDeletingTeam] = useState(null);
@@ -32,16 +34,58 @@ const SettingsPage = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [teamsRes, leadersRes] = await Promise.all([
+      const [teamsRes, leadersRes, settingsRes] = await Promise.all([
         api.get('/teams').catch(() => ({ data: [] })),
-        api.get('/auth/team-leaders').catch(() => ({ data: [] }))
+        api.get('/auth/team-leaders').catch(() => ({ data: [] })),
+        api.get('/settings').catch(() => ({ data: {} }))
       ]);
       setTeams(teamsRes.data || []);
       setTeamLeaders(leadersRes.data || []);
+      if (settingsRes.data) {
+        setSettings({
+          isRegistrationOpen: settingsRes.data.isRegistrationOpen ?? true,
+          maintenanceMode: settingsRes.data.maintenanceMode ?? false,
+          maintenanceMessage: settingsRes.data.maintenanceMessage ?? '',
+        });
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleRegistration = async () => {
+    try {
+      const updatedStatus = !settings.isRegistrationOpen;
+      await api.patch('/settings', { isRegistrationOpen: updatedStatus });
+      setSettings(s => ({ ...s, isRegistrationOpen: updatedStatus }));
+      setShowConfirmToggleReg(false);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to update registration status');
+    }
+  };
+
+  const [savingMaintenance, setSavingMaintenance] = useState(false);
+  const handleToggleMaintenance = async () => {
+    try {
+      const updatedStatus = !settings.maintenanceMode;
+      await api.patch('/settings', { maintenanceMode: updatedStatus });
+      setSettings(s => ({ ...s, maintenanceMode: updatedStatus }));
+    } catch (err) {
+      setError('Failed to update maintenance mode');
+    }
+  };
+
+  const handleSaveMaintenanceMessage = async () => {
+    try {
+      setSavingMaintenance(true);
+      await api.patch('/settings', { maintenanceMessage: settings.maintenanceMessage });
+    } catch (err) {
+      setError('Failed to save message');
+    } finally {
+      setSavingMaintenance(false);
     }
   };
 
@@ -117,10 +161,61 @@ const SettingsPage = () => {
   if (loading) return <div className="p-6">Loading settings...</div>;
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-8">
-      <div>
+    <div className="p-6 max-w-5xl mx-auto space-y-8">
+      <div className="flex items-center justify-between mb-2">
         <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Settings</h1>
-        <p className="text-sm text-[var(--color-text-muted)] mt-1">Manage teams and team leaders.</p>
+      </div>
+
+      {error && <div className="p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>}
+
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6">
+        <h2 className="text-lg font-semibold text-[var(--color-text-heading)] mb-4">Registration Status</h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[var(--color-text-heading)] font-medium">Allow New Registrations</p>
+            <p className="text-sm text-[var(--color-text-muted)]">When disabled, team leaders will see a "Closed" message and cannot register new candidates.</p>
+          </div>
+          <button 
+            onClick={() => setShowConfirmToggleReg(true)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${settings.isRegistrationOpen ? 'bg-green-500' : 'bg-gray-300'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.isRegistrationOpen ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6">
+        <h2 className="text-lg font-semibold text-[var(--color-text-heading)] mb-4">Maintenance Mode</h2>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-[var(--color-text-heading)] font-medium">Enable Maintenance Mode</p>
+            <p className="text-sm text-[var(--color-text-muted)]">When enabled, the public site is hidden and displays the maintenance message. Admins can still log in.</p>
+          </div>
+          <button 
+            onClick={handleToggleMaintenance}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${settings.maintenanceMode ? 'bg-red-500' : 'bg-gray-300'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.maintenanceMode ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+        </div>
+        
+        {settings.maintenanceMode && (
+          <div className="space-y-2 mt-4 pt-4 border-t border-[var(--color-border)]">
+            <label className="block text-sm font-medium text-[var(--color-text-heading)]">Maintenance Message</label>
+            <textarea 
+              value={settings.maintenanceMessage || ''}
+              onChange={(e) => setSettings(s => ({ ...s, maintenanceMessage: e.target.value }))}
+              rows={3}
+              placeholder="e.g., We are currently updating the results. Please check back later."
+              className="w-full px-4 py-3 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+            />
+            <div className="flex justify-end pt-2">
+              <Button onClick={handleSaveMaintenanceMessage} loading={savingMaintenance} variant="primary">
+                Save Message
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -269,6 +364,17 @@ const SettingsPage = () => {
         onConfirm={handleDeleteTeam}
         onCancel={() => setShowConfirmDelete(false)}
         confirmText="Delete"
+      />
+
+      <ConfirmDialog
+        open={showConfirmToggleReg}
+        title={settings.isRegistrationOpen ? "Close Registration" : "Open Registration"}
+        message={settings.isRegistrationOpen 
+          ? "Are you sure you want to close registration? Team leaders will no longer be able to assign candidates to programmes." 
+          : "Are you sure you want to open registration? Team leaders will be able to start assigning candidates again."}
+        onConfirm={handleToggleRegistration}
+        onCancel={() => setShowConfirmToggleReg(false)}
+        confirmText={settings.isRegistrationOpen ? "Close Registration" : "Open Registration"}
       />
     </div>
   );

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 
-const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName, teams = [], categories = [] }) => {
+const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName, teams = [], categories = [], initialData = null }) => {
   const [formData, setFormData] = useState({ 
-    admissionNo: '', 
-    name: '',
-    selectedTeam: teamId || '',
-    selectedCategory: categoryName || ''
+    admissionNo: initialData?.admissionNo || '', 
+    name: initialData?.name || '',
+    selectedTeam: initialData?.team?._id || initialData?.team || teamId || '',
+    selectedCategory: initialData?.category || categoryName || ''
   });
   const [imageFile, setImageFile] = useState(null);
   const [error, setError] = useState('');
@@ -18,8 +18,12 @@ const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName, te
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!imageFile || !formData.admissionNo || !formData.name || !formData.selectedTeam || !formData.selectedCategory) {
-      setError('Please fill all fields, select team/category, and select an image.');
+    if (!initialData && !imageFile) {
+      setError('Please select an image.');
+      return;
+    }
+    if (!formData.admissionNo || !formData.name || !formData.selectedTeam || !formData.selectedCategory) {
+      setError('Please fill all text fields.');
       return;
     }
     setLoading(true);
@@ -28,13 +32,19 @@ const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName, te
     submissionData.append('category', formData.selectedCategory);
     submissionData.append('admissionNo', formData.admissionNo);
     submissionData.append('name', formData.name);
-    submissionData.append('image', imageFile);
+    if (imageFile) {
+      submissionData.append('image', imageFile);
+    }
 
     try {
-      await api.post('/candidates', submissionData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (initialData) {
+        await api.put(`/candidates/${initialData._id}`, submissionData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      } else {
+        await api.post('/candidates', submissionData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      }
       onFormSubmit();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add candidate.');
+      setError(err.response?.data?.message || `Failed to ${initialData ? 'update' : 'add'} candidate.`);
     } finally {
       setLoading(false);
     }
@@ -91,7 +101,7 @@ const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName, te
         </button>
         <button type="submit" disabled={loading}
           className="px-5 py-2.5 text-sm font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl transition disabled:opacity-50">
-          {loading ? 'Adding...' : 'Add Candidate'}
+          {loading ? 'Saving...' : (initialData ? 'Update Candidate' : 'Add Candidate')}
         </button>
       </div>
     </form>

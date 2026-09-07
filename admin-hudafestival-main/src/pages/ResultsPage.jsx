@@ -5,16 +5,10 @@ import Button from '../components/Button';
 import SearchInput from '../components/SearchInput';
 import StatusBadge from '../components/StatusBadge';
 
-const rankPointsMap = {
-    'Stage': { 1: 5, 2: 3, 3: 1 }, 'Non-Stage': { 1: 5, 2: 3, 3: 1 },
-    'Starred': { 1: 7, 2: 5, 3: 3 }, 'Group': { 1: 7, 2: 5, 3: 3 },
-    'General': { 1: 10, 2: 7, 3: 5 }, 'Special': { 1: 15, 2: 10, 3: 7 },
-};
-
 const ResultsPage = () => {
     const [programmes, setProgrammes] = useState([]);
     const [candidates, setCandidates] = useState([]);
-    const [settings, setSettings] = useState(null);
+    const [bylawRules, setBylawRules] = useState(null);
     const [selectedProgramme, setSelectedProgramme] = useState(null);
     const [resultsData, setResultsData] = useState({});
     const [initialResultsData, setInitialResultsData] = useState({});
@@ -29,20 +23,20 @@ const ResultsPage = () => {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
-    const categories = ['ALL', 'BIDAYA', 'ULA', 'THANIYYAH', 'THANAWIYYAH', 'ALIYA'];
+    const categories = ['ALL', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
                 setLoading(true);
-                const [progRes, candRes, setRes] = await Promise.all([
+                const [progRes, candRes, rulesRes] = await Promise.all([
                     api.get('/programmes'),
                     api.get('/candidates'),
-                    api.get('/settings')
+                    api.get('/settings/bylaw-rules')
                 ]);
                 setProgrammes(progRes.data);
                 setCandidates(candRes.data);
-                setSettings(setRes.data[0]);
+                setBylawRules(rulesRes.data);
             } catch (err) {
                 setError('Failed to fetch initial data.');
             } finally {
@@ -163,12 +157,17 @@ const ResultsPage = () => {
     });
 
     const calculatePointsPreview = (rank, grade) => {
-        if (!selectedProgramme) return 0;
-        const ptsRank = rank ? (rankPointsMap[selectedProgramme.type]?.[rank] || 0) : 0;
-        let ptsGrade = 0;
-        if (settings?.gradePoints && grade) {
-            ptsGrade = settings.gradePoints[grade] || 0;
-        }
+        if (!selectedProgramme || !bylawRules) return 0;
+        
+        let tier = 'individual';
+        if (selectedProgramme.category === 'KULLIYYAH') tier = 'kulliyyah';
+        else if (selectedProgramme.isStarred) tier = 'starred';
+        else if (selectedProgramme.format === 'Group') tier = 'group';
+
+        let gradeTier = (selectedProgramme.isStarred || selectedProgramme.format === 'Group' || selectedProgramme.category === 'KULLIYYAH') ? 'starred' : 'standard';
+
+        const ptsRank = rank ? (bylawRules.POSITION_POINTS[tier]?.[rank] || 0) : 0;
+        const ptsGrade = grade ? (bylawRules.GRADE_POINTS[gradeTier]?.[grade] || 0) : 0;
         return ptsRank + ptsGrade;
     };
 

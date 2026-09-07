@@ -13,11 +13,18 @@ const ProgrammesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const categories = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
+  const [editingProgramme, setEditingProgramme] = useState(null);
+  const categories = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH', 'OTHER'];
 
   const fetchProgrammes = async () => { try { setLoading(true); const { data } = await api.get('/programmes'); setProgrammes(data); } catch { setError('Failed to fetch programmes.'); } finally { setLoading(false); } };
   useEffect(() => { fetchProgrammes(); }, []);
-  const handleFormSubmit = () => { setIsModalOpen(false); fetchProgrammes(); };
+  const handleFormSubmit = () => { setIsModalOpen(false); setEditingProgramme(null); fetchProgrammes(); };
+  
+  const handleEdit = (prog) => {
+    setEditingProgramme(prog);
+    setIsModalOpen(true);
+  };
+
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this programme?')) {
       try { await api.delete(`/programmes/${id}`); fetchProgrammes(); } catch { setError('Failed to delete programme.'); }
@@ -28,11 +35,19 @@ const ProgrammesPage = () => {
   const headers = ['Name', 'Type', 'Date', 'Published', 'Actions'];
   const renderRow = (prog) => (
     <tr key={prog._id} className="hover:bg-[var(--color-surface-elevated)] transition">
-      <td className="px-6 py-4 text-sm font-medium text-[var(--color-text-heading)]">{prog.name}</td>
-      <td className="px-6 py-4"><span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)]">{prog.type}</span></td>
-      <td className="px-6 py-4 text-sm text-[var(--color-text-body)]">{new Date(prog.date).toLocaleString()}</td>
-      <td className="px-6 py-4"><StatusBadge status={prog.isResultPublished ? 'published' : 'pending'} /></td>
-      <td className="px-6 py-4"><button onClick={() => handleDelete(prog._id)} className="text-red-400 hover:text-red-300 text-sm font-medium transition">Delete</button></td>
+      <td className="px-6 py-4">
+        <div className="font-medium text-[var(--color-text-heading)]">{prog.name}</div>
+        <div className="text-xs text-[var(--color-text-muted)] mt-0.5">{prog.code}</div>
+      </td>
+      <td className="px-6 py-4 text-sm text-[var(--color-text-body)]">{prog.type}</td>
+      <td className="px-6 py-4 text-sm text-[var(--color-text-body)]">{new Date(prog.date).toLocaleDateString()}</td>
+      <td className="px-6 py-4"><StatusBadge status={prog.isResultPublished ? 'approved' : 'pending'} label={prog.isResultPublished ? 'Yes' : 'No'} /></td>
+      <td className="px-6 py-4">
+        <div className="flex gap-2">
+          <Button variant="secondary" size="sm" onClick={() => handleEdit(prog)}>Edit</Button>
+          <Button variant="danger" size="sm" onClick={() => handleDelete(prog._id)}>Delete</Button>
+        </div>
+      </td>
     </tr>
   );
 
@@ -68,9 +83,9 @@ const ProgrammesPage = () => {
         </div>
       )}
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={selectedCategory ? `Add Programme to ${selectedCategory}` : 'Add Programme'}>
+      <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingProgramme(null); }} title={editingProgramme ? 'Edit Programme' : (selectedCategory ? `Add Programme to ${selectedCategory}` : 'Add Programme')}>
         <div className="text-[var(--color-text-body)]">
-           <AddProgrammeForm onFormSubmit={handleFormSubmit} onFormCancel={() => setIsModalOpen(false)} categoryName={selectedCategory} categories={categories} />
+           <AddProgrammeForm onFormSubmit={handleFormSubmit} onFormCancel={() => { setIsModalOpen(false); setEditingProgramme(null); }} categoryName={selectedCategory} categories={categories} initialData={editingProgramme} />
         </div>
       </Modal>
     </div>

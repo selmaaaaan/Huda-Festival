@@ -10,7 +10,8 @@ import PointAdjustmentPage from './pages/PointAdjustmentPage';
 import Sidebar from './components/Sidebar';
 import Breadcrumbs from './components/Breadcrumbs';
 import SettingsPage from './pages/SettingsPage';
-import { Search, Bell } from 'lucide-react';
+import { Search, Bell, AlertTriangle } from 'lucide-react';
+import api from './services/api';
 
 import TeamLeaderDashboard from './pages/TeamLeaderDashboard';
 import RegistrationReviewPage from './pages/RegistrationReviewPage';
@@ -23,6 +24,20 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialInfo);
   const [userInfo, setUserInfo] = useState(initialInfo);
   const [activePage, setActivePage] = useState(initialInfo?.role === 'team_leader' ? 'candidates' : 'dashboard');
+  const [appSettings, setAppSettings] = useState({ maintenanceMode: false, maintenanceMessage: '' });
+
+  useEffect(() => {
+    // Poll settings every 30s
+    const fetchSettings = async () => {
+      try {
+        const { data } = await api.get('/settings');
+        if (data) setAppSettings({ maintenanceMode: data.maintenanceMode, maintenanceMessage: data.maintenanceMessage });
+      } catch (e) {}
+    };
+    fetchSettings();
+    const int = setInterval(fetchSettings, 30000);
+    return () => clearInterval(int);
+  }, []);
 
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
@@ -90,6 +105,30 @@ function App() {
   };
 
   if (!isAuthenticated) {
+    const isBypass = new URLSearchParams(window.location.search).get('bypass') === 'true';
+    if (appSettings.maintenanceMode && !isBypass) {
+      return (
+        <div className="min-h-screen bg-[#0A0A0B] flex flex-col items-center justify-center text-center p-6 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent pointer-events-none" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="max-w-2xl relative z-10"
+          >
+            <div className="w-20 h-20 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(239,68,68,0.2)]">
+              <AlertTriangle size={40} />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
+              We'll be right back.
+            </h1>
+            <p className="text-lg md:text-xl text-gray-400 font-medium max-w-xl mx-auto leading-relaxed">
+              {appSettings.maintenanceMessage || "The Huda Festival portal is currently undergoing scheduled maintenance. Please check back later."}
+            </p>
+          </motion.div>
+        </div>
+      );
+    }
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
 
@@ -98,6 +137,11 @@ function App() {
 
   return (
     <div className="flex flex-col h-screen bg-[var(--color-bg)] text-[var(--color-text-heading)]">
+      {appSettings.maintenanceMode && (
+        <div className="bg-red-500 text-white text-xs font-bold uppercase tracking-wider py-1.5 px-4 text-center shadow-md z-50">
+          MAINTENANCE MODE ACTIVE - Public site is hidden
+        </div>
+      )}
       {/* Utility Bar */}
       <div className="flex items-center justify-between px-6 py-3 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
         {userInfo?.role === 'team_leader' ? (

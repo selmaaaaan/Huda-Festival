@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 
-const AddProgrammeForm = ({ onFormSubmit, onFormCancel, categoryName, categories = [] }) => {
+const AddProgrammeForm = ({ onFormSubmit, onFormCancel, categoryName, categories = [], initialData = null }) => {
   const [formData, setFormData] = useState({ 
-    code: '',
-    name: '', 
-    type: '', 
-    stageType: 'stage',
-    participantsRaw: '',
-    date: '',
-    selectedCategory: categoryName || '',
+    code: initialData?.code || '',
+    name: initialData?.name || '', 
+    type: initialData?.type || '', 
+    stageType: initialData?.stageType || 'stage',
+    participantsRaw: initialData?.participantsRaw || '',
+    date: initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : '',
+    selectedCategory: initialData?.category || categoryName || '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,10 +35,14 @@ const AddProgrammeForm = ({ onFormSubmit, onFormCancel, categoryName, categories
         date: formData.date,
         category: formData.selectedCategory,
       };
-      await api.post('/programmes', payload);
+      if (initialData) {
+        await api.put(`/programmes/${initialData._id}`, payload);
+      } else {
+        await api.post('/programmes', payload);
+      }
       onFormSubmit();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add programme.');
+      setError(err.response?.data?.message || `Failed to ${initialData ? 'update' : 'add'} programme.`);
     } finally {
       setLoading(false);
     }
@@ -113,7 +117,7 @@ const AddProgrammeForm = ({ onFormSubmit, onFormCancel, categoryName, categories
         </button>
         <button type="submit" disabled={loading}
           className="px-5 py-2.5 text-sm font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl transition disabled:opacity-50">
-          {loading ? 'Adding...' : 'Add Programme'}
+          {loading ? 'Saving...' : (initialData ? 'Update Programme' : 'Add Programme')}
         </button>
       </div>
     </form>

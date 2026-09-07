@@ -4,7 +4,7 @@ import api from '../services/api';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/Modal';
-import { ClipboardList, Users, Plus, Search, CheckCircle } from 'lucide-react';
+import { ClipboardList, Users, Plus, Search, CheckCircle, AlertTriangle } from 'lucide-react';
 
 const Preloader = () => {
   const text = "HUDA FESTIVAL 2K26".split("");
@@ -55,6 +55,7 @@ export default function TeamLeaderDashboard() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
 
   useEffect(() => {
     // Hide preloader after animation finishes
@@ -65,21 +66,38 @@ export default function TeamLeaderDashboard() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [progRes, candRes, regRes] = await Promise.all([
+        const [progRes, candRes, regRes, settingsRes] = await Promise.all([
           api.get('/programmes'),
           api.get('/candidates'), // no team param, scoped by JWT on the backend
           api.get('/registrations'),
+          api.get('/settings').catch(() => ({ data: {} })),
         ]);
         setProgrammes(progRes.data);
         setCandidates(candRes.data);
         const regs = regRes.data?.registrations || regRes.data || [];
         setMyRegistrations(regs);
+        if (settingsRes.data && settingsRes.data.isRegistrationOpen !== undefined) {
+          setIsRegistrationOpen(settingsRes.data.isRegistrationOpen);
+        }
       } catch(e) { console.error(e); }
       finally { setLoading(false); }
     };
     if (teamId) load();
     else setLoading(false);
   }, [teamId]);
+
+  // Poll for settings every 60s
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await api.get('/settings');
+        if (data && data.isRegistrationOpen !== undefined) {
+          setIsRegistrationOpen(data.isRegistrationOpen);
+        }
+      } catch(e) {}
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const selectedProg = programmes.find(p => p._id === form.programmeId);
   const requiredCandidates = selectedProg?.format === 'Group' ? (selectedProg?.groupSize || 1) : 1;
@@ -251,7 +269,30 @@ export default function TeamLeaderDashboard() {
         {/* Registration Form Modal */}
         <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="New Registration">
           <AnimatePresence mode="wait">
-            {success ? (
+            {!isRegistrationOpen ? (
+              <motion.div 
+                key="closed"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="py-12 flex flex-col items-center text-center space-y-4"
+              >
+                <motion.div 
+                  className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center"
+                  animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <AlertTriangle size={32} />
+                </motion.div>
+                <div>
+                  <h3 className="text-lg font-bold text-[var(--color-text-heading)]">Registration is closed by Fest Admins</h3>
+                  <p className="text-sm text-[var(--color-text-muted)] mt-1">
+                    You cannot submit new candidates at this time.
+                  </p>
+                </div>
+                <Button variant="ghost" type="button" onClick={() => setShowForm(false)} className="mt-4">Close</Button>
+              </motion.div>
+            ) : success ? (
               <motion.div 
                 key="success"
                 initial={{ opacity: 0, scale: 0.95 }}
