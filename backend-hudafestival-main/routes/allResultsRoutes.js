@@ -8,11 +8,28 @@ const { protect } = require('../middlewares/authMiddleware.js');
 // @access  Private/Admin
 router.get('/', protect, async (req, res) => {
     try {
-        // Find all documents in the 'results' collection
         const results = await Result.find({});
         res.json(results);
     } catch (error) {
         console.error("Error fetching all results:", error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// @desc    Get all published results
+// @route   GET /api/results/published
+// @access  Public
+router.get('/published', async (req, res) => {
+    try {
+        const results = await Result.find({ status: 'approved' })
+            .populate('programme')
+            .populate({
+                path: 'candidate',
+                populate: { path: 'team' }
+            });
+        res.json(results);
+    } catch (error) {
+        console.error("Error fetching published results:", error);
         res.status(500).json({ message: 'Server Error' });
     }
 });
