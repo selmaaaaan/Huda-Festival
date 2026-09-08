@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
-const LoadingScreen = ({ onComplete }) => {
+const LoadingScreen = ({ onComplete, isReady = true }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [statusIndex, setStatusIndex] = useState(0);
+  const [minTimePassed, setMinTimePassed] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
   const statuses = [
@@ -26,8 +27,7 @@ const LoadingScreen = ({ onComplete }) => {
     }, 600);
 
     const timer = setTimeout(() => {
-      setIsVisible(false);
-      sessionStorage.setItem('hasSeenLoading', 'true');
+      setMinTimePassed(true);
     }, 2000);
 
     return () => {
@@ -35,6 +35,14 @@ const LoadingScreen = ({ onComplete }) => {
       clearInterval(statusTimer);
     };
   }, [onComplete, statuses.length]);
+
+  useEffect(() => {
+    const hasSeenLoading = sessionStorage.getItem('hasSeenLoading');
+    if (!hasSeenLoading && minTimePassed && isReady) {
+      setIsVisible(false);
+      sessionStorage.setItem('hasSeenLoading', 'true');
+    }
+  }, [minTimePassed, isReady]);
 
   const headline = "HUDA FESTIVAL 2026";
   
