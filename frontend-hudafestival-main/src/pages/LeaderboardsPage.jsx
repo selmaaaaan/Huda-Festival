@@ -31,7 +31,7 @@ const LeaderboardsPage = () => {
     const overallRest = (leaderboardData.overall || []).slice(3);
 
     return (
-        <div className="min-h-screen bg-[var(--festival-white)] py-24 px-6 md:px-12">
+        <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
             <div className="max-w-[1440px] mx-auto">
                 
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 border-b-2 border-[var(--border)] pb-8">
@@ -54,9 +54,9 @@ const LeaderboardsPage = () => {
                                 className="order-1 md:order-2 bg-[var(--festival-black)] border-4 border-[var(--border)] shadow-[12px_12px_0px_0px_rgba(23,23,23,1)] p-8 flex flex-col items-center justify-center text-center h-80"
                                 style={{ backgroundColor: overallTop[0].color || 'var(--festival-teal)' }}
                             >
-                                <span className="text-8xl font-black font-display text-[var(--festival-white)] leading-none opacity-90 drop-shadow-md">01</span>
-                                <h3 className="text-4xl font-black font-display uppercase tracking-tight text-[var(--festival-white)] mt-4 drop-shadow-md">{overallTop[0].name}</h3>
-                                <p className="text-xl font-bold font-display text-[var(--festival-white)] mt-2 drop-shadow-md">{overallTop[0].totalPoints} PTS</p>
+                                <span className="text-8xl font-black font-display text-[var(--festival-cream)] leading-none opacity-90 drop-shadow-md">01</span>
+                                <h3 className="text-4xl font-black font-display uppercase tracking-tight text-[var(--festival-cream)] mt-4 drop-shadow-md">{overallTop[0].name}</h3>
+                                <p className="text-xl font-bold font-display text-[var(--festival-cream)] mt-2 drop-shadow-md">{overallTop[0].totalPoints} PTS</p>
                             </motion.div>
                         )}
                         
@@ -67,9 +67,9 @@ const LeaderboardsPage = () => {
                                 className="order-2 md:order-1 bg-[var(--festival-black)] border-4 border-[var(--border)] shadow-[8px_8px_0px_0px_rgba(23,23,23,1)] p-6 flex flex-col items-center justify-center text-center h-64"
                                 style={{ backgroundColor: overallTop[1].color || 'var(--festival-orange)' }}
                             >
-                                <span className="text-6xl font-black font-display text-[var(--festival-white)] leading-none opacity-90 drop-shadow-md">02</span>
-                                <h3 className="text-2xl font-black font-display uppercase tracking-tight text-[var(--festival-white)] mt-4 drop-shadow-md">{overallTop[1].name}</h3>
-                                <p className="text-lg font-bold font-display text-[var(--festival-white)] mt-1 drop-shadow-md">{overallTop[1].totalPoints} PTS</p>
+                                <span className="text-6xl font-black font-display text-[var(--festival-cream)] leading-none opacity-90 drop-shadow-md">02</span>
+                                <h3 className="text-2xl font-black font-display uppercase tracking-tight text-[var(--festival-cream)] mt-4 drop-shadow-md">{overallTop[1].name}</h3>
+                                <p className="text-lg font-bold font-display text-[var(--festival-cream)] mt-1 drop-shadow-md">{overallTop[1].totalPoints} PTS</p>
                             </motion.div>
                         )}
 
@@ -80,9 +80,9 @@ const LeaderboardsPage = () => {
                                 className="order-3 md:order-3 bg-[var(--festival-black)] border-4 border-[var(--border)] shadow-[8px_8px_0px_0px_rgba(23,23,23,1)] p-6 flex flex-col items-center justify-center text-center h-56"
                                 style={{ backgroundColor: overallTop[2].color || 'var(--festival-purple)' }}
                             >
-                                <span className="text-5xl font-black font-display text-[var(--festival-white)] leading-none opacity-90 drop-shadow-md">03</span>
-                                <h3 className="text-2xl font-black font-display uppercase tracking-tight text-[var(--festival-white)] mt-4 drop-shadow-md">{overallTop[2].name}</h3>
-                                <p className="text-lg font-bold font-display text-[var(--festival-white)] mt-1 drop-shadow-md">{overallTop[2].totalPoints} PTS</p>
+                                <span className="text-5xl font-black font-display text-[var(--festival-cream)] leading-none opacity-90 drop-shadow-md">03</span>
+                                <h3 className="text-2xl font-black font-display uppercase tracking-tight text-[var(--festival-cream)] mt-4 drop-shadow-md">{overallTop[2].name}</h3>
+                                <p className="text-lg font-bold font-display text-[var(--festival-cream)] mt-1 drop-shadow-md">{overallTop[2].totalPoints} PTS</p>
                             </motion.div>
                         )}
                     </div>

@@ -81,7 +81,7 @@ const ResultsPage = () => {
   if (error) return <div className="min-h-screen flex items-center justify-center font-display text-2xl uppercase font-black text-[var(--festival-red)]">{error}</div>;
 
   return (
-    <div className="min-h-screen bg-[var(--festival-white)] py-24 px-6 md:px-12">
+    <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
       <div className="max-w-[1440px] mx-auto">
         <Link to="/programmes" className="font-bold uppercase tracking-widest text-sm mb-12 flex items-center gap-2 hover:text-[var(--festival-red)] transition-colors">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
@@ -154,7 +154,7 @@ const ResultsPage = () => {
                       <span className="font-black font-display text-2xl">{result.grade || '--'}</span>
                    </div>
                    <Link to={`/programmes/${programmeId}/results/${result._id}/certificate`}
-                     className="px-6 py-3 bg-[var(--festival-black)] text-[var(--festival-white)] font-bold uppercase tracking-widest text-xs border-2 border-[var(--border)] hover:bg-[var(--festival-red)] transition-colors">
+                     className="px-6 py-3 bg-[var(--festival-black)] text-[var(--festival-cream)] font-bold uppercase tracking-widest text-xs border-2 border-[var(--border)] hover:bg-[var(--festival-red)] transition-colors">
                      View
                    </Link>
                 </div>

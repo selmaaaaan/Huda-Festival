@@ -6,7 +6,7 @@ const MaintenancePage = ({ message }) => {
   const headline = message || "We'll be right back";
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[var(--festival-white)]">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[var(--festival-cream)]">
       {/* Background layer */}
       <FestivalPattern />
 

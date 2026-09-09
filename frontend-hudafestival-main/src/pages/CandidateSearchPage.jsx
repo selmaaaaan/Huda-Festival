@@ -29,7 +29,7 @@ const SearchPage = () => {
 
   if (!selectedCandidate) {
     return (
-      <div className="min-h-screen bg-[var(--festival-white)] py-24 px-6 md:px-12">
+      <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
         <div className="max-w-[1440px] mx-auto text-center">
           <SectionHeading subtitle="Find Your Festival Moment" align="center">
             Candidate <br/>
@@ -39,9 +39,9 @@ const SearchPage = () => {
           <form onSubmit={handleSearch} className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-4 mb-16">
             <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Enter name or admission number..."
-              className="flex-grow px-6 py-4 border-2 border-[var(--border)] font-bold text-lg focus:outline-none focus:ring-4 focus:ring-[var(--festival-yellow)] shadow-[6px_6px_0px_0px_rgba(23,23,23,1)] transition-all bg-[var(--festival-white)]" />
+              className="flex-grow px-6 py-4 border-2 border-[var(--border)] font-bold text-lg focus:outline-none focus:ring-4 focus:ring-[var(--festival-yellow)] shadow-[6px_6px_0px_0px_rgba(23,23,23,1)] transition-all bg-[var(--festival-cream)]" />
             <button type="submit" disabled={loading}
-              className="px-10 py-4 font-black font-display text-xl uppercase tracking-widest text-[var(--festival-white)] bg-[var(--festival-black)] hover:bg-[var(--festival-yellow)] hover:text-[var(--festival-black)] border-2 border-[var(--border)] shadow-[6px_6px_0px_0px_rgba(23,23,23,1)] transition-colors disabled:opacity-50">
+              className="px-10 py-4 font-black font-display text-xl uppercase tracking-widest text-[var(--festival-cream)] bg-[var(--festival-black)] hover:bg-[var(--festival-yellow)] hover:text-[var(--festival-black)] border-2 border-[var(--border)] shadow-[6px_6px_0px_0px_rgba(23,23,23,1)] transition-colors disabled:opacity-50">
               {loading ? '...' : 'Search'}
             </button>
           </form>
@@ -55,7 +55,7 @@ const SearchPage = () => {
                 {searchResults.map((candidate, i) => (
                   <motion.div key={candidate._id} onClick={() => handleSelectCandidate(candidate)}
                     initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-                    className="bg-[var(--festival-white)] p-6 border-2 border-[var(--border)] shadow-[6px_6px_0px_0px_rgba(23,23,23,1)] flex items-center gap-6 cursor-pointer group hover:-translate-y-1 hover:shadow-[10px_10px_0px_0px_rgba(23,23,23,1)] transition-all">
+                    className="bg-[var(--festival-cream)] p-6 border-2 border-[var(--border)] shadow-[6px_6px_0px_0px_rgba(23,23,23,1)] flex items-center gap-6 cursor-pointer group hover:-translate-y-1 hover:shadow-[10px_10px_0px_0px_rgba(23,23,23,1)] transition-all">
                     <div className="w-16 h-16 rounded-full border-2 border-[var(--border)] overflow-hidden shrink-0">
                        <img src={candidate.image.url} alt={candidate.name} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
                     </div>
@@ -63,7 +63,7 @@ const SearchPage = () => {
                       <h3 className="text-2xl font-black font-display uppercase tracking-tight truncate group-hover:text-[var(--festival-yellow)] transition-colors">{candidate.name}</h3>
                       <div className="flex items-center gap-3 mt-2">
                         <span className="text-xs font-bold uppercase tracking-widest text-gray-500 border border-[var(--border)] px-2 py-1">{candidate.admissionNo}</span>
-                        {candidate.team?.name && <span className="text-xs font-bold uppercase tracking-widest text-[var(--festival-white)] border border-[var(--border)] px-2 py-1" style={{ backgroundColor: candidate.team?.color || 'var(--festival-black)' }}>{candidate.team.name}</span>}
+                        {candidate.team?.name && <span className="text-xs font-bold uppercase tracking-widest text-[var(--festival-cream)] border border-[var(--border)] px-2 py-1" style={{ backgroundColor: candidate.team?.color || 'var(--festival-black)' }}>{candidate.team.name}</span>}
                       </div>
                     </div>
                     <div className="text-right flex flex-col items-end">
@@ -81,7 +81,7 @@ const SearchPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--festival-white)] py-24 px-6 md:px-12">
+    <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
       <div className="max-w-[1440px] mx-auto">
         <button onClick={() => setSelectedCandidate(null)} className="font-bold uppercase tracking-widest text-sm mb-12 flex items-center gap-2 hover:text-[var(--festival-yellow)] transition-colors">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
@@ -124,7 +124,7 @@ const SearchPage = () => {
                <div className="space-y-6">
                  {candidateResults.map((result, i) => result.programme && (
                    <motion.div key={result._id} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-                     className="bg-[var(--festival-white)] p-6 border-2 border-[var(--border)] flex flex-col sm:flex-row justify-between sm:items-center gap-6">
+                     className="bg-[var(--festival-cream)] p-6 border-2 border-[var(--border)] flex flex-col sm:flex-row justify-between sm:items-center gap-6">
                      <div>
                        <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--festival-red)] block mb-1">{result.programme?.category || 'Programme'}</span>
                        <p className="text-2xl font-black font-display uppercase tracking-tight leading-none mb-3">{result.programme?.name || 'Programme unavailable'}</p>
@@ -134,7 +134,7 @@ const SearchPage = () => {
                        </div>
                      </div>
                      <Link to={`/programmes/${result.programme?._id}/results/${result._id}/certificate`}
-                       className="shrink-0 px-6 py-4 bg-[var(--festival-black)] text-[var(--festival-white)] font-bold uppercase tracking-widest text-xs hover:bg-[var(--festival-red)] transition-colors border-2 border-[var(--border)] text-center">
+                       className="shrink-0 px-6 py-4 bg-[var(--festival-black)] text-[var(--festival-cream)] font-bold uppercase tracking-widest text-xs hover:bg-[var(--festival-red)] transition-colors border-2 border-[var(--border)] text-center">
                        View Certificate
                      </Link>
                    </motion.div>

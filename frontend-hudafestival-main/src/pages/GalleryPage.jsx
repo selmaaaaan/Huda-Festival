@@ -32,7 +32,7 @@ const GalleryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--festival-white)] py-24 px-6 md:px-12">
+    <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
       <div className="max-w-[1440px] mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 border-b-2 border-[var(--border)] pb-8">
           <SectionHeading subtitle="Moments & Memories" align="left">
@@ -57,7 +57,7 @@ const GalleryPage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: (index % 8) * 0.05 }}
-                className="relative aspect-square border-2 border-[var(--border)] bg-[var(--festival-white)] cursor-pointer group shadow-[6px_6px_0px_0px_rgba(23,23,23,1)] hover:-translate-y-2 hover:shadow-[10px_10px_0px_0px_rgba(23,23,23,1)] transition-all overflow-hidden flex flex-col"
+                className="relative aspect-square border-2 border-[var(--border)] bg-[var(--festival-cream)] cursor-pointer group shadow-[6px_6px_0px_0px_rgba(23,23,23,1)] hover:-translate-y-2 hover:shadow-[10px_10px_0px_0px_rgba(23,23,23,1)] transition-all overflow-hidden flex flex-col"
                 onClick={() => setSelectedIndex(index)}
               >
                 <div className="flex-1 overflow-hidden">

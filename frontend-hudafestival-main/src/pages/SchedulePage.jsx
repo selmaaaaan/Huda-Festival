@@ -46,7 +46,7 @@ const SchedulePage = () => {
   if (loading) return <div className="min-h-screen flex items-center justify-center font-display text-2xl uppercase font-black">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-[var(--festival-white)] py-24 px-6 md:px-12">
+    <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
       <div className="max-w-[1440px] mx-auto">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 gap-8">
           <SectionHeading subtitle="Different Voices. Same Tomorrow.">

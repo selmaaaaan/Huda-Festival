@@ -24,7 +24,7 @@ const ProgrammeCard = ({ programme, index }) => {
       viewport={{ once: true, margin: "-50px" }}
       whileHover={prefersReducedMotion ? {} : { y: -8, rotate: index % 2 === 0 ? 1.5 : -1.5, scale: 1.02, boxShadow: '16px 16px 0px 0px rgba(23,23,23,1)' }}
       transition={{ duration: 0.4, delay: prefersReducedMotion ? 0 : (index % 10) * 0.05, ease: "easeOut" }}
-      className="group relative bg-[var(--festival-white)] border-2 border-[var(--border)] transition-colors duration-300 flex flex-col"
+      className="group relative bg-[var(--festival-cream)] border-2 border-[var(--border)] transition-colors duration-300 flex flex-col"
     >
       <div className="h-4 w-full border-b-2 border-[var(--border)]" style={{ backgroundColor: accentColor }} />
       
@@ -109,7 +109,7 @@ const ProgrammesPage = () => {
   if (error) return <div className="min-h-screen flex items-center justify-center font-display text-2xl uppercase font-black text-[var(--festival-red)]">{error}</div>;
 
   return (
-    <div className="min-h-screen bg-[var(--festival-white)] py-24 px-6 md:px-12">
+    <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
       <div className="max-w-[1440px] mx-auto">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-8">
           <SectionHeading subtitle="Talents Take Centre Stage">

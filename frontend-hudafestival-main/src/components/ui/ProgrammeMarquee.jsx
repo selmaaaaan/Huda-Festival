@@ -13,7 +13,7 @@ const ProgrammeMarquee = ({ programmes }) => {
   
   if (prefersReducedMotion) {
     return (
-      <div className="w-full bg-[var(--festival-black)] text-[var(--festival-white)] py-4 border-y-4 border-[var(--border)] overflow-hidden">
+      <div className="w-full bg-[var(--festival-black)] text-[var(--festival-cream)] py-4 border-y-4 border-[var(--border)] overflow-hidden">
         <div className="px-6 flex flex-wrap gap-4 justify-center">
           {activeProgrammes.map(p => (
             <span key={p._id} className="font-bold uppercase tracking-widest text-sm">{p.name} ✦</span>
@@ -24,7 +24,7 @@ const ProgrammeMarquee = ({ programmes }) => {
   }
 
   return (
-    <div className="w-full bg-[var(--festival-black)] text-[var(--festival-white)] py-4 border-y-4 border-[var(--border)] overflow-hidden flex whitespace-nowrap group">
+    <div className="w-full bg-[var(--festival-black)] text-[var(--festival-cream)] py-4 border-y-4 border-[var(--border)] overflow-hidden flex whitespace-nowrap group">
       {/* We use a custom CSS animation block to handle pausing smoothly, 
           while maintaining the 0 to -50% structure as requested. */}
       <style>{`

@@ -32,8 +32,8 @@ export const FilterPills = ({ options, selected, onChange }) => (
         onClick={() => onChange(opt.value)}
         className={`whitespace-nowrap px-6 py-2 rounded-full font-bold text-sm uppercase tracking-wider transition-colors border-2 ${
           selected === opt.value
-            ? 'bg-[var(--festival-black)] text-[var(--festival-white)] border-[var(--festival-black)]'
-            : 'bg-[var(--festival-white)] text-[var(--festival-black)] border-[var(--border)] hover:bg-gray-100'
+            ? 'bg-[var(--festival-black)] text-[var(--festival-cream)] border-[var(--festival-black)]'
+            : 'bg-[var(--festival-cream)] text-[var(--festival-black)] border-[var(--border)] hover:bg-gray-100'
         }`}
       >
         {opt.label}
@@ -43,7 +43,7 @@ export const FilterPills = ({ options, selected, onChange }) => (
 );
 
 export const EmptyState = ({ title, message, icon }) => (
-  <div className="py-20 flex flex-col items-center text-center border-2 border-[var(--border)] shadow-[8px_8px_0px_0px_rgba(23,23,23,1)] bg-[var(--festival-white)]">
+  <div className="py-20 flex flex-col items-center text-center border-2 border-[var(--border)] shadow-[8px_8px_0px_0px_rgba(23,23,23,1)] bg-[var(--festival-cream)]">
     <div className="text-6xl mb-6 text-gray-300">{icon || '👀'}</div>
     <h3 className="text-2xl font-black font-display uppercase tracking-tight mb-2">{title}</h3>
     <p className="text-gray-600 max-w-sm">{message}</p>
