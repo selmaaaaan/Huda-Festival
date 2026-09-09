@@ -13,6 +13,7 @@ const settingsRoutes = require('./routes/settingsRoutes')
 const authRoutes = require('./routes/authRoutes');
 const allResultsRoutes = require('./routes/allResultsRoutes');
 const pointAdjustmentRoutes = require('./routes/pointAdjustmentRoutes.js');
+const importRoutes = require('./routes/importRoutes');
 const registrationRoutes = require('./routes/registrationRoutes');
 const auditLogRoutes = require('./routes/auditLogRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
@@ -36,6 +37,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/results', allResultsRoutes)
 app.use('/api/point-adjustments', pointAdjustmentRoutes);
+app.use('/api/admin/import', importRoutes);
 app.use('/api/registrations', registrationRoutes);
 app.use('/api/audit-logs', auditLogRoutes);
 app.use('/api/gallery', galleryRoutes);

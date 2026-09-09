@@ -4,6 +4,7 @@ import api from '../services/api';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import DataImportSection from '../components/DataImportSection';
 
 const SettingsPage = () => {
   const [teams, setTeams] = useState([]);
@@ -279,7 +280,9 @@ const SettingsPage = () => {
         </div>
       </div>
 
-      {/* Team Modal */}
+      <DataImportSection />
+
+        {/* Team Modal */}
       <Modal isOpen={showTeamModal} onClose={() => setShowTeamModal(false)} title={editingTeam ? 'Edit Team' : 'Add Team'}>
         <form onSubmit={handleSaveTeam} className="space-y-4">
           {error && <div className="text-sm text-red-400 bg-red-900/20 p-2 rounded">{error}</div>}

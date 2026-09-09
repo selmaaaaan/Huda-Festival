@@ -19,6 +19,10 @@ const settingsSchema = new mongoose.Schema({
     maintenanceMessage: {
         type: String,
         default: "We'll be back soon."
+    },
+    bylawUrl: {
+        type: String,
+        default: null
     }
 }, { timestamps: true })
 
