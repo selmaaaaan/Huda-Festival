@@ -34,8 +34,9 @@ router.get('/:id/registrations', protect, getProgrammeRegistrations);
 // GET is now public, PUT and DELETE remain protected
 router.route('/:id')
   .get(getProgrammeById) // <-- FIX: 'protect' REMOVED
-  .put(protect, updateProgramme)
-  .delete(protect, deleteProgramme);
+  .put(protect, authorize('admin'), updateProgramme)
+  .delete(protect, authorize('admin'), deleteProgramme);
+
+router.patch('/:id/topic-settings', protect, authorize('admin'), updateTopicSettings);
 
 module.exports = router;
-

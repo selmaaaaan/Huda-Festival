@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Menu, X } from 'lucide-react';
+import { Search, Menu, X, LogIn, ChevronDown } from 'lucide-react';
+
+const ADMIN_URL = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174';
 
 const Navbar = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [portalOpen, setPortalOpen] = useState(false);
 
     const LINKS = [
         { to: '/programmes', label: 'Programmes' },
         { to: '/schedule', label: 'Schedule' },
-        { to: '/results', label: 'Results' },
         { to: '/leaderboards', label: 'Leaderboards' },
         { to: '/gallery', label: 'Gallery' }
     ];
@@ -47,13 +49,39 @@ const Navbar = () => {
                 </ul>
 
                 {/* Actions */}
-                <div className="hidden lg:flex items-center gap-4">
+                <div className="hidden lg:flex items-center gap-3">
                     <Link to="/search" className="p-2 hover:bg-black/5 rounded-full transition-colors" aria-label="Search">
                         <Search size={20} className="text-[var(--festival-black)]" />
                     </Link>
-                    <Link to="/schedule" className="px-6 py-2 bg-[var(--festival-black)] text-[var(--festival-cream)] font-bold text-sm uppercase tracking-wider hover:-translate-y-1 hover:shadow-lg transition-all rounded-full">
-                        Get Started
-                    </Link>
+                    
+                    {/* Portal Login Dropdown */}
+                    <div className="relative">
+                        <button 
+                            onClick={() => setPortalOpen(!portalOpen)}
+                            onBlur={() => setTimeout(() => setPortalOpen(false), 200)}
+                            className="flex items-center gap-1 px-4 py-2 bg-[var(--festival-black)] text-[var(--festival-cream)] font-bold text-sm uppercase tracking-wider hover:-translate-y-0.5 hover:shadow-lg transition-all rounded-full"
+                        >
+                            <LogIn size={16} /> Portal <ChevronDown size={14} className={`transition-transform ${portalOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        <AnimatePresence>
+                            {portalOpen && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="absolute right-0 mt-2 w-56 bg-white border-2 border-[var(--border)] shadow-[6px_6px_0px_0px_rgba(17,17,17,1)] overflow-hidden z-50"
+                                >
+                                    <a href={ADMIN_URL} target="_blank" rel="noreferrer" className="block px-4 py-3 text-sm font-bold uppercase tracking-wider hover:bg-[var(--festival-red)] hover:text-white transition-colors border-b-2 border-[var(--border)]">
+                                        Admin Panel
+                                    </a>
+                                    <a href={`${ADMIN_URL}/team-leader-login`} target="_blank" rel="noreferrer" className="block px-4 py-3 text-sm font-bold uppercase tracking-wider hover:bg-[var(--festival-teal)] hover:text-white transition-colors">
+                                        Registration Desk
+                                    </a>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
 
                 {/* Mobile Hamburger */}
@@ -96,9 +124,14 @@ const Navbar = () => {
                             <Link to="/search" onClick={() => setMobileOpen(false)} className="text-4xl font-black font-display uppercase hover:text-[var(--festival-orange)] transition-colors">Search</Link>
                         </div>
                         
-                        <Link to="/schedule" onClick={() => setMobileOpen(false)} className="w-full py-4 text-center bg-[var(--festival-black)] text-[var(--festival-cream)] font-bold text-xl uppercase tracking-wider">
-                            Get Started
-                        </Link>
+                        <div className="space-y-3">
+                            <a href={ADMIN_URL} target="_blank" rel="noreferrer" className="block w-full py-3 text-center bg-[var(--festival-black)] text-[var(--festival-cream)] font-bold text-lg uppercase tracking-wider">
+                                Admin Panel
+                            </a>
+                            <a href={`${ADMIN_URL}/team-leader-login`} target="_blank" rel="noreferrer" className="block w-full py-3 text-center border-2 border-[var(--festival-black)] text-[var(--festival-black)] font-bold text-lg uppercase tracking-wider">
+                                Registration Desk
+                            </a>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -6,6 +6,7 @@ import api from '../services/api';
 
 const ResultsPage = () => {
   const { programmeId } = useParams();
+  const prefersReducedMotion = useReducedMotion();
   const [programme, setProgramme] = useState(null);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -129,7 +130,7 @@ const ResultsPage = () => {
           <EmptyState icon="🎯" title="No matching results" message="Try adjusting your search or filters." />
         ) : (
           <div className="space-y-4">
-            {filteredResults.map((result, i) => { const prefersReducedMotion = useReducedMotion(); return (
+            {filteredResults.map((result, i) => (
               <motion.div key={result._id} initial={prefersReducedMotion ? {} : { opacity: 0, x: -20 }} whileInView={prefersReducedMotion ? {} : { opacity: 1, x: 0 }} viewport={{ once: true }} whileHover={prefersReducedMotion ? {} : { y: -4, rotate: i % 2 === 0 ? 0.5 : -0.5, scale: 1.01 }} transition={{ delay: prefersReducedMotion ? 0 : i * 0.05, ease: 'easeOut' }}
                 className="bg-white border-2 border-[var(--border)] p-4 md:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:bg-gray-50 transition-colors shadow-[6px_6px_0px_0px_rgba(23,23,23,1)]">
                 
@@ -158,7 +159,7 @@ const ResultsPage = () => {
                      View
                    </Link>
                 </div>
-              </motion.div>);})}
+              </motion.div>))}
           </div>
         )}
       </div>

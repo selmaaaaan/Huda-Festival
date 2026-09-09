@@ -19,6 +19,7 @@ import RegistrationReviewPage from './pages/RegistrationReviewPage';
 import ActivityLogsPage from './pages/ActivityLogsPage';
 import GalleryPage from './pages/GalleryPage';
 import NotificationsPage from './pages/NotificationsPage';
+import TopicManagementPage from './pages/TopicManagementPage';
 
 function App() {
   const savedInfo = localStorage.getItem('userInfo');
@@ -93,6 +94,9 @@ function App() {
         break;
       case 'logs':
         pageContent = <ActivityLogsPage />;
+        break;
+      case 'topic_management':
+        pageContent = <TopicManagementPage />;
         break;
       case 'dashboard':
       default:

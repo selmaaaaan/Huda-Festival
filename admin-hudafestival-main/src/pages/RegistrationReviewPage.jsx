@@ -6,6 +6,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
 import { ClipboardList, Users, Plus, Edit2, Trash2 } from 'lucide-react';
+import ProgrammeSelector from '../components/ProgrammeSelector';
 
 export default function RegistrationReviewPage() {
   const [programmes, setProgrammes] = useState([]);

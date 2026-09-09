@@ -5,6 +5,7 @@ import api from '../services/api';
 import LeaderboardTable from '../components/results/LeaderboardTable';
 
 const LeaderboardsPage = () => {
+    const prefersReducedMotion = useReducedMotion();
     const [leaderboardData, setLeaderboardData] = useState({
         overall: [],
         categories: {}
@@ -98,12 +99,12 @@ const LeaderboardsPage = () => {
                     <div className="mt-32">
                         <h2 className="text-4xl font-black font-display uppercase tracking-tight mb-12">Category Standings</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {Object.entries(leaderboardData.categories).map(([category, teams], index) => { const prefersReducedMotion = useReducedMotion(); return (
+                            {Object.entries(leaderboardData.categories).map(([category, teams], index) => (
                                 <motion.div key={category} initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }} whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true }} whileHover={prefersReducedMotion ? {} : { y: -6, rotate: index % 2 === 0 ? 1 : -1, scale: 1.02 }}
                                     className="border-2 border-[var(--border)] bg-white p-6 shadow-[6px_6px_0px_0px_rgba(23,23,23,1)]"
                                 >
                                     <h3 className="text-xl font-black font-display uppercase mb-6 pb-2 border-b-2 border-[var(--border)]">{category}</h3>
-                                    <LeaderboardTable data={teams} compact /></motion.div>);})}
+                                    <LeaderboardTable data={teams} compact /></motion.div>))}
                         </div>
                     </div>
                 )}

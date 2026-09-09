@@ -5,6 +5,7 @@ import { SectionHeading, FilterPills, EmptyState } from '../components/ui';
 import api from '../services/api';
 
 const SchedulePage = () => {
+  const prefersReducedMotion = useReducedMotion();
   const [programmes, setProgrammes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('All');
@@ -71,7 +72,7 @@ const SchedulePage = () => {
               <div>
                 <h3 className="text-2xl font-black font-display uppercase tracking-tight mb-8 border-b-2 border-[var(--border)] pb-4">Scheduled Events</h3>
                 <div className="relative border-l-4 border-[var(--border)] ml-4 md:ml-0 md:border-l-0 md:border-t-4 md:flex md:flex-row md:overflow-x-auto md:pb-12 md:pt-8 md:gap-8 no-scrollbar">
-                  {scheduled.map((prog, i) => { const prefersReducedMotion = useReducedMotion(); return (
+                  {scheduled.map((prog, i) => (
                     <motion.div key={prog._id} initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }} whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }} whileHover={prefersReducedMotion ? {} : { y: -6, rotate: i % 2 === 0 ? 1 : -1, scale: 1.02 }}
                       viewport={{ once: true }}
                       transition={{ delay: (i % 5) * 0.1 }}
@@ -91,7 +92,7 @@ const SchedulePage = () => {
                         <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--festival-purple)] mb-2 block">{prog.category}</span>
                         <h4 className="text-xl font-black font-display uppercase tracking-tight leading-tight mb-2">{prog.name}</h4>
                         <p className="text-sm font-medium text-gray-600">Main Stage</p>
-                      </div></motion.div>);})}
+                      </div></motion.div>))}
                 </div>
               </div>
             )}

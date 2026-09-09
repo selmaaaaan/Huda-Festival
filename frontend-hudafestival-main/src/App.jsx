@@ -10,14 +10,12 @@ import CertificatePage from './pages/CertificateViewPage';
 import Navbar from './components/layout/Navbar';
 import HomePage from './pages/HomePage';
 import Footer from './components/layout/Footer';
-import ControllersPage from './pages/ControllersPage';
 import SchedulePage from './pages/SchedulePage';
 import GalleryPage from './pages/GalleryPage';
 import LoadingScreen from './components/ui/LoadingScreen';
 import NotificationBanner from './components/ui/NotificationBanner';
 import MaintenancePage from './components/ui/MaintenancePage';
 import api from './services/api';
-import { AnimatePresence } from 'framer-motion';
 import PageTransition from './components/layout/PageTransition';
 
 function App() {
@@ -63,9 +61,9 @@ function App() {
               <Route path="/search" element={<PageTransition><SearchPage /></PageTransition>} />
               <Route path="/programmes/:programmeId/results" element={<PageTransition><ResultsPage /></PageTransition>} />
               <Route path="/programmes/:programmeId/results/:resultId/certificate" element={<PageTransition><CertificatePage /></PageTransition>} />
-              <Route path="/controllers" element={<PageTransition><ControllersPage /></PageTransition>} />
               <Route path="/schedule" element={<PageTransition><SchedulePage /></PageTransition>} />
               <Route path="/gallery" element={<PageTransition><GalleryPage /></PageTransition>} />
+              <Route path="*" element={<PageTransition><div className="min-h-screen flex items-center justify-center font-display text-4xl uppercase font-black">Page Not Found</div></PageTransition>} />
             </Routes>
           </main>
           <Footer />

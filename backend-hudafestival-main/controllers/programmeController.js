@@ -177,6 +177,25 @@ const getProgrammeByCodeForJudging = async (req, res) => {
     }
 };
 
+const updateTopicSettings = async (req, res) => {
+    try {
+        const { topicMode, topicList } = req.body;
+        const programme = await Programme.findById(req.params.id);
+        if (!programme) {
+            return res.status(404).json({ message: 'Programme not found' });
+        }
+        
+        if (topicMode !== undefined) programme.topicMode = topicMode;
+        if (topicList !== undefined) programme.topicList = topicList;
+
+        const updatedProgramme = await programme.save();
+        res.status(200).json(updatedProgramme);
+    } catch (error) {
+        console.error(`Error while updating topic settings: ${error.message}`);
+        res.status(500).json({ message: 'Failed to updateTopicSettings', error: error.message || 'Unknown error' });
+    }
+}
+
 module.exports = {
     getProgrammeByCodeForJudging,
     createProgramme,
@@ -184,4 +203,5 @@ module.exports = {
     getProgrammeById,
     updateProgramme,
     deleteProgramme,
+    updateTopicSettings
 }

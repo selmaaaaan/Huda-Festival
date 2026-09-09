@@ -13,6 +13,7 @@ const navItems = [
   { key: 'logs', label: 'Activity Logs', icon: Activity },
   { key: 'gallery', label: 'Gallery', icon: ImageIcon },
   { key: 'notifications', label: 'Notifications', icon: Bell },
+  { key: 'topic_management', label: 'Topic Mgmt', icon: ClipboardList },
   { key: 'settings', label: 'Settings', icon: Settings },
 ];
 

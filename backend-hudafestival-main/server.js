@@ -18,6 +18,7 @@ const registrationRoutes = require('./routes/registrationRoutes');
 const auditLogRoutes = require('./routes/auditLogRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const topicRegistrationRoutes = require('./routes/topicRegistrationRoutes');
 
 connectDB();
 const app = express();
@@ -42,6 +43,7 @@ app.use('/api/registrations', registrationRoutes);
 app.use('/api/audit-logs', auditLogRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/topic-registrations', topicRegistrationRoutes);
 
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 

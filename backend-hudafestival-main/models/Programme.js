@@ -67,6 +67,12 @@ const programmeSchema = new mongoose.Schema({
         type: Number,
         default: Infinity,
     },
+    topicMode: { 
+        type: String, 
+        enum: ['none', 'free-text', 'fixed-list'], 
+        default: 'none' 
+    },
+    topicList: [String]
 }, { timestamps: true })
 
 const Programme = mongoose.model('Programme', programmeSchema);
