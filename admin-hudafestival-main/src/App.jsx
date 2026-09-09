@@ -13,6 +13,7 @@ import SettingsPage from './pages/SettingsPage';
 import { Search, Bell, AlertTriangle } from 'lucide-react';
 import api from './services/api';
 
+import JudgePanel from './pages/JudgePanel';
 import TeamLeaderDashboard from './pages/TeamLeaderDashboard';
 import RegistrationReviewPage from './pages/RegistrationReviewPage';
 import ActivityLogsPage from './pages/ActivityLogsPage';
@@ -25,7 +26,7 @@ function App() {
   
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialInfo);
   const [userInfo, setUserInfo] = useState(initialInfo);
-  const [activePage, setActivePage] = useState(initialInfo?.role === 'team_leader' ? 'candidates' : 'dashboard');
+  const [activePage, setActivePage] = useState(initialInfo?.role === 'judge' ? 'judge_panel' : (initialInfo?.role === 'team_leader' ? 'candidates' : 'dashboard'));
   const [appSettings, setAppSettings] = useState({ maintenanceMode: false, maintenanceMessage: '' });
 
   useEffect(() => {
@@ -57,6 +58,9 @@ function App() {
     let pageKey = activePage;
 
     switch (activePage) {
+      case 'judge_panel':
+        pageContent = <JudgePanel />;
+        break;
       case 'team_dashboard':
         pageContent = <TeamLeaderDashboard />;
         break;

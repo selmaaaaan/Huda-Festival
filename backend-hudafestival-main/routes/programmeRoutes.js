@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-  createProgramme, getAllProgrammes, getProgrammeById,
-  updateProgramme, deleteProgramme,
+  createProgramme, getAllProgrammes, getProgrammeById, updateProgramme, deleteProgramme, getProgrammeByCodeForJudging,
 } = require('../controllers/programmeController.js');
 const { approvePendingResults } = require('../controllers/resultController.js');
 const { protect } = require('../middlewares/authMiddleware.js');
@@ -10,6 +9,8 @@ const resultRouter = require('./resultRoutes.js');
 
 // --- Main Programme Routes ---
 // GET is now public, POST remains protected
+router.get('/code/:code/judging', protect, getProgrammeByCodeForJudging);
+
 router.route('/')
   .get(getAllProgrammes) // <-- FIX: 'protect' REMOVED
   .post(protect, createProgramme);

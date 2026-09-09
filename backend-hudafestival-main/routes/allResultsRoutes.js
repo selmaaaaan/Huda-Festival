@@ -41,4 +41,24 @@ router.get('/published', async (req, res) => {
 // @access  Private/Admin
 router.post('/batch-publish', protect, publishBatch);
 
+
+// @desc    Get current judge's submitted results
+// @route   GET /api/results/my-submissions
+// @access  Private/Judge
+router.get('/my-submissions', protect, async (req, res) => {
+    try {
+        const results = await Result.find({ submittedBy: req.user._id })
+            .populate('programme', 'name code')
+            .populate({
+                path: 'candidate',
+                populate: { path: 'team', select: 'name' }
+            })
+            .sort({ updatedAt: -1 });
+        res.json(results);
+    } catch (error) {
+        console.error("Error fetching my submissions:", error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 module.exports = router;

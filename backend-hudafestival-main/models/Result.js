@@ -30,6 +30,11 @@ const resultSchema = new mongoose.Schema({
         enum: ['pending', 'approved'],
         default: 'pending'
     },
+    submittedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+    },
     pointsFromRank: { 
          type: Number,
          default: 0 
@@ -41,14 +46,7 @@ const resultSchema = new mongoose.Schema({
     totalPoints: { 
         type: Number, 
         default: 0,
-    },
-    
-    status: {
-            type: String,
-            enum: ['pending', 'approved'],
-            default: 'pending',
-    },
-    
+    }
 }, {
     timestamps: true
 })

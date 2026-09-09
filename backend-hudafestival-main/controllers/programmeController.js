@@ -156,7 +156,29 @@ const deleteProgramme = async (req, res) => {
     }
 }
 
+
+const Registration = require('../models/Registration');
+const getProgrammeByCodeForJudging = async (req, res) => {
+    try {
+        const { code } = req.params;
+        const programme = await Programme.findOne({ code });
+        if (!programme) {
+            return res.status(404).json({ message: 'Programme not found' });
+        }
+
+        const registrations = await Registration.find({ programme: programme._id, status: 'approved' })
+            .populate('candidates', 'name admissionNo')
+            .populate('team', 'name');
+
+        res.status(200).json({ programme, registrations });
+    } catch (error) {
+        console.error('Error in getProgrammeByCodeForJudging:', error);
+        res.status(500).json({ message: 'Failed to fetch programme for judging', error: error.message });
+    }
+};
+
 module.exports = {
+    getProgrammeByCodeForJudging,
     createProgramme,
     getAllProgrammes,
     getProgrammeById,

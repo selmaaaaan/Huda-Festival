@@ -143,6 +143,9 @@ const savePendingResultsBulk = async (req, res) => {
                         grade: resultData.grade || null,
                         status: 'pending',
                         batchId: batchId || null,
+                        submittedBy: req.user._id,
+                        status: 'pending',
+                        batchId: batchId || null,
                         pointsFromRank: 0,
                         pointsFromGrade: 0,
                         totalPoints: 0

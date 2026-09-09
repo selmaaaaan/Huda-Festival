@@ -37,8 +37,11 @@ const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
   };
 
   const isTeamLeader = userInfo?.role === 'team_leader';
+  const isJudge = userInfo?.role === 'judge';
 
-  const visibleNavItems = isTeamLeader 
+  const visibleNavItems = isJudge 
+    ? [{ key: 'judge_panel', label: 'Judge Panel', icon: Trophy }] 
+    : isTeamLeader 
     ? [
         { key: 'candidates', label: 'My Team', icon: Users },
         { key: 'team_dashboard', label: 'Programme Registration', icon: Calendar }
