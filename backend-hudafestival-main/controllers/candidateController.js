@@ -40,7 +40,7 @@ const createCandidate = async (req, res) => {
     }
     catch (error) {
         console.error('Error creating candidate:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Failed to createCandidate', error: error.message || 'Unknown error' });
     }
 }
 
@@ -52,13 +52,20 @@ const getAllCandidates = async (req, res) => {
         const filter = {};
         if (req.teamScope) {
             filter.team = req.teamScope;
+        } else if (req.query.team) {
+            filter.team = req.query.team;
         }
+
+        if (req.query.category) {
+            filter.category = req.query.category;
+        }
+
         const candidates = await Candidate.find(filter).populate('team', 'name color');
         res.status(200).json(candidates);
     }
     catch (error) {
         console.error('Error fetching candidates:', error);
-        res.status(500).json({ message: 'Server error'});
+        res.status(500).json({ message: 'Failed to getAllCandidates', error: error.message || 'Unknown error' });
     }
 }
 
@@ -76,7 +83,7 @@ const getCandidateById = async (req, res) => {
     }
     catch (error) {
         console.error('Error fetching candidate by Id:', error);
-        res.status(500).json({ message: 'Server error'});
+        res.status(500).json({ message: 'Failed to getCandidateById', error: error.message || 'Unknown error' });
     }
 }
 
@@ -107,7 +114,7 @@ const updateCandidate = async (req, res) => {
     }
     catch (error) {
         console.error('Error updating candidate:', error);
-        res.status(500).json({ message: 'Server error'});
+        res.status(500).json({ message: 'Failed to updateCandidate', error: error.message || 'Unknown error' });
     }
 }
 
@@ -143,7 +150,7 @@ const deleteCandidate = async (req, res) => {
     }
     catch(error) {
         console.error('Error deleting candidate: ', error);
-        res.status(500).json({ message: 'Server error'});
+        res.status(500).json({ message: 'Failed to deleteCandidate', error: error.message || 'Unknown error' });
     }
 }
 
@@ -178,7 +185,7 @@ const addMinusPoints = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while add minus points ${error.message}`);
-        res.status(500).json({ message: 'Server Error'});
+        res.status(500).json({ message: 'Failed to addMinusPoints', error: error.message || 'Unknown error' });
     }
 }
 
@@ -200,7 +207,7 @@ const searchCandidates = async (req, res) => {
         res.status(200).json(candidates);
     } catch (error) {
         console.error("Error searching candidates:", error);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Failed to searchCandidates', error: error.message || 'Unknown error' });
     }
 };
 
@@ -216,7 +223,7 @@ const getCandidateResults = async (req, res) => {
         res.status(200).json(results);
     } catch (error) {
         console.error("Error fetching candidate results:", error);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Failed to getCandidateResults', error: error.message || 'Unknown error' });
     }
 };
 

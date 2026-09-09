@@ -18,10 +18,11 @@ const Logo = ({ size = 'default' }) => {
         <div className={`${s.square} rounded-sm bg-[#22C55E]`} />
       </div>
       <span className={`${s.text} font-extrabold tracking-tight text-[var(--color-text-heading)]`}>
-        HUDA
+        L'INTERVENTION
       </span>
     </div>
   );
 };
 
 export default Logo;
+

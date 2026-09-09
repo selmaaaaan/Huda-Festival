@@ -64,7 +64,7 @@ const getLeaderboards = async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching leaderboards:", error);
-        res.status(500).json({ message: "Server Error" });
+        res.status(500).json({ message: 'Failed to getLeaderboards', error: error.message || 'Unknown error' });
     }
 };
 

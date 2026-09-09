@@ -1,21 +1,31 @@
 import React, { useState, useEffect } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { SectionHeading, FilterPills, EmptyState } from '../components/ui';
 import api from '../services/api';
-import { Search, CalendarDays, Clock, MapPin, Timer } from 'lucide-react';
 
 const SchedulePage = () => {
   const [programmes, setProgrammes] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  const categories = [
+    { label: 'All', value: 'All' },
+    { label: 'BIDĀYAH', value: 'BIDĀYAH' },
+    { label: 'ʾŪLĀ', value: 'ʾŪLĀ' },
+    { label: 'THĀNIYAH', value: 'THĀNIYAH' },
+    { label: 'THĀNAWIYYAH', value: 'THĀNAWIYYAH' },
+    { label: 'ʿĀLIYAH', value: 'ʿĀLIYAH' },
+    { label: 'KULLIYYAH', value: 'KULLIYYAH' }
+  ];
 
   useEffect(() => {
     const fetchProgrammes = async () => {
       try {
-        setLoading(true);
-        const { data } = await api.get('/programmes');
-        setProgrammes(data);
-      } catch (err) {
-        setError('Failed to fetch schedule data.');
+        const response = await api.get('/programmes');
+        setProgrammes(response.data);
+      } catch (error) {
+        console.error('Error fetching programmes:', error);
       } finally {
         setLoading(false);
       }
@@ -23,80 +33,82 @@ const SchedulePage = () => {
     fetchProgrammes();
   }, []);
 
-  const filteredProgrammes = programmes.filter(p => 
-    p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = activeCategory === 'All' 
+    ? programmes 
+    : programmes.filter(p => p.category === activeCategory);
+
+  const scheduled = filtered.filter(p => p.date);
+  const unscheduled = filtered.filter(p => !p.date);
+
+  // Sort scheduled by date
+  scheduled.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center font-display text-2xl uppercase font-black">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-[var(--color-public-bg)] py-8 mt-16 font-sans">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-[var(--color-text-heading)]">Event Schedule</h1>
-          <p className="text-[var(--color-text-body)] mt-2">Find timings and venues for all upcoming programmes</p>
+    <div className="min-h-screen bg-[var(--festival-white)] py-24 px-6 md:px-12">
+      <div className="max-w-[1440px] mx-auto">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 gap-8">
+          <SectionHeading subtitle="Different Voices. Same Tomorrow.">
+            Festival <br/>
+            <span className="text-[var(--festival-purple)]">Schedule</span>
+          </SectionHeading>
+          
+          <div className="flex-shrink-0 lg:max-w-2xl overflow-hidden">
+            <FilterPills 
+              options={categories} 
+              selected={activeCategory} 
+              onChange={setActiveCategory} 
+            />
+          </div>
         </div>
 
-        <div className="max-w-md mx-auto mb-8 relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search size={18} className="text-[var(--color-text-body)]" />
-          </div>
-          <input
-            type="text"
-            className="w-full pl-10 pr-4 py-3 bg-white border border-[var(--color-border)] rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition shadow-sm"
-            placeholder="Search events or categories..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        {loading ? (
-          <p className="text-center text-[var(--color-text-body)]">Loading schedule...</p>
-        ) : error ? (
-          <p className="text-center text-red-500">{error}</p>
-        ) : filteredProgrammes.length === 0 ? (
-          <div className="text-center py-12">
-             <p className="text-lg font-semibold text-[var(--color-text-heading)]">No events found</p>
-             <p className="text-[var(--color-text-body)]">Try a different search term.</p>
-          </div>
+        {scheduled.length === 0 && unscheduled.length === 0 ? (
+          <EmptyState icon="⏳" title="No Schedule Yet" message="The schedule for this category has not been published yet." />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProgrammes.map(prog => (
-              <div key={prog._id} className="bg-white rounded-2xl border border-[var(--color-border)] p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-bold text-[var(--color-text-heading)] leading-tight">{prog.name}</h3>
-                  <span className="bg-[var(--color-badge-yellow)]/20 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ml-3">
-                    {prog.category || 'General'}
-                  </span>
-                </div>
-                
-                <div className="space-y-2 mt-4">
-                  {prog.date && (
-                    <div className="flex items-center text-sm text-[var(--color-text-body)]">
-                      <CalendarDays size={16} className="mr-2 text-[var(--color-primary)]" />
-                      <span>{new Date(prog.date).toLocaleDateString()}</span>
-                    </div>
-                  )}
-                  {prog.startTime && (
-                    <div className="flex items-center text-sm text-[var(--color-text-body)]">
-                      <Clock size={16} className="mr-2 text-[var(--color-primary)]" />
-                      <span>{prog.startTime}</span>
-                    </div>
-                  )}
-                  {prog.venue && (
-                    <div className="flex items-center text-sm text-[var(--color-text-body)]">
-                      <MapPin size={16} className="mr-2 text-[var(--color-primary)]" />
-                      <span>{prog.venue}</span>
-                    </div>
-                  )}
-                  {prog.duration && (
-                    <div className="flex items-center text-sm text-[var(--color-text-body)]">
-                      <Timer size={16} className="mr-2 text-[var(--color-primary)]" />
-                      <span>{prog.duration}</span>
-                    </div>
-                  )}
+          <div className="space-y-24">
+            {scheduled.length > 0 && (
+              <div>
+                <h3 className="text-2xl font-black font-display uppercase tracking-tight mb-8 border-b-2 border-[var(--border)] pb-4">Scheduled Events</h3>
+                <div className="relative border-l-4 border-[var(--border)] ml-4 md:ml-0 md:border-l-0 md:border-t-4 md:flex md:flex-row md:overflow-x-auto md:pb-12 md:pt-8 md:gap-8 no-scrollbar">
+                  {scheduled.map((prog, i) => { const prefersReducedMotion = useReducedMotion(); return (
+                    <motion.div key={prog._id} initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }} whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }} whileHover={prefersReducedMotion ? {} : { y: -6, rotate: i % 2 === 0 ? 1 : -1, scale: 1.02 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: (i % 5) * 0.1 }}
+                      className="relative pl-8 md:pl-0 pt-8 md:pt-0 md:min-w-[300px] mb-12 md:mb-0"
+                    >
+                      {/* Timeline dot */}
+                      <div className="absolute left-[-14px] md:left-auto md:-top-[42px] top-8 w-6 h-6 rounded-full border-4 border-[var(--border)] bg-[var(--festival-purple)]" />
+                      
+                      <div className="font-bold text-xl mb-4 font-display">
+                        {new Date(prog.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <span className="block text-sm text-gray-500 mt-1">
+                          {new Date(prog.date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
+                        </span>
+                      </div>
+                      
+                      <div className="bg-white border-2 border-[var(--border)] p-6 shadow-[6px_6px_0px_0px_rgba(23,23,23,1)]">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--festival-purple)] mb-2 block">{prog.category}</span>
+                        <h4 className="text-xl font-black font-display uppercase tracking-tight leading-tight mb-2">{prog.name}</h4>
+                        <p className="text-sm font-medium text-gray-600">Main Stage</p>
+                      </div></motion.div>);})}
                 </div>
               </div>
-            ))}
+            )}
+
+            {unscheduled.length > 0 && (
+              <div>
+                <h3 className="text-2xl font-black font-display uppercase tracking-tight mb-8 border-b-2 border-[var(--border)] pb-4">To Be Scheduled</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {unscheduled.map(prog => (
+                    <div key={prog._id} className="border-2 border-dashed border-[var(--border)] p-6 bg-gray-50/50">
+                       <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2 block">{prog.category}</span>
+                       <h4 className="text-lg font-bold font-display uppercase tracking-tight">{prog.name}</h4>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

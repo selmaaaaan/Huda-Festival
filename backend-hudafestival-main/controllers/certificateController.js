@@ -234,7 +234,7 @@ doc.end();
     }
     catch (error) {
         console.error(`Error while generating certificate ${error.message}`);
-        res.status(500).json({ message: 'Server Error'})
+        res.status(500).json({ message: 'Failed to startX', error: error.message || 'Unknown error' })
     }
 }
 

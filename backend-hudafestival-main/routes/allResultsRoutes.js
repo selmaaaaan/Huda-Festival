@@ -16,6 +16,8 @@ router.get('/', protect, async (req, res) => {
     }
 });
 
+const { publishBatch } = require('../controllers/resultController');
+
 // @desc    Get all published results
 // @route   GET /api/results/published
 // @access  Public
@@ -33,5 +35,10 @@ router.get('/published', async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 });
+
+// @desc    Publish a batch of results
+// @route   POST /api/results/batch-publish
+// @access  Private/Admin
+router.post('/batch-publish', protect, publishBatch);
 
 module.exports = router;

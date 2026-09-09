@@ -39,7 +39,7 @@ const createProgramme = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while creating programme: ${error.message}`);
-        res.status(500).json({ message: 'Server Error'})
+        res.status(500).json({ message: 'Failed to createProgramme', error: error.message || 'Unknown error' })
     }
 }
 
@@ -48,12 +48,23 @@ const createProgramme = async (req, res) => {
 // @access Public
 const getAllProgrammes = async (req, res) => {
     try {
-        const programmes = await Programme.find({});
+        let filter = {};
+        if (req.query.search) {
+            const regex = new RegExp(req.query.search, 'i');
+            filter = {
+                $or: [
+                    { name: regex },
+                    { code: regex },
+                    { category: regex }
+                ]
+            };
+        }
+        const programmes = await Programme.find(filter);
         res.status(200).json(programmes)
     }
     catch (error) {
         console.error(`Error while fetching programmes: ${error.message}`);
-        res.status(500).json({ message: 'Server Error'});
+        res.status(500).json({ message: 'Failed to getAllProgrammes', error: error.message || 'Unknown error' });
     }
 }
 
@@ -71,7 +82,7 @@ const getProgrammeById = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while fetching programme by ID: ${error.message}`);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Failed to getProgrammeById', error: error.message || 'Unknown error' });
     }
 }
 
@@ -79,18 +90,21 @@ const getProgrammeById = async (req, res) => {
 // @route PUT /api/programmes/:id
 // @access Private/Admin
 const updateProgramme = async (req,res) => {
-    const { name, type, date, description, isResultPublished } = req.body;
+    const { name, type, category, code, stageType, participantsRaw, format, isStarred } = req.body;
     try {
         const programme = await Programme.findById(req.params.id);
         if(!programme) {
             return res.status(404).json({ message: 'Programme not found'});
         }
 
-        programme.name = name || programme.name;
-        programme.type = type || programme.type;
-        programme.date = date || programme.date;
-        programme.description = description || programme.description;
-        programme.isResultPublished = isResultPublished !== undefined ? isResultPublished : programme.isResultPublished;
+        if (name !== undefined) programme.name = name;
+        if (type !== undefined) programme.type = type;
+        if (category !== undefined) programme.category = category;
+        if (code !== undefined) programme.code = code;
+        if (stageType !== undefined) programme.stageType = stageType;
+        if (participantsRaw !== undefined) programme.participantsRaw = participantsRaw;
+        if (format !== undefined) programme.format = format;
+        if (isStarred !== undefined) programme.isStarred = isStarred;
 
         const updatedProgramme = await programme.save();
         res.status(200).json(updatedProgramme);
@@ -98,7 +112,7 @@ const updateProgramme = async (req,res) => {
     }
     catch (error) {
         console.error(`Error while updating programme: ${error.message}`);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Failed to updateProgramme', error: error.message || 'Unknown error' });
     }
 }
 
@@ -138,7 +152,7 @@ const deleteProgramme = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while deleting programme: ${error.message}`);
-        res.status(500).json({ message: 'Server Error'});
+        res.status(500).json({ message: 'Failed to deleteProgramme', error: error.message || 'Unknown error' });
     }
 }
 

@@ -1,1 +1,50 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  
+  --color-brand-white: var(--festival-white);
+  --color-brand-black: var(--festival-black);
+  --color-brand-red: var(--festival-red);
+  --color-brand-orange: var(--festival-orange);
+  --color-brand-purple: var(--festival-purple);
+  --color-brand-teal: var(--festival-teal);
+  --color-brand-yellow: var(--festival-yellow);
+}
+
+@layer base {
+  :root {
+    --festival-white: #FFFDF8;
+    --festival-black: #171717;
+    --festival-red: #F04444;
+    --festival-orange: #FF8A00;
+    --festival-purple: #A94BC7;
+    --festival-teal: #079A98;
+    --festival-yellow: #FFC928;
+    --border: #171717;
+    
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 28px;
+    --page-padding: clamp(20px, 5vw, 80px);
+  }
+
+  body {
+    background-color: var(--festival-white);
+    color: var(--festival-black);
+    /* Subtle paper texture */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .border-brand {
+    border-color: var(--border);
+  }
+}

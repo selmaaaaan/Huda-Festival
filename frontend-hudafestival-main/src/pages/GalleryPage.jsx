@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import ImageModal from '../components/ImageModal';
+import { motion } from 'framer-motion';
+import ImageModal from '../components/gallery/ImageModal';
+import { SectionHeading, EmptyState } from '../components/ui';
 import api from '../services/api';
 
 const GalleryPage = () => {
@@ -30,36 +32,53 @@ const GalleryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-public-bg)] py-8 mt-16 font-sans">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-[var(--color-text-heading)]">Photo Gallery</h1>
-          <p className="text-[var(--color-text-body)] mt-2">Moments and memories from the festival</p>
+    <div className="min-h-screen bg-[var(--festival-white)] py-24 px-6 md:px-12">
+      <div className="max-w-[1440px] mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 border-b-2 border-[var(--border)] pb-8">
+          <SectionHeading subtitle="Moments & Memories" align="left">
+             Photo <br/>
+             <span className="text-[var(--festival-orange)]">Gallery</span>
+          </SectionHeading>
+          <p className="font-bold text-sm uppercase tracking-widest text-right hidden md:block">
+             A visual diary <br/> of the festival
+          </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {images.map((img, index) => (
-            <div 
-              key={img._id} 
-              className="relative aspect-square rounded-xl overflow-hidden cursor-pointer group shadow-sm hover:shadow-md transition-shadow bg-white"
-              onClick={() => setSelectedIndex(index)}
-            >
-              <img 
-                src={img.url} 
-                alt={`Gallery thumbnail ${index + 1}`} 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
-              
-              {img.day && (
-                <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-[var(--color-text-heading)] text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
-                  {img.day}
+        {loading ? (
+          <div className="min-h-[50vh] flex items-center justify-center font-display text-2xl uppercase font-black">Loading...</div>
+        ) : images.length === 0 ? (
+          <EmptyState icon="📸" title="No photos yet" message="Check back later for festival highlights." />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {images.map((img, index) => (
+              <motion.div 
+                key={img._id} 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: (index % 8) * 0.05 }}
+                className="relative aspect-square border-2 border-[var(--border)] bg-[var(--festival-white)] cursor-pointer group shadow-[6px_6px_0px_0px_rgba(23,23,23,1)] hover:-translate-y-2 hover:shadow-[10px_10px_0px_0px_rgba(23,23,23,1)] transition-all overflow-hidden flex flex-col"
+                onClick={() => setSelectedIndex(index)}
+              >
+                <div className="flex-1 overflow-hidden">
+                  <img 
+                    src={img.url} 
+                    alt={img.caption || `Gallery thumbnail ${index + 1}`} 
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+                
+                {(img.caption || img.day) && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-[var(--festival-black)] p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                     {img.day && <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--festival-orange)] block mb-1">{img.day}</span>}
+                     {img.caption && <p className="text-white text-xs font-bold uppercase tracking-widest truncate">{img.caption}</p>}
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       <ImageModal 

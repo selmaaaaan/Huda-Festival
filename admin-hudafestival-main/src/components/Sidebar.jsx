@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { LayoutDashboard, Users, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight, Settings } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LayoutDashboard, Users, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight, Settings, Sun, Moon, Image as ImageIcon, Bell } from 'lucide-react';
 import Logo from './Logo';
 
 const navItems = [
@@ -11,11 +11,30 @@ const navItems = [
   { key: 'pending results', label: 'Pending Results', icon: Clock },
   { key: 'adjustments', label: 'Point Adjustments', icon: Sliders },
   { key: 'logs', label: 'Activity Logs', icon: Activity },
+  { key: 'gallery', label: 'Gallery', icon: ImageIcon },
+  { key: 'notifications', label: 'Notifications', icon: Bell },
   { key: 'settings', label: 'Settings', icon: Settings },
 ];
 
 const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
+  }, []);
+
+  const toggleTheme = () => {
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('huda-admin-theme', 'light');
+      setIsDark(false);
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('huda-admin-theme', 'dark');
+      setIsDark(true);
+    }
+  };
 
   const isTeamLeader = userInfo?.role === 'team_leader';
 
@@ -66,12 +85,21 @@ const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
           {!collapsed && <span>Logout</span>}
         </button>
         
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className={`w-full flex items-center justify-center py-2.5 rounded-xl text-sm text-[var(--color-text-body)] hover:bg-[var(--color-surface-elevated)] hover:text-[var(--color-text-heading)] transition-colors`}
-        >
-          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={toggleTheme}
+            title={collapsed ? (isDark ? "Light Mode" : "Dark Mode") : undefined}
+            className={`flex-1 flex items-center justify-center py-2.5 rounded-xl text-sm text-[var(--color-text-body)] hover:bg-[var(--color-surface-elevated)] hover:text-[var(--color-text-heading)] transition-colors`}
+          >
+            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className={`flex-1 flex items-center justify-center py-2.5 rounded-xl text-sm text-[var(--color-text-body)] hover:bg-[var(--color-surface-elevated)] hover:text-[var(--color-text-heading)] transition-colors`}
+          >
+            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </button>
+        </div>
       </div>
     </aside>
   );

@@ -132,7 +132,7 @@ export default function TeamLeaderDashboard() {
     try {
       const { data } = await api.post('/registrations', {
         programmeId: form.programmeId,
-        teamId,
+        teamId: teamId,
         candidateIds: form.candidateIds,
       });
       setMyRegistrations(prev => [data, ...prev]);

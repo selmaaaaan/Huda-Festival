@@ -16,6 +16,8 @@ import api from './services/api';
 import TeamLeaderDashboard from './pages/TeamLeaderDashboard';
 import RegistrationReviewPage from './pages/RegistrationReviewPage';
 import ActivityLogsPage from './pages/ActivityLogsPage';
+import GalleryPage from './pages/GalleryPage';
+import NotificationsPage from './pages/NotificationsPage';
 
 function App() {
   const savedInfo = localStorage.getItem('userInfo');
@@ -57,6 +59,12 @@ function App() {
     switch (activePage) {
       case 'team_dashboard':
         pageContent = <TeamLeaderDashboard />;
+        break;
+      case 'gallery':
+        pageContent = <GalleryPage />;
+        break;
+      case 'notifications':
+        pageContent = <NotificationsPage />;
         break;
       case 'settings':
         pageContent = <SettingsPage />;

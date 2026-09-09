@@ -16,7 +16,7 @@ const getSettings = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while get settings ${error.message}`);
-        res.status(500).json({ message: "Server Error"});
+        res.status(500).json({ message: 'Failed to getSettings', error: error.message || 'Unknown error' });
     }
 }
 
@@ -51,7 +51,7 @@ const updateSettings = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while updating settings ${error.message}`);
-        res.status(500).json({ message: "Server Error"})
+        res.status(500).json({ message: 'Failed to updateSettings', error: error.message || 'Unknown error' })
     }
 }
 

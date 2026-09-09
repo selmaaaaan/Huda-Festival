@@ -1,5 +1,7 @@
 const Team = require('../models/Team');
 const Candidate = require('../models/Candidate');
+const Registration = require('../models/Registration');
+const Programme = require('../models/Programme');
 
 // @create a new team 
 // @route POST /api/teams
@@ -27,7 +29,7 @@ const createTeam = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while creating team: ${error.message}`);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Failed to createTeam', error: error.message || 'Unknown error' });
     }
 }
 
@@ -41,7 +43,7 @@ const getAllTeams = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while fetching teams: ${error.message}`);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Failed to getAllTeams', error: error.message || 'Unknown error' });
     }
 }
 // @desc Get team by ID
@@ -58,7 +60,7 @@ const getTeamById = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while get team by ID: ${error.message}`);
-        res.status(500).json({message: 'Server Error'})
+        res.status(500).json({ message: 'Failed to getTeamById', error: error.message || 'Unknown error' })
     }
 }
 
@@ -81,7 +83,7 @@ const updateTeamById = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while updating team ${error.message}`);
-        res.status(500).json({ message: 'Server Error'});
+        res.status(500).json({ message: 'Failed to updateTeamById', error: error.message || 'Unknown error' });
     }
 }
 
@@ -106,7 +108,28 @@ const deleteTeamById = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while deleting team: ${error.message}`);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Failed to deleteTeamById', error: error.message || 'Unknown error' });
+    }
+}
+
+// @desc Get unregistered programmes for a team
+// @route GET /api/teams/:id/unregistered-programmes
+// @access Private
+const getUnregisteredProgrammes = async (req, res) => {
+    try {
+        const teamId = req.params.id;
+        
+        // Find all programmes the team has registered for
+        const registrations = await Registration.find({ team: teamId });
+        const registeredProgrammeIds = registrations.map(reg => reg.programme);
+
+        // Find all programmes NOT in that list
+        const unregisteredProgrammes = await Programme.find({ _id: { $nin: registeredProgrammeIds } });
+
+        res.status(200).json(unregisteredProgrammes);
+    } catch (error) {
+        console.error(`Error while fetching unregistered programmes: ${error.message}`);
+        res.status(500).json({ message: 'Failed to getUnregisteredProgrammes', error: error.message || 'Unknown error' });
     }
 }
 
@@ -114,6 +137,7 @@ module.exports = {
     createTeam,
     getAllTeams,
     getTeamById,
-    deleteTeamById,
     updateTeamById,
+    deleteTeamById,
+    getUnregisteredProgrammes
 }

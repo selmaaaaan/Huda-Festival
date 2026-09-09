@@ -20,7 +20,7 @@ const uploadImage = async (req, res) => {
         res.status(201).json(savedImage);
     } catch (error) {
         console.error('Error uploading gallery image:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Failed to uploadImage', error: error.message || 'Unknown error' });
     }
 };
 
@@ -30,7 +30,7 @@ const getAllImages = async (req, res) => {
         res.status(200).json(images);
     } catch (error) {
         console.error('Error fetching gallery images:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Failed to getAllImages', error: error.message || 'Unknown error' });
     }
 };
 
@@ -47,7 +47,7 @@ const deleteImage = async (req, res) => {
         res.status(200).json({ message: 'Image deleted successfully' });
     } catch (error) {
         console.error('Error deleting gallery image:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Failed to deleteImage', error: error.message || 'Unknown error' });
     }
 };
 

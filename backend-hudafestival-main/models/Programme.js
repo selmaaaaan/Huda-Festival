@@ -48,7 +48,7 @@ const programmeSchema = new mongoose.Schema({
     },
     date: { 
         type: Date,
-         required: true,
+         required: false,
     },
     isResultPublished: { 
         type: Boolean,

@@ -34,18 +34,18 @@ const ImageModal = ({ images, currentIndex, onClose, onNavigate }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--festival-black)]">
       <div className="absolute top-4 right-4 flex items-center gap-4 z-50">
         <button 
           onClick={handleDownload}
-          className="p-2 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition"
+          className="p-2 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-none border-2 border-[var(--border)] transition"
           title="Download Image"
         >
           <Download size={24} />
         </button>
         <button 
           onClick={onClose}
-          className="p-2 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition"
+          className="p-2 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-none border-2 border-[var(--border)] transition"
           title="Close"
         >
           <X size={28} />
@@ -54,7 +54,7 @@ const ImageModal = ({ images, currentIndex, onClose, onNavigate }) => {
 
       <button 
         onClick={(e) => { e.stopPropagation(); onNavigate('prev'); }}
-        className="absolute left-4 p-3 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition z-50"
+        className="absolute left-4 p-3 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-none border-2 border-[var(--border)] transition z-50"
       >
         <ChevronLeft size={32} />
       </button>
@@ -63,11 +63,11 @@ const ImageModal = ({ images, currentIndex, onClose, onNavigate }) => {
         <img 
           src={currentImage.url} 
           alt={`Gallery image ${currentIndex + 1}`} 
-          className="max-w-full max-h-[90vh] object-contain rounded-sm"
+          className="max-w-full max-h-[90vh] object-contain rounded-none border-4 border-white"
           onClick={(e) => e.stopPropagation()}
         />
         {currentImage.day && (
-          <div className="absolute bottom-4 left-4 bg-black/60 text-white text-sm font-medium px-3 py-1.5 rounded-full backdrop-blur-md">
+          <div className="absolute bottom-4 left-4 bg-black/60 text-white text-sm font-medium px-3 py-1.5 rounded-none border-2 border-[var(--border)] backdrop-blur-md">
             {currentImage.day}
           </div>
         )}
@@ -75,7 +75,7 @@ const ImageModal = ({ images, currentIndex, onClose, onNavigate }) => {
 
       <button 
         onClick={(e) => { e.stopPropagation(); onNavigate('next'); }}
-        className="absolute right-4 p-3 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full transition z-50"
+        className="absolute right-4 p-3 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-none border-2 border-[var(--border)] transition z-50"
       >
         <ChevronRight size={32} />
       </button>

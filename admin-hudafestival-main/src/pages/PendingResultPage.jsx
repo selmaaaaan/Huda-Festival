@@ -5,7 +5,7 @@ import Button from '../components/Button';
 import { Clock } from 'lucide-react';
 
 const PendingResultsPage = () => {
-  const [pendingProgrammes, setPendingProgrammes] = useState([]);
+  const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -13,25 +13,55 @@ const PendingResultsPage = () => {
     try {
       setLoading(true);
       const [progRes, resultsRes] = await Promise.all([api.get('/programmes'), api.get('/results')]);
-      const programmesWithPending = new Set(resultsRes.data.filter(r => r.status === 'pending').map(r => r.programme));
-      setPendingProgrammes(progRes.data.filter(p => programmesWithPending.has(p._id)));
+      const allProgrammes = progRes.data;
+      const pendingResults = resultsRes.data.filter(r => r.status === 'pending');
+      
+      const batchMap = {};
+      pendingResults.forEach(r => {
+        const bid = r.batchId || 'legacy';
+        if (!batchMap[bid]) {
+          batchMap[bid] = { batchId: bid, resultsCount: 0, programmes: new Set() };
+        }
+        batchMap[bid].resultsCount++;
+        batchMap[bid].programmes.add(r.programme);
+      });
+
+      const batchList = Object.values(batchMap).map(b => {
+        return {
+          ...b,
+          programmeIds: Array.from(b.programmes),
+          programmeNames: Array.from(b.programmes).map(pid => {
+            const p = allProgrammes.find(prog => prog._id === pid);
+            return p ? p.name : 'Unknown Programme';
+          })
+        };
+      });
+
+      setBatches(batchList);
     } catch { setError('Failed to fetch pending results.'); }
     finally { setLoading(false); }
   };
 
   useEffect(() => { fetchPendingData(); }, []);
 
-  const handleApprove = async (id) => {
-    if (window.confirm('Approve and publish these results?')) {
-      try { await api.post(`/programmes/${id}/approve`); alert('Results approved!'); fetchPendingData(); }
+  const handleApproveBatch = async (batch) => {
+    if (window.confirm('Approve and publish all results in this batch?')) {
+      try { 
+        await api.post('/results/batch-publish', { programmeIds: batch.programmeIds });
+        alert('Batch published successfully!'); 
+        fetchPendingData(); 
+      }
       catch (err) { alert('Error: ' + (err.response?.data?.message || 'Failed.')); }
     }
   };
 
-  const handleDeny = async (id) => {
-    if (window.confirm('Deny and delete all pending results for this programme?')) {
-      try { await api.delete(`/programmes/${id}/results`); alert('Pending results deleted.'); fetchPendingData(); }
-      catch (err) { alert('Error: ' + (err.response?.data?.message || 'Failed.')); }
+  const handleDenyBatch = async (batch) => {
+    if (window.confirm('Delete all pending results in this batch?')) {
+        try {
+            await Promise.all(batch.programmeIds.map(pid => api.delete(`/programmes/${pid}/results`)));
+            alert('Batch deleted.');
+            fetchPendingData();
+        } catch (err) { alert('Error deleting some results.'); }
     }
   };
 
@@ -41,21 +71,28 @@ const PendingResultsPage = () => {
   return (
     <div className="p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Pending Results</h1>
-        <p className="text-sm text-[var(--color-text-body)] mt-1">Approve or deny results awaiting review.</p>
+        <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Pending Batches</h1>
+        <p className="text-sm text-[var(--color-text-body)] mt-1">Approve or deny batches of results awaiting review.</p>
       </div>
 
-      {pendingProgrammes.length > 0 ? (
-        <div className="space-y-3">
-          {pendingProgrammes.map(prog => (
-            <div key={prog._id} className="p-5 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] flex justify-between items-center transition-colors hover:border-[var(--color-primary)]">
+      {batches.length > 0 ? (
+        <div className="space-y-4">
+          {batches.map((batch) => (
+            <div key={batch.batchId} className="p-5 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] flex justify-between items-center transition-colors hover:border-[var(--color-primary)]">
               <div>
-                <h2 className="text-base font-semibold text-[var(--color-text-heading)]">{prog.name}</h2>
-                <span className="text-xs font-medium text-[var(--color-text-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] px-2.5 py-1 rounded-full mt-2 inline-block">{prog.category}</span>
+                <h2 className="text-base font-semibold text-[var(--color-text-heading)]">
+                  {batch.batchId === 'legacy' ? 'Legacy Pending Results' : `Batch: ${batch.batchId}`}
+                </h2>
+                <div className="text-sm text-[var(--color-text-muted)] mt-1">
+                  {batch.resultsCount} results across {batch.programmeNames.length} programme(s).
+                </div>
+                <div className="text-xs text-[var(--color-text-muted)] mt-2 italic">
+                  {batch.programmeNames.join(', ')}
+                </div>
               </div>
               <div className="flex items-center gap-3">
-                <Button size="sm" variant="danger" onClick={() => handleDeny(prog._id)}>Deny</Button>
-                <Button size="sm" variant="primary" onClick={() => handleApprove(prog._id)}>Approve</Button>
+                <Button size="sm" variant="danger" onClick={() => handleDenyBatch(batch)}>Delete Batch</Button>
+                <Button size="sm" variant="primary" onClick={() => handleApproveBatch(batch)}>Publish Batch</Button>
               </div>
             </div>
           ))}

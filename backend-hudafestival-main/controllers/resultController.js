@@ -31,7 +31,7 @@ const savePendingResults = async (req, res) => {
         }
         res.status(201).json({ message: 'Results saved as pending.' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error while saving pending results.' });
+        res.status(500).json({ message: 'Failed to savePendingResults', error: error.message || 'Unknown error' });
     }
 };
 
@@ -92,7 +92,7 @@ const approvePendingResults = async (req, res) => {
         res.status(200).json({ message: 'Results approved and published successfully!' });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server error while approving results.' });
+        res.status(500).json({ message: 'Failed to approvePendingResults', error: error.message || 'Unknown error' });
     }
 };
 
@@ -110,7 +110,7 @@ const publishBatch = async (req, res) => {
       res.status(200).json({ message: `Published ${programmeIds.length} programmes`, results });
   } catch (error) {
       console.error(error);
-      res.status(500).json({ message: 'Server error while bulk publishing results.' });
+      res.status(500).json({ message: 'Failed to publishBatch', error: error.message || 'Unknown error' });
   }
 };
 
@@ -120,13 +120,13 @@ const getProgrammeResults = async (req, res) => {
         const results = await Result.find({ programme: req.params.id });
         res.status(200).json(results);
     } catch (error) {
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Failed to getProgrammeResults', error: error.message || 'Unknown error' });
     }
 };
 
 // @desc    Bulk upsert results as 'pending'
 const savePendingResultsBulk = async (req, res) => {
-    const { results } = req.body; // Array of { candidateId, rank, grade }
+    const { results, batchId } = req.body; // Array of { candidateId, rank, grade }
     const { id: programmeId } = req.params;
     
     if (!Array.isArray(results)) {
@@ -142,6 +142,7 @@ const savePendingResultsBulk = async (req, res) => {
                         rank: resultData.rank || null,
                         grade: resultData.grade || null,
                         status: 'pending',
+                        batchId: batchId || null,
                         pointsFromRank: 0,
                         pointsFromGrade: 0,
                         totalPoints: 0
@@ -154,10 +155,10 @@ const savePendingResultsBulk = async (req, res) => {
         if (bulkOps.length > 0) {
             await Result.bulkWrite(bulkOps);
         }
-        await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'RESULT_SAVED', entityType: 'Result', details: { programmeId, count: results.length }, req });
+        await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'RESULT_SAVED', entityType: 'Result', details: { programmeId, count: results.length, batchId }, req });
         res.status(201).json({ message: 'Results saved as pending in bulk.' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error while saving bulk pending results.' });
+        res.status(500).json({ message: 'Failed to savePendingResultsBulk', error: error.message || 'Unknown error' });
     }
 };
 

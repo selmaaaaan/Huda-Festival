@@ -7,16 +7,18 @@ import SearchPage from './pages/CandidateSearchPage';
 import CertificatePage from './pages/CertificateViewPage';
 
 // 1. Import the necessary components from react-router-dom
-import Navbar from './components/Navbar';
+import Navbar from './components/layout/Navbar';
 import HomePage from './pages/HomePage';
-import Footer from './components/Footer';
+import Footer from './components/layout/Footer';
 import ControllersPage from './pages/ControllersPage';
 import SchedulePage from './pages/SchedulePage';
 import GalleryPage from './pages/GalleryPage';
-import LoadingScreen from './components/LoadingScreen';
-import NotificationBanner from './components/NotificationBanner';
-import MaintenancePage from './components/MaintenancePage';
+import LoadingScreen from './components/ui/LoadingScreen';
+import NotificationBanner from './components/ui/NotificationBanner';
+import MaintenancePage from './components/ui/MaintenancePage';
 import api from './services/api';
+import { AnimatePresence } from 'framer-motion';
+import PageTransition from './components/layout/PageTransition';
 
 function App() {
   const [loadingComplete, setLoadingComplete] = useState(false);
@@ -39,8 +41,6 @@ function App() {
   }, []);
 
   const isMaintenance = appSettings?.maintenanceMode === true;
-  // We keep the LoadingScreen mounted until it fires onComplete (which sets loadingComplete to true)
-  // It won't fire onComplete until both its internal timer finishes AND isReady (!settingsLoading) is true.
 
   return (
     <BrowserRouter>
@@ -51,28 +51,27 @@ function App() {
         />
       )}
       
-      {/* If settings are loaded and we are NOT in maintenance mode, show the normal app */}
       {!settingsLoading && !isMaintenance && (
-        <div className={`bg-[var(--color-public-bg)] font-sans min-h-screen ${!loadingComplete ? 'hidden' : ''}`}>
+        <div className={`font-sans min-h-screen flex flex-col ${!loadingComplete ? 'hidden' : ''}`}>
           <Navbar />
           <NotificationBanner />
-          <main>
+          <main className="flex-1 relative">
             <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/leaderboards" element={<LeaderboardsPage />} />
-              <Route path="/programmes" element={<ProgrammesPage />} />
-              <Route path="/search" element={<SearchPage />} />
-              <Route path="/programmes/:programmeId/results" element={<ResultsPage />} />
-              <Route path="/programmes/:programmeId/results/:resultId/certificate" element={<CertificatePage />} />
-              <Route path="/controllers" element={<ControllersPage />} />
-              <Route path="/schedule" element={<SchedulePage />} />
-              <Route path="/gallery" element={<GalleryPage />} />
+              <Route path="/" element={<PageTransition><HomePage /></PageTransition>} />
+              <Route path="/leaderboards" element={<PageTransition><LeaderboardsPage /></PageTransition>} />
+              <Route path="/programmes" element={<PageTransition><ProgrammesPage /></PageTransition>} />
+              <Route path="/search" element={<PageTransition><SearchPage /></PageTransition>} />
+              <Route path="/programmes/:programmeId/results" element={<PageTransition><ResultsPage /></PageTransition>} />
+              <Route path="/programmes/:programmeId/results/:resultId/certificate" element={<PageTransition><CertificatePage /></PageTransition>} />
+              <Route path="/controllers" element={<PageTransition><ControllersPage /></PageTransition>} />
+              <Route path="/schedule" element={<PageTransition><SchedulePage /></PageTransition>} />
+              <Route path="/gallery" element={<PageTransition><GalleryPage /></PageTransition>} />
             </Routes>
           </main>
+          <Footer />
         </div>
       )}
 
-      {/* If settings are loaded and we ARE in maintenance mode, show MaintenancePage */}
       {!settingsLoading && isMaintenance && (
         <div className={!loadingComplete ? 'hidden' : ''}>
           <MaintenancePage message={appSettings?.maintenanceMessage} />

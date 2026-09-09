@@ -6,12 +6,15 @@ const {
     deleteTeamById,
     getTeamById,
     updateTeamById,
+    getUnregisteredProgrammes
 } = require('../controllers/teamController');
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
 router.route('/')
     .get(getAllTeams)
     .post(protect, authorize('admin'), createTeam);
+
+router.get('/:id/unregistered-programmes', protect, getUnregisteredProgrammes);
 
 router.route('/:id')
     .get(getTeamById)

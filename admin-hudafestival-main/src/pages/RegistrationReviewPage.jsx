@@ -19,16 +19,60 @@ export default function RegistrationReviewPage() {
   const [actionLoading, setActionLoading] = useState(null);
 
   const [assignModal, setAssignModal] = useState({ isOpen: false, mode: 'create', editId: null });
+  const [assignCategory, setAssignCategory] = useState('');
   const [assignForm, setAssignForm] = useState({ teamId: '', programmeId: '', candidateIds: [] });
   const [assignSubmitting, setAssignSubmitting] = useState(false);
   const [assignError, setAssignError] = useState('');
   const [teamCandidates, setTeamCandidates] = useState([]);
-  const [assignCategoryFilter, setAssignCategoryFilter] = useState('ALL');
+  
+  const [filterStatus, setFilterStatus] = useState('ALL');
+  const [filterTeam, setFilterTeam] = useState('');
+  const [filterCategory, setFilterCategory] = useState('ALL');
+  const [visibleProgrammes, setVisibleProgrammes] = useState([]);
+  const [isFiltering, setIsFiltering] = useState(false);
+
 
   const CATEGORIES = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const isAdminOrJudge = ['admin', 'judge'].includes(userInfo.role);
+
+  
+  useEffect(() => {
+    const computeVisibleProgrammes = async () => {
+      setIsFiltering(true);
+      let baseProgrammes = [...programmes];
+
+      if (filterTeam) {
+        if (filterStatus === 'UNREGISTERED') {
+          try {
+            const { data } = await api.get(`/teams/${filterTeam}/unregistered-programmes`);
+            baseProgrammes = data;
+          } catch(e) { console.error(e); }
+        } else if (filterStatus === 'REGISTERED') {
+          try {
+            const { data } = await api.get(`/registrations?team=${filterTeam}&limit=1000`);
+            const regs = data.registrations || data || [];
+            const registeredProgIds = regs.map(r => r.programme._id || r.programme);
+            baseProgrammes = baseProgrammes.filter(p => registeredProgIds.includes(p._id));
+          } catch(e) { console.error(e); }
+        }
+      }
+
+      if (filterCategory !== 'ALL') {
+        baseProgrammes = baseProgrammes.filter(p => p.category === filterCategory);
+      }
+      
+      setVisibleProgrammes(baseProgrammes);
+      setIsFiltering(false);
+    };
+
+    if (programmes.length > 0) {
+       computeVisibleProgrammes();
+    } else {
+       setVisibleProgrammes([]);
+    }
+  }, [filterStatus, filterTeam, filterCategory, programmes]);
 
   // Fetch programmes and teams
   useEffect(() => {
@@ -43,15 +87,14 @@ export default function RegistrationReviewPage() {
 
   // Fetch candidates for selected team in the form
   useEffect(() => {
-    setAssignCategoryFilter('ALL');
-    if (assignForm.teamId) {
-      api.get(`/candidates?team=${assignForm.teamId}`)
+    if (assignForm.teamId && assignCategory) {
+      api.get(`/candidates?team=${assignForm.teamId}&category=${assignCategory}`)
          .then(r => setTeamCandidates(r.data))
          .catch(console.error);
     } else {
       setTeamCandidates([]);
     }
-  }, [assignForm.teamId]);
+  }, [assignForm.teamId, assignCategory]);
 
   // Fetch registrations for selected programme
   useEffect(() => {
@@ -95,6 +138,8 @@ export default function RegistrationReviewPage() {
   const openAssignModal = (mode, reg = null) => {
     setAssignError('');
     if (mode === 'edit' && reg) {
+      const prog = programmes.find(p => p._id === (reg.programme?._id || reg.programme));
+      setAssignCategory(prog ? prog.category : '');
       setAssignForm({
         teamId: reg.team?._id || reg.team,
         programmeId: reg.programme?._id || reg.programme,
@@ -102,7 +147,8 @@ export default function RegistrationReviewPage() {
       });
       setAssignModal({ isOpen: true, mode: 'edit', editId: reg._id });
     } else {
-      setAssignForm({ teamId: '', programmeId: selectedProg ? selectedProg._id : '', candidateIds: [] });
+      setAssignCategory(selectedProg ? selectedProg.category : '');
+      setAssignForm({ teamId: filterTeam || '', programmeId: selectedProg ? selectedProg._id : '', candidateIds: [] });
       setAssignModal({ isOpen: true, mode: 'create', editId: null });
     }
   };
@@ -173,10 +219,42 @@ export default function RegistrationReviewPage() {
             <ClipboardList size={16} /> Programmes
           </h2>
         </div>
-        <div className="flex-1 overflow-y-auto">
-          {loading ? (
+        <div className="p-4 border-b border-[var(--color-border)] bg-[var(--color-surface-elevated)] space-y-3">
+            <select
+              value={filterStatus}
+              onChange={e => setFilterStatus(e.target.value)}
+              className="w-full text-xs px-2 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
+            >
+              <option value="ALL">All Status</option>
+              <option value="REGISTERED" disabled={!filterTeam}>Registered (Requires Team)</option>
+              <option value="UNREGISTERED" disabled={!filterTeam}>Unregistered (Requires Team)</option>
+            </select>
+            
+            <select
+              value={filterTeam}
+              onChange={e => {
+                setFilterTeam(e.target.value);
+                if (!e.target.value && filterStatus !== 'ALL') setFilterStatus('ALL');
+              }}
+              className="w-full text-xs px-2 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
+            >
+              <option value="">All Teams</option>
+              {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+            </select>
+
+            <select
+              value={filterCategory}
+              onChange={e => setFilterCategory(e.target.value)}
+              className="w-full text-xs px-2 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
+            >
+              <option value="ALL">All Categories</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+          {loading || isFiltering ? (
             <div className="p-4 text-sm text-[var(--color-text-muted)]">Loading...</div>
-          ) : programmes.map(prog => (
+          ) : visibleProgrammes.map(prog => (
             <button key={prog._id} onClick={() => setSelectedProg(prog)}
               className={`w-full text-left px-4 py-3 border-b border-[var(--color-border)] transition-colors flex items-center justify-between ${
                 selectedProg?._id === prog._id ? 'bg-[var(--color-primary)]/10 border-l-2 border-l-[var(--color-primary)]' : 'hover:bg-[var(--color-surface-elevated)]'
@@ -312,24 +390,28 @@ export default function RegistrationReviewPage() {
           {assignError && <div className="text-sm text-red-400 bg-red-900/20 border border-red-800/40 rounded-lg px-3 py-2">{assignError}</div>}
 
           <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">Team</label>
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">1. Category</label>
             <select 
-              value={assignForm.teamId} 
-              onChange={e => setAssignForm(f => ({ ...f, teamId: e.target.value, candidateIds: [] }))}
+              value={assignCategory} 
+              onChange={e => {
+                setAssignCategory(e.target.value);
+                setAssignForm(f => ({ ...f, programmeId: '', candidateIds: [] }));
+              }}
               className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]">
-              <option value="">Select a team...</option>
-              {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+              <option value="">Select a category...</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">Programme</label>
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">2. Programme</label>
             <select 
               value={assignForm.programmeId} 
               onChange={e => setAssignForm(f => ({ ...f, programmeId: e.target.value, candidateIds: [] }))}
-              className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]">
+              disabled={!assignCategory}
+              className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50">
               <option value="">Select a programme...</option>
-              {programmes.map(p => <option key={p._id} value={p._id}>{p.name} ({p.category})</option>)}
+              {programmes.filter(p => p.category === assignCategory).map(p => <option key={p._id} value={p._id}>{p.name} ({p.category})</option>)}
             </select>
           </div>
 
@@ -345,6 +427,17 @@ export default function RegistrationReviewPage() {
             );
           })()}
 
+          <div>
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">3. Team</label>
+            <select 
+              value={assignForm.teamId} 
+              onChange={e => setAssignForm(f => ({ ...f, teamId: e.target.value, candidateIds: [] }))}
+              className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]">
+              <option value="">Select a team...</option>
+              {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+            </select>
+          </div>
+
           {assignForm.teamId && assignForm.programmeId && (
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -353,24 +446,15 @@ export default function RegistrationReviewPage() {
                   const reqCands = prog?.format === 'Group' ? (prog?.groupSize || 1) : 1;
                   return (
                     <label className="block text-xs font-medium text-[var(--color-text-muted)]">
-                      Select {reqCands} Candidate(s) <span className="text-[var(--color-primary)]">{assignForm.candidateIds.length}/{reqCands}</span>
+                      4. Select {reqCands} Candidate(s) <span className="text-[var(--color-primary)]">{assignForm.candidateIds.length}/{reqCands}</span>
                     </label>
                   );
                 })()}
-                <select
-                  value={assignCategoryFilter}
-                  onChange={e => setAssignCategoryFilter(e.target.value)}
-                  className="text-xs px-2 py-1 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
-                >
-                  {['ALL', ...CATEGORIES].map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
               </div>
               <div className="max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg">
-                {teamCandidates.filter(c => assignCategoryFilter === 'ALL' || c.category === assignCategoryFilter).length === 0 ? (
+                {teamCandidates.length === 0 ? (
                   <div className="p-4 text-center text-xs text-[var(--color-text-muted)]">No candidates found for this team in the selected category.</div>
-                ) : teamCandidates.filter(c => assignCategoryFilter === 'ALL' || c.category === assignCategoryFilter).map(c => (
+                ) : teamCandidates.map(c => (
                   <label key={c._id} className="flex items-center gap-3 px-3 py-2 hover:bg-[var(--color-surface-elevated)] cursor-pointer border-b border-[var(--color-border)] last:border-0">
                     <input type="checkbox" checked={assignForm.candidateIds.includes(c._id)} onChange={() => handleCandidateToggle(c._id)} className="rounded" />
                     <div>
@@ -382,10 +466,10 @@ export default function RegistrationReviewPage() {
               </div>
             </div>
           )}
-
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="ghost" type="button" onClick={() => setAssignModal({ isOpen: false, mode: 'create', editId: null })}>Cancel</Button>
-            <Button variant="primary" type="submit" loading={assignSubmitting}>{assignModal.mode === 'edit' ? 'Save Changes' : 'Assign'}</Button>
+          
+          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)] mt-6">
+            <Button type="button" variant="secondary" onClick={() => setAssignModal({ isOpen: false, mode: 'create', editId: null })}>Cancel</Button>
+            <Button type="submit" variant="primary" loading={assignSubmitting}>{assignModal.mode === 'edit' ? 'Update Registration' : 'Assign Candidate'}</Button>
           </div>
         </form>
       </Modal>

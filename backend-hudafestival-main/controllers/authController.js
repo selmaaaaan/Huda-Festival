@@ -35,7 +35,7 @@ const registerAdmin = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while registering admin ${error.message}`);
-        res.status(500).json({ message: 'Server Error'})
+        res.status(500).json({ message: 'Failed to registerAdmin', error: error.message || 'Unknown error' })
     }
 }
 
@@ -68,7 +68,7 @@ const createTeamLeader = async (req, res) => {
         });
     } catch (error) {
         console.error(`Error while creating team leader: ${error.message}`);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Failed to createTeamLeader', error: error.message || 'Unknown error' });
     }
 }
 
@@ -94,7 +94,7 @@ const loginAdmin = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while login in admin ${error.message}`);
-        res.status(500).json({ message: 'Server Error'})
+        res.status(500).json({ message: 'Failed to loginAdmin', error: error.message || 'Unknown error' })
     }
 }
 
@@ -117,7 +117,7 @@ const teamLeaderLogin = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while login in team leader ${error.message}`);
-        res.status(500).json({ message: 'Server Error'})
+        res.status(500).json({ message: 'Failed to teamLeaderLogin', error: error.message || 'Unknown error' })
     }
 }
 
@@ -132,7 +132,7 @@ const getAllTeamLeaders = async (req, res) => {
         res.status(200).json(teamLeaders);
     } catch (error) {
         console.error(`Error fetching team leaders: ${error.message}`);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Failed to getAllTeamLeaders', error: error.message || 'Unknown error' });
     }
 }
 

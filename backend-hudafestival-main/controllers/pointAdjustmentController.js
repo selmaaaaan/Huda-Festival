@@ -32,7 +32,7 @@ const createAdjustment = async (req, res) => {
 
         res.status(201).json(adjustment);
     } catch (error) {
-        res.status(500).json({ message: 'Error creating adjustment', error: error.message });
+        res.status(500).json({ message: 'Failed to createAdjustment', error: error.message || 'Unknown error' });
     }
 };
 
@@ -45,7 +45,7 @@ const getAllAdjustments = async (req, res) => {
             .sort({ createdAt: -1 });
         res.status(200).json(adjustments);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching adjustments', error: error.message });
+        res.status(500).json({ message: 'Failed to getAllAdjustments', error: error.message || 'Unknown error' });
     }
 };
 
@@ -72,7 +72,7 @@ const deleteAdjustment = async (req, res) => {
         await PointAdjustment.findByIdAndDelete(id);
         res.status(200).json({ message: 'Adjustment deleted and points reverted' });
     } catch (error) {
-        res.status(500).json({ message: 'Error deleting adjustment', error: error.message });
+        res.status(500).json({ message: 'Failed to deleteAdjustment', error: error.message || 'Unknown error' });
     }
 };
 

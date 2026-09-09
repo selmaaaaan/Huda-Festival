@@ -17,9 +17,18 @@ const resultSchema = new mongoose.Schema({
         default: null,
     },
     grade: {
-        type: String, 
-        enum: ['A', 'B', null],
-        default: null,
+        type: String,
+        enum: ['A', 'B', 'C', null],
+        default: null
+    },
+    batchId: {
+        type: String,
+        default: null
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'approved'],
+        default: 'pending'
     },
     pointsFromRank: { 
          type: Number,

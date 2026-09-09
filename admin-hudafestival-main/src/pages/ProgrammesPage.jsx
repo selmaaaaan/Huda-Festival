@@ -40,7 +40,7 @@ const ProgrammesPage = () => {
         <div className="text-xs text-[var(--color-text-muted)] mt-0.5">{prog.code}</div>
       </td>
       <td className="px-6 py-4 text-sm text-[var(--color-text-body)]">{prog.type}</td>
-      <td className="px-6 py-4 text-sm text-[var(--color-text-body)]">{new Date(prog.date).toLocaleDateString()}</td>
+      <td className="px-6 py-4 text-sm text-[var(--color-text-body)]">{prog.date ? new Date(prog.date).toLocaleDateString() : 'Unscheduled'}</td>
       <td className="px-6 py-4"><StatusBadge status={prog.isResultPublished ? 'approved' : 'pending'} label={prog.isResultPublished ? 'Yes' : 'No'} /></td>
       <td className="px-6 py-4">
         <div className="flex gap-2">

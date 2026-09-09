@@ -72,7 +72,7 @@ const createRegistration = async (req, res) => {
         if (error.code === 11000) {
             return res.status(400).json({ message: 'Duplicate registration for candidate' });
         }
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Failed to createRegistration', error: error.message || 'Unknown error' });
     }
 };
 
@@ -111,7 +111,7 @@ const getRegistrations = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching registrations:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Failed to getAllRegistrations', error: error.message || 'Unknown error' });
     }
 };
 
@@ -129,7 +129,7 @@ const approveRegistration = async (req, res) => {
         res.status(200).json(registration);
     } catch (error) {
         console.error('Error approving registration:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Failed to approveRegistration', error: error.message || 'Unknown error' });
     }
 };
 
@@ -150,7 +150,7 @@ const rejectRegistration = async (req, res) => {
         res.status(200).json(registration);
     } catch (error) {
         console.error('Error rejecting registration:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Failed to rejectRegistration', error: error.message || 'Unknown error' });
     }
 };
 
@@ -187,7 +187,7 @@ const updateRegistration = async (req, res) => {
         res.status(200).json(saved);
     } catch (error) {
         console.error('Error updating registration:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Failed to updateRegistration', error: error.message || 'Unknown error' });
     }
 };
 
@@ -198,7 +198,7 @@ const deleteRegistration = async (req, res) => {
         res.status(200).json({ message: 'Registration deleted' });
     } catch (error) {
         console.error('Error deleting registration:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Failed to deleteRegistration', error: error.message || 'Unknown error' });
     }
 };
 
@@ -210,7 +210,7 @@ const getProgrammeRegistrations = async (req, res) => {
         res.status(200).json(registrations);
     } catch (error) {
         console.error('Error fetching programme registrations:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Failed to getProgrammeRegistrations', error: error.message || 'Unknown error' });
     }
 };
 
