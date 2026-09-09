@@ -201,11 +201,11 @@ const JudgePanel = () => {
                                 <button
                                   key={pos}
                                   onClick={() => handleResultChange(cand._id, 'rank', results[cand._id]?.rank === pos ? null : pos)}
-                                  className={\`w-8 h-8 rounded-lg text-xs font-semibold flex items-center justify-center transition-all \${
+                                  className={`w-8 h-8 rounded-lg text-xs font-semibold flex items-center justify-center transition-all \${
                                     results[cand._id]?.rank === pos 
                                       ? 'bg-[var(--color-primary)] text-white shadow-md' 
                                       : 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-body)] hover:border-[var(--color-primary)]/50'
-                                  }\`}
+                                  }`}
                                 >
                                   {pos}
                                 </button>
@@ -218,11 +218,11 @@ const JudgePanel = () => {
                                 <button
                                   key={g}
                                   onClick={() => handleResultChange(cand._id, 'grade', results[cand._id]?.grade === g ? null : g)}
-                                  className={\`w-8 h-8 rounded-lg text-xs font-semibold flex items-center justify-center transition-all \${
+                                  className={`w-8 h-8 rounded-lg text-xs font-semibold flex items-center justify-center transition-all \${
                                     results[cand._id]?.grade === g 
                                       ? 'bg-emerald-500 text-white shadow-md' 
                                       : 'bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-body)] hover:border-emerald-500/50'
-                                  }\`}
+                                  }`}
                                 >
                                   {g}
                                 </button>
@@ -279,9 +279,9 @@ const JudgePanel = () => {
                           <div className="font-medium text-[var(--color-text-heading)] text-sm">{sub.candidate?.name || 'Unknown Candidate'}</div>
                           <div className="text-xs text-[var(--color-text-muted)]">{sub.programme?.name}</div>
                         </div>
-                        <span className={\`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full \${
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full \${
                           sub.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
-                        }\`}>
+                        }`}>
                           {sub.status}
                         </span>
                       </div>

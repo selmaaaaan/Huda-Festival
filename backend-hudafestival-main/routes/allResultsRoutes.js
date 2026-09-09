@@ -61,4 +61,16 @@ router.get('/my-submissions', protect, async (req, res) => {
     }
 });
 
+// @desc    Delete a batch of pending results
+// @route   DELETE /api/results/batch/:batchId
+// @access  Private/Admin
+router.delete('/batch/:batchId', protect, async (req, res) => {
+    try {
+        await Result.deleteMany({ batchId: req.params.batchId, status: 'pending' });
+        res.json({ message: 'Batch deleted' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 module.exports = router;

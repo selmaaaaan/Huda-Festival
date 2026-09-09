@@ -24,7 +24,8 @@ const ResultsPage = () => {
     const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
     const [programmeSearchResults, setProgrammeSearchResults] = useState([]);
     const [modalSearchText, setModalSearchText] = useState('');
-    const [batchId, setBatchId] = useState(null);
+    const [batchId, setBatchId] = useState(Date.now().toString() + '-' + Math.random().toString(36).substr(2, 5));
+const [searchCode, setSearchCode] = useState('');
     const [registeredCandidates, setRegisteredCandidates] = useState([]);
 
     const [successMessage, setSuccessMessage] = useState('');
@@ -206,7 +207,7 @@ const ResultsPage = () => {
                             setModalSearchText('');
                             setProgrammeSearchResults([]);
                             setIsSearchModalOpen(true);
-                            setBatchId(Date.now().toString() + '-' + Math.random().toString(36).substr(2, 5));
+                            
                         }}>+ Add Result</Button>
                     </div>
                     <div className="flex flex-col gap-3">
@@ -413,6 +414,7 @@ const ResultsPage = () => {
                 )}
             </div>
 
+            
             {/* Search Modal */}
             {isSearchModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -423,17 +425,49 @@ const ResultsPage = () => {
                                 <XCircle size={20} />
                             </button>
                         </div>
-                        <div className="p-4 border-b border-[var(--color-border)]">
+                        <div className="p-4 border-b border-[var(--color-border)] space-y-4">
+                            <div>
+                                <label className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 block">Quick Code Entry</label>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter exact Code (e.g. MUSIC-01)"
+                                        className="flex-1 px-4 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)]"
+                                        value={searchCode}
+                                        onChange={(e) => setSearchCode(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && searchCode) {
+                                                const p = programmes.find(pr => pr.code.toLowerCase() === searchCode.toLowerCase());
+                                                if (p) { setSelectedProgramme(p); setIsSearchModalOpen(false); setSearchCode(''); }
+                                                else alert('Code not found');
+                                            }
+                                        }}
+                                    />
+                                    <Button onClick={() => {
+                                        const p = programmes.find(pr => pr.code.toLowerCase() === searchCode.toLowerCase());
+                                        if (p) { setSelectedProgramme(p); setIsSearchModalOpen(false); setSearchCode(''); }
+                                        else alert('Code not found');
+                                    }}>Load</Button>
+                                </div>
+                            </div>
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                                    <div className="w-full border-t border-[var(--color-border)]"></div>
+                                </div>
+                                <div className="relative flex justify-center">
+                                    <span className="px-2 bg-[var(--color-surface)] text-xs text-[var(--color-text-muted)]">OR SEARCH</span>
+                                </div>
+                            </div>
                             <input
-                                autoFocus
                                 type="text"
-                                placeholder="Search by name, code, or category..."
+                                placeholder="Search by name or category..."
                                 className="w-full px-4 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
                                 value={modalSearchText}
                                 onChange={(e) => {
                                     setModalSearchText(e.target.value);
                                     if (e.target.value.length > 1) {
-                                        api.get(`/programmes?search=${encodeURIComponent(e.target.value)}`).then(res => setProgrammeSearchResults(res.data)).catch(console.error);
+                                        const searchLower = e.target.value.toLowerCase();
+                                        setProgrammeSearchResults(programmes.filter(p => p.name.toLowerCase().includes(searchLower) || p.category.toLowerCase().includes(searchLower)));
                                     } else {
                                         setProgrammeSearchResults([]);
                                     }
@@ -454,7 +488,7 @@ const ResultsPage = () => {
                                         className="w-full text-left p-3 hover:bg-[var(--color-surface-elevated)] border-b border-[var(--color-border)] last:border-0 transition-colors"
                                     >
                                         <div className="font-medium text-[var(--color-text-heading)]">{p.name}</div>
-                                        <div className="text-xs text-[var(--color-text-muted)]">{p.code} • {p.category}</div>
+                                        <div className="text-xs text-[var(--color-text-muted)]">{p.code} ? {p.category}</div>
                                     </button>
                                 ))
                             )}
@@ -462,6 +496,7 @@ const ResultsPage = () => {
                     </div>
                 </div>
             )}
+
         </div>
     );
 };

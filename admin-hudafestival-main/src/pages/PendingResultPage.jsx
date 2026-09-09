@@ -47,7 +47,7 @@ const PendingResultsPage = () => {
   const handleApproveBatch = async (batch) => {
     if (window.confirm('Approve and publish all results in this batch?')) {
       try { 
-        await api.post('/results/batch-publish', { programmeIds: batch.programmeIds });
+        await api.post('/results/batch-publish', { batchId: batch.batchId });
         alert('Batch published successfully!'); 
         fetchPendingData(); 
       }
@@ -58,7 +58,7 @@ const PendingResultsPage = () => {
   const handleDenyBatch = async (batch) => {
     if (window.confirm('Delete all pending results in this batch?')) {
         try {
-            await Promise.all(batch.programmeIds.map(pid => api.delete(`/programmes/${pid}/results`)));
+            await api.delete(`/results/batch/${batch.batchId}`);
             alert('Batch deleted.');
             fetchPendingData();
         } catch (err) { alert('Error deleting some results.'); }
