@@ -10,6 +10,7 @@ import { ChevronLeft } from 'lucide-react';
 const ProgrammesPage = () => {
   const [programmes, setProgrammes] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [stageFilter, setStageFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,7 +32,7 @@ const ProgrammesPage = () => {
     }
   };
 
-  const filteredProgrammes = selectedCategory ? programmes.filter(p => p.category === selectedCategory) : [];
+  const filteredProgrammes = selectedCategory ? programmes.filter(p => p.category === selectedCategory && (stageFilter === 'ALL' || p.stageType === stageFilter)) : [];
   const headers = ['Name', 'Type', 'Date', 'Published', 'Actions'];
   const renderRow = (prog) => (
     <tr key={prog._id} className="hover:bg-[var(--color-surface-elevated)] transition">
@@ -78,7 +79,20 @@ const ProgrammesPage = () => {
           <button onClick={() => setSelectedCategory(null)} className="flex items-center gap-1 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-heading)] mb-4 transition">
             <ChevronLeft size={16} /> Back to Categories
           </button>
-          <h2 className="text-xl font-bold text-[var(--color-text-heading)] mb-4">Programmes — {selectedCategory}</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-[var(--color-text-heading)]">Programmes - {selectedCategory}</h2>
+            <div className="flex gap-2">
+              {['ALL', 'Stage', 'Non-Stage'].map(stage => (
+                <button
+                  key={stage}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${stageFilter === stage ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--color-surface-elevated)] border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-heading)]'}`}
+                  onClick={() => setStageFilter(stage)}
+                >
+                  {stage === 'ALL' ? 'All Stages' : stage}
+                </button>
+              ))}
+            </div>
+          </div>
           <DataTable headers={headers} data={filteredProgrammes} renderRow={renderRow} />
         </div>
       )}

@@ -28,6 +28,7 @@ export default function RegistrationReviewPage() {
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [filterTeam, setFilterTeam] = useState('');
   const [filterCategory, setFilterCategory] = useState('ALL');
+  const [filterStageType, setFilterStageType] = useState('ALL');
   const [visibleProgrammes, setVisibleProgrammes] = useState([]);
   const [isFiltering, setIsFiltering] = useState(false);
 
@@ -250,6 +251,15 @@ export default function RegistrationReviewPage() {
               <option value="ALL">All Categories</option>
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
+            <select
+              value={filterStageType}
+              onChange={e => setFilterStageType(e.target.value)}
+              className="w-full text-xs px-2 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)] mt-3"
+            >
+              <option value="ALL">All Stages</option>
+              <option value="Stage">Stage</option>
+              <option value="Non-Stage">Non-Stage</option>
+            </select>
           </div>
           <div className="flex-1 overflow-y-auto">
           {loading || isFiltering ? (
@@ -389,31 +399,11 @@ export default function RegistrationReviewPage() {
         <form onSubmit={handleAssignSubmit} className="space-y-4">
           {assignError && <div className="text-sm text-red-400 bg-red-900/20 border border-red-800/40 rounded-lg px-3 py-2">{assignError}</div>}
 
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">1. Category</label>
-            <select 
-              value={assignCategory} 
-              onChange={e => {
-                setAssignCategory(e.target.value);
-                setAssignForm(f => ({ ...f, programmeId: '', candidateIds: [] }));
-              }}
-              className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]">
-              <option value="">Select a category...</option>
-              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">2. Programme</label>
-            <select 
-              value={assignForm.programmeId} 
-              onChange={e => setAssignForm(f => ({ ...f, programmeId: e.target.value, candidateIds: [] }))}
-              disabled={!assignCategory}
-              className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50">
-              <option value="">Select a programme...</option>
-              {programmes.filter(p => p.category === assignCategory).map(p => <option key={p._id} value={p._id}>{p.name} ({p.category})</option>)}
-            </select>
-          </div>
+          <ProgrammeSelector 
+              programmes={programmes}
+              value={assignForm.programmeId}
+              onChange={(id) => setAssignForm(f => ({ ...f, programmeId: id, candidateIds: [] }))}
+            />
 
           {(() => {
             const prog = programmes.find(p => p._id === assignForm.programmeId);

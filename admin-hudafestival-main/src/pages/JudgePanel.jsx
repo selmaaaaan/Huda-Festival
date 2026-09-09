@@ -153,14 +153,33 @@ const JudgePanel = () => {
             </form>
 
             {activeProgramme && (
-              <div className="mt-6 p-4 bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 rounded-xl">
-                <h3 className="font-semibold text-[var(--color-primary)] mb-1">{activeProgramme.name}</h3>
-                <div className="flex gap-4 text-xs text-[var(--color-text-body)]">
-                  <span>Category: {activeProgramme.category}</span>
-                  <span>Type: {activeProgramme.type}</span>
+                <div className="mt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+                              Programme Name
+                          </label>
+                          <input
+                              type="text"
+                              readOnly
+                              value={activeProgramme.name}
+                              className="w-full px-4 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-muted)] cursor-not-allowed"
+                          />
+                      </div>
+                      <div>
+                          <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+                              Category
+                          </label>
+                          <input
+                              type="text"
+                              readOnly
+                              value={activeProgramme.category}
+                              className="w-full px-4 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-muted)] cursor-not-allowed"
+                          />
+                      </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
 
           {activeProgramme && (
