@@ -65,7 +65,7 @@ const HomePage = () => {
     fetchStats();
   }, []);
 
-  const daysToGo = Math.max(0, Math.ceil((new Date('2026-05-01').getTime() - new Date().getTime()) / (1000 * 3600 * 24)));
+  const daysToGo = Math.max(0, Math.ceil((new Date('2027-05-01').getTime() - new Date().getTime()) / (1000 * 3600 * 24)));
 
   const featuredProgrammes = stats.programmesList.slice(0, 6);
   const TAGLINES = ["A festival of ideas", "Culture Connects Us", "Voices of the Future", "Creativity Unleashed", "Inspiring Generations"];
@@ -82,60 +82,134 @@ const HomePage = () => {
 
       {/* Hero Section */}
       <section className="relative z-10 container mx-auto px-6 lg:px-12 pt-16 pb-20 flex flex-col items-center text-center">
+        {/* Festive Background Shapes (Animated) */}
+        {!prefersReducedMotion && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+            <motion.div 
+              animate={{ y: [0, -30, 0], rotate: [0, 45, 0] }} 
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+              className="absolute top-10 left-10 w-32 h-32 bg-[var(--festival-yellow)] rounded-full mix-blend-multiply filter blur-2xl opacity-40" 
+            />
+            <motion.div 
+              animate={{ y: [0, 50, 0], x: [0, 30, 0] }} 
+              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+              className="absolute top-40 right-10 w-48 h-48 bg-[var(--festival-teal)] rounded-full mix-blend-multiply filter blur-2xl opacity-30" 
+            />
+            <motion.div 
+              animate={{ scale: [1, 1.2, 1], rotate: [0, -45, 0] }} 
+              transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+              className="absolute bottom-10 left-1/4 w-40 h-40 bg-[var(--festival-purple)] rounded-full mix-blend-multiply filter blur-2xl opacity-20" 
+            />
+            
+            {/* Floating Geometry */}
+            <motion.div
+              animate={{ y: [0, 20, 0], rotate: [0, 90, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-20 right-1/4 w-12 h-12 border-4 border-[var(--festival-red)] opacity-50"
+            />
+            <motion.div
+              animate={{ y: [0, -20, 0], rotate: [45, -45, 45] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute bottom-40 right-20 w-8 h-8 bg-[var(--festival-orange)] opacity-50 rotate-45"
+            />
+          </div>
+        )}
+
         {/* Decorative Glyph Swarm */}
-        <div className="absolute bottom-10 right-10 text-4xl font-black opacity-10 font-display rotate-12 select-none">ア 新 ก</div>
-        <div className="absolute top-20 left-10 text-2xl font-black opacity-10 font-display -rotate-12 select-none">Ω ツ</div>
+        <div className="absolute bottom-10 right-10 text-4xl font-black opacity-10 font-display rotate-12 select-none z-0">ア 新 ก</div>
+        <div className="absolute top-20 left-10 text-2xl font-black opacity-10 font-display -rotate-12 select-none z-0">Ω ツ</div>
 
         {/* Small Annotations */}
-        <div className="absolute hidden lg:block top-32 right-32 text-sm rotate-6" style={{ fontFamily: '"Comic Sans MS", "Caveat", cursive' }}>
+        <div className="absolute hidden lg:block top-32 right-32 text-sm rotate-6 z-0" style={{ fontFamily: '"Comic Sans MS", "Caveat", cursive' }}>
           Different Voices,<br/>A Brighter Tomorrow
         </div>
-        <div className="absolute hidden lg:block bottom-40 left-32 text-sm -rotate-6" style={{ fontFamily: '"Comic Sans MS", "Caveat", cursive' }}>
+        <div className="absolute hidden lg:block bottom-40 left-32 text-sm -rotate-6 z-0" style={{ fontFamily: '"Comic Sans MS", "Caveat", cursive' }}>
           Culture Connects Us
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex flex-col items-center"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
+          className="flex flex-col items-center relative z-10"
         >
           {/* ECRIS LE MONDE */}
-          <div className="flex items-center gap-4 mb-8">
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="flex items-center gap-4 mb-8"
+          >
             <div className="w-12 h-[2px] bg-[var(--festival-black)]"></div>
             <span className="text-sm font-bold tracking-[0.3em] uppercase">Écris le monde</span>
             <div className="w-12 h-[2px] bg-[var(--festival-black)]"></div>
-          </div>
+          </motion.div>
 
           {/* Huge Title */}
-          <h1 className="text-6xl md:text-8xl lg:text-[10rem] leading-none mb-6">
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-6xl md:text-8xl lg:text-[10rem] leading-none mb-6 relative"
+          >
             <span style={{ fontFamily: 'Georgia, serif' }}>L'in</span>
-            <span style={{ fontFamily: '"Brush Script MT", "Pacifico", cursive' }} className="text-[var(--festival-orange)] px-1">t</span>
+            <motion.span 
+              display="inline-block"
+              animate={{ rotate: [-5, 5, -5] }}
+              transition={{ duration: 4, repeat: Infinity }}
+              style={{ fontFamily: '"Brush Script MT", "Pacifico", cursive' }} 
+              className="text-[var(--festival-orange)] px-1 inline-block"
+            >
+              t
+            </motion.span>
             <span style={{ fontFamily: 'Georgia, serif' }}>erv</span>
-            <span style={{ fontFamily: '"Brush Script MT", "Pacifico", cursive' }} className="text-[var(--festival-purple)] px-1">e</span>
+            <motion.span 
+              display="inline-block"
+              animate={{ y: [-2, 2, -2] }}
+              transition={{ duration: 3, repeat: Infinity }}
+              style={{ fontFamily: '"Brush Script MT", "Pacifico", cursive' }} 
+              className="text-[var(--festival-purple)] px-1 inline-block"
+            >
+              e
+            </motion.span>
             <span style={{ fontFamily: 'Georgia, serif' }}>ntion</span>
-          </h1>
+          </motion.h1>
 
           {/* 2026 */}
-          <div className="text-7xl md:text-9xl font-black font-display tracking-tighter mb-8 flex">
-            <span className="text-[var(--festival-red)]">2</span>
-            <span className="text-[var(--festival-teal)]">0</span>
-            <span className="text-[var(--festival-yellow)]">2</span>
-            <span className="text-[var(--festival-purple)]">6</span>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4, type: "spring" }}
+            className="text-7xl md:text-9xl font-black font-display tracking-tighter mb-8 flex"
+          >
+            <motion.span whileHover={{ y: -10 }} className="text-[var(--festival-red)] cursor-default transition-transform">2</motion.span>
+            <motion.span whileHover={{ y: -10 }} className="text-[var(--festival-teal)] cursor-default transition-transform">0</motion.span>
+            <motion.span whileHover={{ y: -10 }} className="text-[var(--festival-yellow)] cursor-default transition-transform">2</motion.span>
+            <motion.span whileHover={{ y: -10 }} className="text-[var(--festival-purple)] cursor-default transition-transform">6</motion.span>
+          </motion.div>
 
-          <p className="max-w-2xl text-xl md:text-2xl font-medium text-gray-700 mb-12">
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="max-w-2xl text-xl md:text-2xl font-medium text-gray-700 mb-12"
+          >
             A festival of ideas. A celebration of voices. A brighter tomorrow.
-          </p>
+          </motion.p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="flex flex-col sm:flex-row gap-4"
+          >
             <Link to="/programmes" className="px-8 py-4 bg-[var(--festival-red)] text-[var(--festival-cream)] font-bold uppercase tracking-wider text-lg hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(17,17,17,1)] transition-all border-2 border-[var(--border)]">
               Explore Programmes →
             </Link>
             <Link to="/schedule" className="px-8 py-4 bg-[var(--festival-cream)] text-[var(--festival-black)] font-bold uppercase tracking-wider text-lg hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(17,17,17,1)] transition-all border-2 border-[var(--border)]">
               View Schedule
             </Link>
-          </div>
+          </motion.div>
         </motion.div>
       </section>
 
