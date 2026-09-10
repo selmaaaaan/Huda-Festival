@@ -34,7 +34,7 @@ const pointAdjustmentSchema = new mongoose.Schema({
     },
     adjustedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Admin'
+        ref: 'User'
     }
 }, { timestamps: true });
 

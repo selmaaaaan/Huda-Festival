@@ -4,9 +4,11 @@ const {
     savePendingResults, 
     savePendingResultsBulk,
     getProgrammeResults,
-    approvePendingResults
+    approvePendingResults,
+    updateResult
 } = require('../controllers/resultController.js');
 const { protect } = require('../middlewares/authMiddleware.js');
+const { authorize } = require('../middlewares/authMiddleware.js');
 
 const certificateRouter = require('./certificateRoutes.js');
 
@@ -16,6 +18,8 @@ router.route('/')
     .post(protect, savePendingResults)
 
 router.post('/bulk', protect, savePendingResultsBulk);
+
+router.patch('/:resultId', protect, authorize('admin', 'judge'), updateResult);
 
 // Nested route for certificates remains the same
 router.use('/:id/certificate', certificateRouter);

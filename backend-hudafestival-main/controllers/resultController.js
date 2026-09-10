@@ -55,7 +55,7 @@ const approveForProgramme = async (programmeId, user) => {
         tier = 'group';
     }
 
-    let gradeTier = (programme.isStarred || programme.format === 'Group' || programme.category === 'KULLIYYAH') ? 'starred' : 'standard';
+    let gradeTier = programme.isStarred ? 'starred' : 'standard';
 
     for (const result of pendingResults) {
         const pointsFromRank = result.rank ? (POSITION_POINTS[tier]?.[result.rank] || 0) : 0;
@@ -165,4 +165,26 @@ const savePendingResultsBulk = async (req, res) => {
     }
 };
 
-module.exports = { savePendingResults, savePendingResultsBulk, approvePendingResults, getProgrammeResults, publishBatch };
+const updateResult = async (req, res) => {
+    const { rank, grade } = req.body;
+    try {
+        const result = await Result.findById(req.params.resultId);
+        if (!result) return res.status(404).json({ message: 'Result not found' });
+        
+        if (result.status === 'approved') {
+            return res.status(403).json({ message: 'This result is published — unpublish its batch first.' });
+        }
+
+        result.rank = rank || null;
+        result.grade = grade || null;
+        
+        await result.save();
+        await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'RESULT_UPDATED', entityType: 'Result', entityId: result._id, details: { rank, grade }, req });
+        res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to update result', error: error.message || 'Unknown error' });
+    }
+};
+
+module.exports = { savePendingResults, savePendingResultsBulk, approvePendingResults, getProgrammeResults, publishBatch, updateResult };

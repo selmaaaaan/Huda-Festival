@@ -65,7 +65,7 @@ const [searchCode, setSearchCode] = useState('');
             ]).then(([resultsRes, regsRes]) => {
                 // Populate existing results
                 const existingResults = resultsRes.data.reduce((acc, result) => {
-                    acc[result.candidate] = { rank: result.rank, grade: result.grade, status: result.status };
+                    acc[result.candidate] = { _id: result._id, rank: result.rank, grade: result.grade, status: result.status };
                     return acc;
                 }, {});
                 setResultsData(existingResults);
@@ -98,6 +98,8 @@ const [searchCode, setSearchCode] = useState('');
         return JSON.stringify(resultsData) !== JSON.stringify(initialResultsData);
     }, [resultsData, initialResultsData]);
 
+    const [editingRows, setEditingRows] = useState(new Set());
+
     const handleResultChange = (candidateId, field, value) => {
         setResultsData(prev => ({
             ...prev,
@@ -106,6 +108,32 @@ const [searchCode, setSearchCode] = useState('');
                 [field]: value
             }
         }));
+    };
+
+    const handleUpdateRow = async (candidateId) => {
+        const data = resultsData[candidateId];
+        if (!data || !data._id) return;
+        try {
+            await api.patch(`/programmes/${selectedProgramme._id}/results/${data._id}`, {
+                rank: data.rank ? Number(data.rank) : null,
+                grade: data.grade || null
+            });
+            setSuccessMessage('Result updated successfully!');
+            setTimeout(() => setSuccessMessage(''), 3000);
+            
+            setEditingRows(prev => {
+                const next = new Set(prev);
+                next.delete(candidateId);
+                return next;
+            });
+            // Update initial data to reflect the save
+            setInitialResultsData(prev => ({
+                ...prev,
+                [candidateId]: { ...data }
+            }));
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to update result');
+        }
     };
 
     const clearRow = (candidateId) => {
@@ -344,6 +372,9 @@ const [searchCode, setSearchCode] = useState('');
                                         const pts = calculatePointsPreview(result.rank, result.grade);
                                         const isPublished = selectedProgramme.isResultPublished && result.status === 'approved';
                                         
+                                        const isExisting = !!result._id;
+                                        const isEditing = editingRows.has(candidate._id) || !isExisting;
+
                                         return (
                                             <tr key={candidate._id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-elevated)] transition-colors">
                                                 <td className="py-3 px-4">
@@ -357,51 +388,85 @@ const [searchCode, setSearchCode] = useState('');
                                                     </div>
                                                 </td>
                                                 <td className="py-3 px-4 text-center">
-                                                    <div className="flex justify-center gap-3">
-                                                        {[1, 2, 3].map(pos => (
-                                                            <label key={pos} className="flex items-center gap-1.5 cursor-pointer text-[var(--color-text-body)]">
-                                                                <input 
-                                                                    type="radio" 
-                                                                    name={`rank-${candidate._id}`} 
-                                                                    value={pos} 
-                                                                    checked={Number(result.rank) === pos}
-                                                                    onChange={() => handleResultChange(candidate._id, 'rank', pos)}
-                                                                    disabled={isPublished}
-                                                                    className="text-[var(--color-primary)] bg-[var(--color-surface)] border-[var(--color-border)]"
-                                                                /> <span className="text-xs font-medium">{pos}</span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
+                                                    {!isEditing ? (
+                                                        <span className="text-[var(--color-text-heading)] font-semibold">{result.rank || '-'}</span>
+                                                    ) : (
+                                                        <div className="flex justify-center gap-3">
+                                                            {[1, 2, 3].map(pos => (
+                                                                <label key={pos} className="flex items-center gap-1.5 cursor-pointer text-[var(--color-text-body)]">
+                                                                    <input 
+                                                                        type="radio" 
+                                                                        name={`rank-${candidate._id}`} 
+                                                                        value={pos} 
+                                                                        checked={Number(result.rank) === pos}
+                                                                        onChange={() => handleResultChange(candidate._id, 'rank', pos)}
+                                                                        disabled={isPublished}
+                                                                        className="text-[var(--color-primary)] bg-[var(--color-surface)] border-[var(--color-border)]"
+                                                                    /> <span className="text-xs font-medium">{pos}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </td>
                                                 <td className="py-3 px-4 text-center">
-                                                    <div className="flex justify-center gap-3">
-                                                        {['A', 'B', 'C'].map(grade => (
-                                                            <label key={grade} className="flex items-center gap-1.5 cursor-pointer text-[var(--color-text-body)]">
-                                                                <input 
-                                                                    type="radio" 
-                                                                    name={`grade-${candidate._id}`} 
-                                                                    value={grade} 
-                                                                    checked={result.grade === grade}
-                                                                    onChange={() => handleResultChange(candidate._id, 'grade', grade)}
-                                                                    disabled={isPublished}
-                                                                    className="text-[var(--color-primary)] bg-[var(--color-surface)] border-[var(--color-border)]"
-                                                                /> <span className="text-xs font-medium">{grade}</span>
-                                                            </label>
-                                                        ))}
-                                                    </div>
+                                                    {!isEditing ? (
+                                                        <span className="text-[var(--color-text-heading)] font-semibold">{result.grade || '-'}</span>
+                                                    ) : (
+                                                        <div className="flex justify-center gap-3">
+                                                            {['A', 'B', 'C'].map(grade => (
+                                                                <label key={grade} className="flex items-center gap-1.5 cursor-pointer text-[var(--color-text-body)]">
+                                                                    <input 
+                                                                        type="radio" 
+                                                                        name={`grade-${candidate._id}`} 
+                                                                        value={grade} 
+                                                                        checked={result.grade === grade}
+                                                                        onChange={() => handleResultChange(candidate._id, 'grade', grade)}
+                                                                        disabled={isPublished}
+                                                                        className="text-[var(--color-primary)] bg-[var(--color-surface)] border-[var(--color-border)]"
+                                                                    /> <span className="text-xs font-medium">{grade}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </td>
                                                 <td className="py-3 px-4 text-center font-semibold text-[var(--color-text-heading)]">
                                                     {pts > 0 ? pts : '-'}
                                                 </td>
                                                 <td className="py-3 px-4 text-center">
-                                                    <button 
-                                                        onClick={() => clearRow(candidate._id)}
-                                                        disabled={isPublished}
-                                                        className="text-[var(--color-text-muted)] hover:text-red-400 disabled:opacity-50 transition-colors"
-                                                        title="Clear Result"
-                                                    >
-                                                        <XCircle size={16} />
-                                                    </button>
+                                                    <div className="flex justify-center items-center gap-2">
+                                                        {!isEditing && (
+                                                            <Button 
+                                                                size="sm" 
+                                                                variant="secondary" 
+                                                                onClick={() => {
+                                                                    if (isPublished) {
+                                                                        alert('This result is published — unpublish its batch first.');
+                                                                    } else {
+                                                                        setEditingRows(prev => new Set(prev).add(candidate._id));
+                                                                    }
+                                                                }}
+                                                            >
+                                                                Edit
+                                                            </Button>
+                                                        )}
+                                                        {isEditing && isExisting && (
+                                                            <Button 
+                                                                size="sm" 
+                                                                variant="primary" 
+                                                                onClick={() => handleUpdateRow(candidate._id)}
+                                                            >
+                                                                Update
+                                                            </Button>
+                                                        )}
+                                                        <button 
+                                                            onClick={() => clearRow(candidate._id)}
+                                                            disabled={isPublished}
+                                                            className="text-[var(--color-text-muted)] hover:text-red-400 disabled:opacity-50 transition-colors"
+                                                            title="Clear Form"
+                                                        >
+                                                            <XCircle size={16} />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );

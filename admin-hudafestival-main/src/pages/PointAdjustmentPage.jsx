@@ -23,17 +23,21 @@ const PointAdjustmentPage = () => {
         remarks: ''
     });
 
+    const [selectedCategory, setSelectedCategory] = useState('');
+
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [adjRes, teamRes, candRes] = await Promise.all([
+            const results = await Promise.allSettled([
                 api.get('/point-adjustments'),
                 api.get('/teams'),
                 api.get('/candidates')
             ]);
-            setAdjustments(adjRes.data);
-            setTeams(teamRes.data);
-            setCandidates(candRes.data);
+            
+            if (results[0].status === 'fulfilled') setAdjustments(results[0].value.data);
+            if (results[1].status === 'fulfilled') setTeams(results[1].value.data);
+            if (results[2].status === 'fulfilled') setCandidates(results[2].value.data);
+
         } catch (err) {
             setError('Failed to load data');
         } finally {
@@ -135,7 +139,11 @@ const PointAdjustmentPage = () => {
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-sm">
                     <div>
                         <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">Applies To</label>
-                        <select name="appliesTo" value={formData.appliesTo} onChange={handleChange} className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]">
+                        <select name="appliesTo" value={formData.appliesTo} onChange={(e) => {
+                            const val = e.target.value;
+                            setSelectedCategory('');
+                            setFormData(f => ({ ...f, appliesTo: val, teamId: '', candidateId: '' }));
+                        }} className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]">
                             <option value="team">Team</option>
                             <option value="candidate">Candidate</option>
                         </select>
@@ -148,14 +156,42 @@ const PointAdjustmentPage = () => {
                                 <option value="">-- Select Team --</option>
                                 {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
                             </select>
+                            <p className="mt-1 text-xs text-[var(--color-text-muted)]">This adjustment applies directly to the team's total points.</p>
                         </div>
                     ) : (
-                        <div>
-                            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">Select Candidate</label>
-                            <select name="candidateId" value={formData.candidateId} onChange={handleChange} required className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]">
-                                <option value="">-- Select Candidate --</option>
-                                {candidates.map(c => <option key={c._id} value={c._id}>{c.name} ({c.admissionNo})</option>)}
-                            </select>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">1. Select Team</label>
+                                <select name="teamId" value={formData.teamId} onChange={(e) => { handleChange(e); setSelectedCategory(''); setFormData(f => ({...f, candidateId: ''})); }} required className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]">
+                                    <option value="">-- Select Team --</option>
+                                    {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+                                </select>
+                            </div>
+                            
+                            {formData.teamId && (
+                                <div>
+                                    <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">2. Select Category</label>
+                                    <select value={selectedCategory} onChange={(e) => { setSelectedCategory(e.target.value); setFormData(f => ({...f, candidateId: ''})); }} className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]">
+                                        <option value="">-- Select Category --</option>
+                                        {[...new Set(candidates.filter(c => c.team?._id === formData.teamId || c.team === formData.teamId).map(c => c.category))].map(cat => (
+                                            <option key={cat} value={cat}>{cat}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {selectedCategory && (
+                                <div>
+                                    <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">3. Select Candidate</label>
+                                    <select name="candidateId" value={formData.candidateId} onChange={handleChange} required className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]">
+                                        <option value="">-- Select Candidate --</option>
+                                        {candidates.filter(c => (c.team?._id === formData.teamId || c.team === formData.teamId) && c.category === selectedCategory).map(c => (
+                                            <option key={c._id} value={c._id}>{c.name} ({c.admissionNo})</option>
+                                        ))}
+                                    </select>
+                                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">This adjustment applies to the candidate AND cascades to their team's total points.</p>
+                                </div>
+                            )}
                         </div>
                     )}
 

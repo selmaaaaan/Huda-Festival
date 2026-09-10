@@ -41,7 +41,7 @@ const getAllAdjustments = async (req, res) => {
         const adjustments = await PointAdjustment.find()
             .populate('team', 'name')
             .populate('candidate', 'name admissionNo')
-            .populate('adjustedBy', 'name')
+            .populate('adjustedBy', 'userName')
             .sort({ createdAt: -1 });
         res.status(200).json(adjustments);
     } catch (error) {

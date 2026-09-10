@@ -20,7 +20,7 @@ export default function RegistrationReviewPage() {
   const [actionLoading, setActionLoading] = useState(null);
 
   const [assignModal, setAssignModal] = useState({ isOpen: false, mode: 'create', editId: null });
-  const [assignCategory, setAssignCategory] = useState('');
+
   const [assignForm, setAssignForm] = useState({ teamId: '', programmeId: '', candidateIds: [] });
   const [assignSubmitting, setAssignSubmitting] = useState(false);
   const [assignError, setAssignError] = useState('');
@@ -87,16 +87,17 @@ export default function RegistrationReviewPage() {
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
-  // Fetch candidates for selected team in the form
+  // Fetch candidates for selected team and programme category
   useEffect(() => {
-    if (assignForm.teamId && assignCategory) {
-      api.get(`/candidates?team=${assignForm.teamId}&category=${assignCategory}`)
+    const prog = programmes.find(p => p._id === assignForm.programmeId);
+    if (assignForm.teamId && prog) {
+      api.get(`/candidates?team=${assignForm.teamId}&category=${prog.category}`)
          .then(r => setTeamCandidates(r.data))
          .catch(console.error);
     } else {
       setTeamCandidates([]);
     }
-  }, [assignForm.teamId, assignCategory]);
+  }, [assignForm.teamId, assignForm.programmeId, programmes]);
 
   // Fetch registrations for selected programme
   useEffect(() => {
@@ -140,8 +141,6 @@ export default function RegistrationReviewPage() {
   const openAssignModal = (mode, reg = null) => {
     setAssignError('');
     if (mode === 'edit' && reg) {
-      const prog = programmes.find(p => p._id === (reg.programme?._id || reg.programme));
-      setAssignCategory(prog ? prog.category : '');
       setAssignForm({
         teamId: reg.team?._id || reg.team,
         programmeId: reg.programme?._id || reg.programme,
@@ -149,7 +148,6 @@ export default function RegistrationReviewPage() {
       });
       setAssignModal({ isOpen: true, mode: 'edit', editId: reg._id });
     } else {
-      setAssignCategory(selectedProg ? selectedProg.category : '');
       setAssignForm({ teamId: filterTeam || '', programmeId: selectedProg ? selectedProg._id : '', candidateIds: [] });
       setAssignModal({ isOpen: true, mode: 'create', editId: null });
     }

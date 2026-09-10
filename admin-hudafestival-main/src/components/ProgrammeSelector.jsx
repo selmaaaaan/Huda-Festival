@@ -6,12 +6,22 @@ const ProgrammeSelector = ({ programmes, value, onChange }) => {
     const selectedProgramme = programmes.find(p => p._id === value);
     const [searchCode, setSearchCode] = useState(selectedProgramme ? selectedProgramme.code : '');
 
-    const handleSelect = (e) => {
-        const selectedId = e.target.value;
-        onChange(selectedId);
-        const p = programmes.find(pr => pr._id === selectedId);
-        setSearchCode(p ? p.code : '');
-    };
+    React.useEffect(() => {
+        if (selectedProgramme) {
+            setSearchCode(selectedProgramme.code);
+        } else if (!value) {
+            setSearchCode('');
+        }
+    }, [value, selectedProgramme]);
+
+    React.useEffect(() => {
+        const p = programmes.find(pr => pr.code.toLowerCase() === searchCode.toLowerCase());
+        if (p && p._id !== value) {
+            onChange(p._id);
+        } else if (!p && searchCode === '') {
+            onChange('');
+        }
+    }, [searchCode, programmes, onChange, value]);
 
     const handleCodeKeyDown = (e) => {
         if (e.key === 'Enter') {
@@ -49,6 +59,7 @@ const ProgrammeSelector = ({ programmes, value, onChange }) => {
                         <Search className="absolute left-3 top-2.5 text-[var(--color-text-muted)]" size={16} />
                         <input
                             type="text"
+                            list="programme-codes"
                             placeholder="Type Code & Enter..."
                             value={searchCode}
                             onChange={(e) => setSearchCode(e.target.value)}
@@ -56,17 +67,11 @@ const ProgrammeSelector = ({ programmes, value, onChange }) => {
                             onBlur={handleCodeBlur}
                             className="w-full pl-9 pr-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:border-[var(--color-primary)] text-[var(--color-text-heading)] transition-colors"
                         />
-                        <select
-                            value={value || ''}
-                            onChange={handleSelect}
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                            title="Or select from list"
-                        >
-                            <option value="">Select Code...</option>
+                        <datalist id="programme-codes">
                             {programmes.sort((a,b)=>a.code.localeCompare(b.code)).map(p => (
-                                <option key={p._id} value={p._id}>{p.code}</option>
+                                <option key={p._id} value={p.code}>{p.name}</option>
                             ))}
-                        </select>
+                        </datalist>
                     </div>
                 </div>
 
