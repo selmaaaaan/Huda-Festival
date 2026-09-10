@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-  createProgramme, getAllProgrammes, getProgrammeById, updateProgramme, deleteProgramme, getProgrammeByCodeForJudging,
+  createProgramme, getAllProgrammes, getProgrammeById, updateProgramme, deleteProgramme, getProgrammeByCodeForJudging, updateTopicSettings
 } = require('../controllers/programmeController.js');
 const { approvePendingResults } = require('../controllers/resultController.js');
 const { protect } = require('../middlewares/authMiddleware.js');

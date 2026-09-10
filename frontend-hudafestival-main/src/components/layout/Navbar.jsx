@@ -75,7 +75,7 @@ const Navbar = () => {
                                     <a href={ADMIN_URL} target="_blank" rel="noreferrer" className="block px-4 py-3 text-sm font-bold uppercase tracking-wider hover:bg-[var(--festival-red)] hover:text-white transition-colors border-b-2 border-[var(--border)]">
                                         Admin Panel
                                     </a>
-                                    <a href={`${ADMIN_URL}/team-leader-login`} target="_blank" rel="noreferrer" className="block px-4 py-3 text-sm font-bold uppercase tracking-wider hover:bg-[var(--festival-teal)] hover:text-white transition-colors">
+                                    <a href={ADMIN_URL} target="_blank" rel="noreferrer" className="block px-4 py-3 text-sm font-bold uppercase tracking-wider hover:bg-[var(--festival-teal)] hover:text-white transition-colors">
                                         Registration Desk
                                     </a>
                                 </motion.div>
@@ -128,7 +128,7 @@ const Navbar = () => {
                             <a href={ADMIN_URL} target="_blank" rel="noreferrer" className="block w-full py-3 text-center bg-[var(--festival-black)] text-[var(--festival-cream)] font-bold text-lg uppercase tracking-wider">
                                 Admin Panel
                             </a>
-                            <a href={`${ADMIN_URL}/team-leader-login`} target="_blank" rel="noreferrer" className="block w-full py-3 text-center border-2 border-[var(--festival-black)] text-[var(--festival-black)] font-bold text-lg uppercase tracking-wider">
+                            <a href={ADMIN_URL} target="_blank" rel="noreferrer" className="block w-full py-3 text-center border-2 border-[var(--festival-black)] text-[var(--festival-black)] font-bold text-lg uppercase tracking-wider">
                                 Registration Desk
                             </a>
                         </div>

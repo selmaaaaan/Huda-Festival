@@ -24,8 +24,8 @@ const Footer = () => {
           <div className="text-center md:text-right flex flex-col items-center md:items-end gap-3">
             <h3 className="font-display font-black text-xl uppercase tracking-widest text-[var(--festival-red)] mb-2">Portals</h3>
             <a href={ADMIN_URL} target="_blank" rel="noreferrer" className="text-sm font-bold uppercase tracking-widest hover:text-[var(--festival-red)] transition-colors">Admin Panel</a>
-            <a href={`${ADMIN_URL}/team-leader-login`} target="_blank" rel="noreferrer" className="text-sm font-bold uppercase tracking-widest hover:text-[var(--festival-red)] transition-colors">Registration Desk</a>
-            <a href={`${ADMIN_URL}/judge-login`} target="_blank" rel="noreferrer" className="text-sm font-bold uppercase tracking-widest hover:text-[var(--festival-red)] transition-colors">Judge Panel</a>
+            <a href={ADMIN_URL} target="_blank" rel="noreferrer" className="text-sm font-bold uppercase tracking-widest hover:text-[var(--festival-red)] transition-colors">Registration Desk</a>
+            <a href={ADMIN_URL} target="_blank" rel="noreferrer" className="text-sm font-bold uppercase tracking-widest hover:text-[var(--festival-red)] transition-colors">Judge Panel</a>
           </div>
         </div>
         
