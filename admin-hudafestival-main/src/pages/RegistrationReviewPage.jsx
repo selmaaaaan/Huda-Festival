@@ -6,7 +6,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
 import { ClipboardList, Users, Plus, Edit2, Trash2 } from 'lucide-react';
-import ProgrammeSelector from '../components/ProgrammeSelector';
+import ProgrammeCodePicker from '../components/ProgrammeCodePicker';
 
 export default function RegistrationReviewPage() {
   const [programmes, setProgrammes] = useState([]);
@@ -398,11 +398,14 @@ export default function RegistrationReviewPage() {
         <form onSubmit={handleAssignSubmit} className="space-y-4">
           {assignError && <div className="text-sm text-red-400 bg-red-900/20 border border-red-800/40 rounded-lg px-3 py-2">{assignError}</div>}
 
-          <ProgrammeSelector 
+          <div>
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">1. Programme Code</label>
+            <ProgrammeCodePicker
               programmes={programmes}
               value={assignForm.programmeId}
-              onChange={(id) => setAssignForm(f => ({ ...f, programmeId: id, candidateIds: [] }))}
+              onSelect={(prog) => setAssignForm(f => ({ ...f, programmeId: prog?._id || '', candidateIds: [] }))}
             />
+          </div>
 
           {(() => {
             const prog = programmes.find(p => p._id === assignForm.programmeId);

@@ -47,6 +47,7 @@ const SettingsPage = () => {
           isRegistrationOpen: settingsRes.data.isRegistrationOpen ?? true,
           maintenanceMode: settingsRes.data.maintenanceMode ?? false,
           maintenanceMessage: settingsRes.data.maintenanceMessage ?? '',
+          venues: settingsRes.data.venues || []
         });
       }
     } catch (err) {
@@ -87,6 +88,30 @@ const SettingsPage = () => {
       setError('Failed to save message');
     } finally {
       setSavingMaintenance(false);
+    }
+  };
+
+  const [venueForm, setVenueForm] = useState('');
+  const handleAddVenue = async () => {
+    if(!venueForm.trim()) return;
+    try {
+        const newVenues = [...(settings.venues || []), venueForm.trim()];
+        await api.patch('/settings', { venues: newVenues });
+        setSettings(s => ({ ...s, venues: newVenues }));
+        setVenueForm('');
+    } catch(err) {
+        setError('Failed to add venue');
+    }
+  };
+
+  const handleDeleteVenue = async (venueToDelete) => {
+    if(!window.confirm(`Delete venue "${venueToDelete}"?`)) return;
+    try {
+        const newVenues = (settings.venues || []).filter(v => v !== venueToDelete);
+        await api.patch('/settings', { venues: newVenues });
+        setSettings(s => ({ ...s, venues: newVenues }));
+    } catch(err) {
+        setError('Failed to delete venue');
     }
   };
 
@@ -275,6 +300,40 @@ const SettingsPage = () => {
                   </div>
                 )
               })
+            )}
+          </div>
+        </div>
+
+        {/* Venues Section */}
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl overflow-hidden col-span-1 lg:col-span-2">
+          <div className="px-4 py-4 border-b border-[var(--color-border)] flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-[var(--color-text-heading)]">Venues</h2>
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                value={venueForm} 
+                onChange={e => setVenueForm(e.target.value)}
+                placeholder="New Venue Name"
+                className="px-3 py-1 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAddVenue(); }}
+              />
+              <Button onClick={handleAddVenue} variant="primary" className="py-1 px-3 text-sm">
+                <Plus size={16} className="mr-1" /> Add
+              </Button>
+            </div>
+          </div>
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+            {(!settings.venues || settings.venues.length === 0) ? (
+              <div className="text-sm text-[var(--color-text-muted)] text-center py-4 col-span-full">No venues found.</div>
+            ) : (
+              settings.venues.map(venue => (
+                <div key={venue} className="flex items-center justify-between p-3 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg">
+                  <div className="font-medium text-[var(--color-text-heading)]">{venue}</div>
+                  <button onClick={() => handleDeleteVenue(venue)} className="p-1.5 text-[var(--color-text-muted)] hover:text-red-500 rounded-md hover:bg-red-500/10">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))
             )}
           </div>
         </div>

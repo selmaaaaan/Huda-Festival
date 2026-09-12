@@ -23,7 +23,10 @@ const settingsSchema = new mongoose.Schema({
     bylawUrl: {
         type: String,
         default: null
-    }
+    },
+    venues: [{
+        type: String
+    }]
 }, { timestamps: true })
 
 const Settings = mongoose.model('Settings', settingsSchema);

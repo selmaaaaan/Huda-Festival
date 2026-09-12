@@ -7,7 +7,7 @@ import Modal from '../components/Modal';
 import ProgrammeCodePicker from '../components/ProgrammeCodePicker';
 import {
   ClipboardList, Users, Plus, Search, CheckCircle, AlertTriangle,
-  MessageSquare, BookOpen, ChevronRight, X, Filter, Edit3
+  MessageSquare, BookOpen, ChevronRight, X, Filter
 } from 'lucide-react';
 
 const CATEGORIES = ['All', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
@@ -77,7 +77,6 @@ export default function TeamLeaderDashboard() {
 
   // ── Registration Form ───────────────────────────────────────────────────────
   const [form, setForm] = useState({ programmeId: '', candidateIds: [] });
-  const [editId, setEditId] = useState(null);
   const [regSearchQuery, setRegSearchQuery] = useState('');
 
   // ── Topic Form (cascade state) ──────────────────────────────────────────────
@@ -146,16 +145,12 @@ export default function TeamLeaderDashboard() {
   // ── Registration Form Logic ───────────────────────────────────────────────────
   const selectedProg = programmes.find(p => p._id === form.programmeId);
   const requiredCandidates = selectedProg?.format === 'Group' ? (selectedProg?.groupSize || 1) : 1;
-  const filteredFormCandidates = useMemo(() => {
-    if (!selectedProg) return [];
-    return candidates.filter(c => {
-      if (c.category !== selectedProg.category) return false;
-      const q = regSearchQuery.toLowerCase();
-      return c.name.toLowerCase().includes(q) ||
-             c.admissionNo?.toLowerCase().includes(q) ||
-             c.category?.toLowerCase().includes(q);
-    });
-  }, [candidates, regSearchQuery, selectedProg]);
+  const filteredFormCandidates = useMemo(() =>
+    candidates.filter(c =>
+      c.name.toLowerCase().includes(regSearchQuery.toLowerCase()) ||
+      c.admissionNo?.toLowerCase().includes(regSearchQuery.toLowerCase()) ||
+      c.category?.toLowerCase().includes(regSearchQuery.toLowerCase())
+    ), [candidates, regSearchQuery]);
 
   const handleCandidateToggle = id => {
     setForm(f => {
@@ -175,18 +170,13 @@ export default function TeamLeaderDashboard() {
     }
     setSubmitting(true);
     try {
-      if (editId) {
-        const { data } = await api.patch('/registrations/' + editId, { candidateIds: form.candidateIds });
-        setMyRegistrations(prev => prev.map(r => r._id === editId ? data : r));
-      } else {
-        const { data } = await api.post('/registrations', {
-          programmeId: form.programmeId, teamId, candidateIds: form.candidateIds,
-        });
-        setMyRegistrations(prev => [data, ...prev]);
-      }
+      const { data } = await api.post('/registrations', {
+        programmeId: form.programmeId, teamId, candidateIds: form.candidateIds,
+      });
+      setMyRegistrations(prev => [data, ...prev]);
       setSuccess(true);
       setTimeout(() => {
-        setShowForm(false); setForm({ programmeId: '', candidateIds: [] }); setEditId(null);
+        setShowForm(false); setForm({ programmeId: '', candidateIds: [] });
         setRegSearchQuery(''); setSuccess(false);
       }, 1500);
     } catch (e) { setError(e.response?.data?.message || 'Submission failed'); }
@@ -238,20 +228,16 @@ export default function TeamLeaderDashboard() {
   };
 
   const openNewRegistration = () => {
-    if (appSettings.isRegistrationOpen === false) return;
     setSuccess(false); setError('');
-    setEditId(null);
-    setForm({ programmeId: '', candidateIds: [] });
-    setRegSearchQuery('');
-    setShowForm(true);
-  };
-
-  const openEditRegistration = (reg) => {
-    if (appSettings.isRegistrationOpen === false) return;
-    setSuccess(false); setError('');
-    setEditId(reg._id);
-    setForm({ programmeId: reg.programme._id, candidateIds: reg.candidates.map(c => c._id) });
-    setShowForm(true);
+    if (activeTab === 'topics') {
+      setTopicForm({ programmeId: '', candidateId: '', topic: '' });
+      setTopicCategory('');
+      setShowTopicForm(true);
+    } else {
+      setForm({ programmeId: '', candidateIds: [] });
+      setRegSearchQuery('');
+      setShowForm(true);
+    }
   };
 
   // ── Table Filter Logic ─────────────────────────────────────────────────────────
@@ -346,8 +332,30 @@ export default function TeamLeaderDashboard() {
             <StatCard label="Pending Review"  value={pendingCount}                 accent="#f59e0b" />
           </div>
 
-          {/* ── Hidden Tabs ─────────────────────────────────────────────────────────── */}
-          <div className="hidden border-b border-[var(--color-border)] gap-6">
+          {/* ── Tabs ─────────────────────────────────────────────────────────── */}
+          <div className="flex border-b border-[var(--color-border)] gap-6">
+            {[
+              { key: 'registrations', label: 'Registrations', icon: ClipboardList, count: myRegistrations.length },
+              { key: 'topics',        label: 'Topic Registrations', icon: BookOpen, count: myTopics.length },
+            ].map(({ key, label, icon: Icon, count }) => (
+              <button
+                key={key}
+                className={`pb-3 font-semibold text-sm flex items-center gap-2 transition-colors border-b-2 -mb-px ${
+                  activeTab === key
+                    ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                    : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-heading)]'
+                }`}
+                onClick={() => setActiveTab(key)}
+              >
+                <Icon size={15} />
+                {label}
+                <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                  activeTab === key
+                    ? 'bg-[var(--color-primary)]/15 text-[var(--color-primary)]'
+                    : 'bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)]'
+                }`}>{count}</span>
+              </button>
+            ))}
           </div>
 
           {/* ── Registrations Tab ─────────────────────────────────────────────── */}
@@ -410,7 +418,7 @@ export default function TeamLeaderDashboard() {
                   <table className="w-full text-sm">
                     <thead className="bg-[var(--color-surface)]">
                       <tr>
-                        {['Programme', 'Candidates', 'Submitted', 'Status', 'Reason', ''].map(h => (
+                        {['Programme', 'Candidates', 'Submitted', 'Status', 'Reason'].map(h => (
                           <th key={h} className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider border-b border-[var(--color-border)]">{h}</th>
                         ))}
                       </tr>
@@ -434,13 +442,6 @@ export default function TeamLeaderDashboard() {
                           </td>
                           <td className="px-6 py-4"><StatusBadge status={reg.status} /></td>
                           <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] max-w-xs truncate">{reg.rejectionReason || '—'}</td>
-                          <td className="px-6 py-4 text-right">
-                            {appSettings.isRegistrationOpen !== false && reg.status !== 'approved' && (
-                              <button onClick={() => openEditRegistration(reg)} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1" title="Edit Registration">
-                                <Edit3 size={16} />
-                              </button>
-                            )}
-                          </td>
                         </motion.tr>
                       ))}
                     </tbody>
@@ -541,7 +542,7 @@ export default function TeamLeaderDashboard() {
       {/* ═══════════════════════════════════════════════════════════════════════
           New Registration Modal
       ══════════════════════════════════════════════════════════════════════════ */}
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editId ? "Edit Registration" : "New Registration"}>
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="New Registration">
         <AnimatePresence mode="wait">
           {!isRegistrationOpen ? (
             <motion.div key="closed" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
@@ -573,17 +574,11 @@ export default function TeamLeaderDashboard() {
 
               <div>
                 <label className="block text-sm font-medium mb-1.5 text-[var(--color-text-heading)]">Programme</label>
-                {editId ? (
-                  <div className="w-full px-4 py-3 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm font-medium text-[var(--color-text-muted)] opacity-70">
-                    {selectedProg?.code} - {selectedProg?.name}
-                  </div>
-                ) : (
-                  <ProgrammeCodePicker
-                    programmes={programmes}
-                    value={form.programmeId}
-                    onSelect={(prog) => setForm(f => ({ ...f, programmeId: prog?._id || '', candidateIds: [] }))}
-                  />
-                )}
+                <ProgrammeCodePicker
+                  programmes={programmes}
+                  value={form.programmeId}
+                  onSelect={(prog) => setForm(f => ({ ...f, programmeId: prog?._id || '', candidateIds: [] }))}
+                />
               </div>
 
               {form.programmeId && (

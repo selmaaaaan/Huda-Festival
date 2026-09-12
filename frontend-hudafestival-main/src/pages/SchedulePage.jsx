@@ -4,6 +4,29 @@ import { Link } from 'react-router-dom';
 import { SectionHeading, FilterPills, EmptyState } from '../components/ui';
 import api from '../services/api';
 
+// Status visual config
+const STATUS_CONFIG = {
+  live:      { label: 'LIVE',       classes: 'bg-green-500 text-white',           pulse: true  },
+  upcoming:  { label: 'UPCOMING',   classes: 'bg-blue-100 text-blue-700',          pulse: false },
+  completed: { label: 'COMPLETED',  classes: 'bg-gray-200 text-gray-600',          pulse: false },
+  postponed: { label: 'POSTPONED',  classes: 'bg-red-100 text-red-700',            pulse: false },
+};
+
+const StatusBadge = ({ status }) => {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG['upcoming'];
+  return (
+    <span className={`inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${cfg.classes}`}>
+      {cfg.pulse && (
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-300 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-100" />
+        </span>
+      )}
+      {cfg.label}
+    </span>
+  );
+};
+
 const SchedulePage = () => {
   const prefersReducedMotion = useReducedMotion();
   const [programmes, setProgrammes] = useState([]);
@@ -41,8 +64,12 @@ const SchedulePage = () => {
   const scheduled = filtered.filter(p => p.date);
   const unscheduled = filtered.filter(p => !p.date);
 
-  // Sort scheduled by date
-  scheduled.sort((a, b) => new Date(a.date) - new Date(b.date));
+  // Sort scheduled by startTime (if set) or date
+  scheduled.sort((a, b) => {
+    const aTime = a.startTime ? new Date(a.startTime) : new Date(a.date);
+    const bTime = b.startTime ? new Date(b.startTime) : new Date(b.date);
+    return aTime - bTime;
+  });
 
   if (loading) return <div className="min-h-screen flex items-center justify-center font-display text-2xl uppercase font-black">Loading...</div>;
 
@@ -82,17 +109,30 @@ const SchedulePage = () => {
                       <div className="absolute left-[-14px] md:left-auto md:-top-[42px] top-8 w-6 h-6 rounded-full border-4 border-[var(--border)] bg-[var(--festival-purple)]" />
                       
                       <div className="font-bold text-xl mb-4 font-display">
-                        {new Date(prog.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {prog.startTime 
+                          ? new Date(prog.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                          : new Date(prog.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        }
                         <span className="block text-sm text-gray-500 mt-1">
                           {new Date(prog.date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
                         </span>
                       </div>
                       
                       <div className="bg-white border-2 border-[var(--border)] p-6 shadow-[6px_6px_0px_0px_rgba(23,23,23,1)]">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--festival-purple)] mb-2 block">{prog.category}</span>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--festival-purple)]">{prog.category}</span>
+                          <StatusBadge status={prog.status || 'upcoming'} />
+                        </div>
                         <h4 className="text-xl font-black font-display uppercase tracking-tight leading-tight mb-2">{prog.name}</h4>
-                        <p className="text-sm font-medium text-gray-600">Main Stage</p>
-                      </div></motion.div>))}
+                        {prog.venue && (
+                          <p className="text-sm font-medium text-gray-600 flex items-center gap-1">
+                            <span>📍</span> {prog.venue}
+                          </p>
+                        )}
+                        {!prog.venue && <p className="text-sm font-medium text-gray-400">Venue TBA</p>}
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
             )}
@@ -118,3 +158,4 @@ const SchedulePage = () => {
 };
 
 export default SchedulePage;
+

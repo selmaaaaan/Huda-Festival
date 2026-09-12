@@ -50,6 +50,19 @@ const programmeSchema = new mongoose.Schema({
         type: Date,
          required: false,
     },
+    startTime: {
+        type: Date,
+        required: false,
+    },
+    venue: {
+        type: String,
+        required: false,
+    },
+    status: {
+        type: String,
+        enum: ['upcoming', 'live', 'completed', 'postponed'],
+        default: 'upcoming',
+    },
     isResultPublished: { 
         type: Boolean,
         default: false,
@@ -72,7 +85,11 @@ const programmeSchema = new mongoose.Schema({
         enum: ['none', 'free-text', 'fixed-list'], 
         default: 'none' 
     },
-    topicList: [String]
+    topicList: [String],
+    conceptNote: {
+        type: String,
+        default: null
+    }
 }, { timestamps: true })
 
 const Programme = mongoose.model('Programme', programmeSchema);

@@ -196,12 +196,109 @@ const updateTopicSettings = async (req, res) => {
     }
 }
 
+const updateProgrammeSchedule = async (req, res) => {
+    try {
+        const { date, startTime, venue } = req.body;
+        const programme = await Programme.findById(req.params.id);
+        if (!programme) {
+            return res.status(404).json({ message: 'Programme not found' });
+        }
+        
+        if (date !== undefined) programme.date = date;
+        if (startTime !== undefined) programme.startTime = startTime;
+        if (venue !== undefined) programme.venue = venue;
+
+        const updatedProgramme = await programme.save();
+        res.status(200).json(updatedProgramme);
+    } catch (error) {
+        console.error(`Error while updating programme schedule: ${error.message}`);
+        res.status(500).json({ message: 'Failed to update schedule', error: error.message || 'Unknown error' });
+    }
+}
+
+const updateProgrammeStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const allowedStatuses = ['upcoming', 'live', 'completed', 'postponed'];
+        if (!status || !allowedStatuses.includes(status)) {
+            return res.status(400).json({ message: `status must be one of: ${allowedStatuses.join(', ')}` });
+        }
+        const programme = await Programme.findById(req.params.id);
+        if (!programme) {
+            return res.status(404).json({ message: 'Programme not found' });
+        }
+        programme.status = status;
+        const updatedProgramme = await programme.save();
+        res.status(200).json(updatedProgramme);
+    } catch (error) {
+        console.error(`Error while updating programme status: ${error.message}`);
+        res.status(500).json({ message: 'Failed to update status', error: error.message || 'Unknown error' });
+    }
+}
+
+// @desc  Get programme candidates identified only by code letter (blind judging)
+// @route GET /api/programmes/:id/candidates-for-judging
+// @access Private (judge | admin)
+const CodeLetter = require('../models/CodeLetter');
+const getCandidatesForBlindJudging = async (req, res) => {
+    try {
+        const { id: programmeId } = req.params;
+        const programme = await Programme.findById(programmeId).select('name code category conceptNote isStarred format type');
+        if (!programme) {
+            return res.status(404).json({ message: 'Programme not found' });
+        }
+
+        // Check code letters assigned
+        const codeLetters = await CodeLetter.find({ programme: programmeId }).select('letter _id');
+        if (codeLetters.length === 0) {
+            return res.status(400).json({
+                message: 'Code letters not yet assigned — ask a volunteer to assign them first',
+                noCodeLetters: true
+            });
+        }
+
+        // Check if already judged (pending or approved results exist)
+        const existingResultCount = await Result.countDocuments({ programme: programmeId });
+        const alreadyJudged = existingResultCount > 0;
+
+        // Return only { _id (of CodeLetter doc), letter } — NO candidate name
+        const blindCandidates = codeLetters.map(cl => ({
+            codeLetterId: cl._id,
+            letter: cl.letter
+        }));
+
+        // Sort alphabetically by letter
+        blindCandidates.sort((a, b) => a.letter.localeCompare(b.letter));
+
+        res.status(200).json({
+            programme: {
+                _id: programme._id,
+                name: programme.name,
+                code: programme.code,
+                category: programme.category,
+                conceptNote: programme.conceptNote,
+                isStarred: programme.isStarred,
+                format: programme.format,
+                type: programme.type
+            },
+            candidates: blindCandidates,
+            alreadyJudged
+        });
+    } catch (error) {
+        console.error('Error in getCandidatesForBlindJudging:', error);
+        res.status(500).json({ message: 'Failed to fetch candidates for judging', error: error.message });
+    }
+};
+
 module.exports = {
     getProgrammeByCodeForJudging,
+    getCandidatesForBlindJudging,
     createProgramme,
     getAllProgrammes,
     getProgrammeById,
     updateProgramme,
     deleteProgramme,
-    updateTopicSettings
+    updateTopicSettings,
+    updateProgrammeSchedule,
+    updateProgrammeStatus
 }

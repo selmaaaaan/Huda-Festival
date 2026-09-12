@@ -46,6 +46,11 @@ const resultSchema = new mongoose.Schema({
     totalPoints: { 
         type: Number, 
         default: 0,
+    },
+    remarks: {
+        type: String,
+        default: null,
+        select: false   // NEVER included in query results by default
     }
 }, {
     timestamps: true

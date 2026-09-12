@@ -49,14 +49,14 @@ const StatCard = ({ label, value, accent }) => (
 );
 
 // ─── Main Component ──────────────────────────────────────────────────────────
-export default function TeamLeaderDashboard() {
+export default function TeamTopicRegistrationPage() {
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const teamId = userInfo.team?._id || userInfo.team;
   const teamColor = userInfo.team?.color || '#4f46e5';
   const teamName = userInfo.team?.name || 'Your Team';
 
   // ── Core State ─────────────────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState('registrations');
+  const [activeTab, setActiveTab] = useState('topics');
   const [programmes, setProgrammes] = useState([]);
   const [candidates, setCandidates] = useState([]);
   const [myRegistrations, setMyRegistrations] = useState([]);
@@ -77,11 +77,11 @@ export default function TeamLeaderDashboard() {
 
   // ── Registration Form ───────────────────────────────────────────────────────
   const [form, setForm] = useState({ programmeId: '', candidateIds: [] });
-  const [editId, setEditId] = useState(null);
   const [regSearchQuery, setRegSearchQuery] = useState('');
 
   // ── Topic Form (cascade state) ──────────────────────────────────────────────
   const [topicForm, setTopicForm] = useState({ programmeId: '', candidateId: '', topic: '' });
+  const [editTopicId, setEditTopicId] = useState(null);
   const [topicCategory, setTopicCategory] = useState('');
 
   // ── Table Filters ───────────────────────────────────────────────────────────
@@ -175,18 +175,13 @@ export default function TeamLeaderDashboard() {
     }
     setSubmitting(true);
     try {
-      if (editId) {
-        const { data } = await api.patch('/registrations/' + editId, { candidateIds: form.candidateIds });
-        setMyRegistrations(prev => prev.map(r => r._id === editId ? data : r));
-      } else {
-        const { data } = await api.post('/registrations', {
-          programmeId: form.programmeId, teamId, candidateIds: form.candidateIds,
-        });
-        setMyRegistrations(prev => [data, ...prev]);
-      }
+      const { data } = await api.post('/registrations', {
+        programmeId: form.programmeId, teamId, candidateIds: form.candidateIds,
+      });
+      setMyRegistrations(prev => [data, ...prev]);
       setSuccess(true);
       setTimeout(() => {
-        setShowForm(false); setForm({ programmeId: '', candidateIds: [] }); setEditId(null);
+        setShowForm(false); setForm({ programmeId: '', candidateIds: [] });
         setRegSearchQuery(''); setSuccess(false);
       }, 1500);
     } catch (e) { setError(e.response?.data?.message || 'Submission failed'); }
@@ -220,15 +215,21 @@ export default function TeamLeaderDashboard() {
     if (!topicForm.programmeId || !topicForm.topic) { setError('Please fill all fields'); return; }
     setSubmitting(true);
     try {
-      const { data } = await api.post('/topic-registrations', {
-        programmeId: topicForm.programmeId, teamId,
-        candidateId: topicForm.candidateId || undefined,
-        topic: topicForm.topic,
-      });
-      setMyTopics(prev => [data, ...prev]);
+      if (editTopicId) {
+        const { data } = await api.patch('/topic-registrations/' + editTopicId, { topic: topicForm.topic });
+        setMyTopics(prev => prev.map(t => t._id === editTopicId ? data : t));
+      } else {
+        const { data } = await api.post('/topic-registrations', {
+          programmeId: topicForm.programmeId, teamId,
+          candidateId: topicForm.candidateId || undefined,
+          topic: topicForm.topic,
+        });
+        setMyTopics(prev => [data, ...prev]);
+      }
       setSuccess(true);
       setTimeout(() => {
         setShowTopicForm(false);
+        setEditTopicId(null);
         setTopicForm({ programmeId: '', candidateId: '', topic: '' });
         setTopicCategory('');
         setSuccess(false);
@@ -240,18 +241,20 @@ export default function TeamLeaderDashboard() {
   const openNewRegistration = () => {
     if (appSettings.isRegistrationOpen === false) return;
     setSuccess(false); setError('');
-    setEditId(null);
-    setForm({ programmeId: '', candidateIds: [] });
-    setRegSearchQuery('');
-    setShowForm(true);
+    setEditTopicId(null);
+    setTopicForm({ programmeId: '', candidateId: '', topic: '' });
+    setTopicCategory('');
+    setShowTopicForm(true);
   };
 
-  const openEditRegistration = (reg) => {
+  const openEditTopic = (t) => {
     if (appSettings.isRegistrationOpen === false) return;
     setSuccess(false); setError('');
-    setEditId(reg._id);
-    setForm({ programmeId: reg.programme._id, candidateIds: reg.candidates.map(c => c._id) });
-    setShowForm(true);
+    setEditTopicId(t._id);
+    setTopicCategory(t.programme?.category || '');
+    setTopicForm({ programmeId: t.programme?._id, candidateId: t.candidate?._id, topic: t.topic });
+    loadOtherTopics(t.programme?._id);
+    setShowTopicForm(true);
   };
 
   // ── Table Filter Logic ─────────────────────────────────────────────────────────
@@ -410,7 +413,7 @@ export default function TeamLeaderDashboard() {
                   <table className="w-full text-sm">
                     <thead className="bg-[var(--color-surface)]">
                       <tr>
-                        {['Programme', 'Candidates', 'Submitted', 'Status', 'Reason', ''].map(h => (
+                        {['Programme', 'Candidates', 'Submitted', 'Status', 'Reason'].map(h => (
                           <th key={h} className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider border-b border-[var(--color-border)]">{h}</th>
                         ))}
                       </tr>
@@ -434,13 +437,6 @@ export default function TeamLeaderDashboard() {
                           </td>
                           <td className="px-6 py-4"><StatusBadge status={reg.status} /></td>
                           <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] max-w-xs truncate">{reg.rejectionReason || '—'}</td>
-                          <td className="px-6 py-4 text-right">
-                            {appSettings.isRegistrationOpen !== false && reg.status !== 'approved' && (
-                              <button onClick={() => openEditRegistration(reg)} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1" title="Edit Registration">
-                                <Edit3 size={16} />
-                              </button>
-                            )}
-                          </td>
                         </motion.tr>
                       ))}
                     </tbody>
@@ -510,7 +506,7 @@ export default function TeamLeaderDashboard() {
                   <table className="w-full text-sm">
                     <thead className="bg-[var(--color-surface)]">
                       <tr>
-                        {['Programme', 'Candidate', 'Topic', 'Status', 'Review Note'].map(h => (
+                        {['Programme', 'Candidate', 'Topic', 'Status', 'Review Note', ''].map(h => (
                           <th key={h} className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider border-b border-[var(--color-border)]">{h}</th>
                         ))}
                       </tr>
@@ -527,6 +523,13 @@ export default function TeamLeaderDashboard() {
                           <td className="px-6 py-4 font-medium" style={{ color: teamColor }}>{t.topic}</td>
                           <td className="px-6 py-4"><StatusBadge status={t.status} /></td>
                           <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] max-w-xs truncate">{t.reviewNote || '—'}</td>
+                          <td className="px-6 py-4 text-right">
+                            {appSettings.isRegistrationOpen !== false && t.status !== 'approved' && (
+                              <button onClick={() => openEditTopic(t)} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1" title="Edit Topic">
+                                <Edit3 size={16} />
+                              </button>
+                            )}
+                          </td>
                         </motion.tr>
                       ))}
                     </tbody>
@@ -541,7 +544,7 @@ export default function TeamLeaderDashboard() {
       {/* ═══════════════════════════════════════════════════════════════════════
           New Registration Modal
       ══════════════════════════════════════════════════════════════════════════ */}
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editId ? "Edit Registration" : "New Registration"}>
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="New Registration">
         <AnimatePresence mode="wait">
           {!isRegistrationOpen ? (
             <motion.div key="closed" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
@@ -573,17 +576,11 @@ export default function TeamLeaderDashboard() {
 
               <div>
                 <label className="block text-sm font-medium mb-1.5 text-[var(--color-text-heading)]">Programme</label>
-                {editId ? (
-                  <div className="w-full px-4 py-3 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm font-medium text-[var(--color-text-muted)] opacity-70">
-                    {selectedProg?.code} - {selectedProg?.name}
-                  </div>
-                ) : (
-                  <ProgrammeCodePicker
-                    programmes={programmes}
-                    value={form.programmeId}
-                    onSelect={(prog) => setForm(f => ({ ...f, programmeId: prog?._id || '', candidateIds: [] }))}
-                  />
-                )}
+                <ProgrammeCodePicker
+                  programmes={programmes}
+                  value={form.programmeId}
+                  onSelect={(prog) => setForm(f => ({ ...f, programmeId: prog?._id || '', candidateIds: [] }))}
+                />
               </div>
 
               {form.programmeId && (
@@ -635,7 +632,7 @@ export default function TeamLeaderDashboard() {
       {/* ═══════════════════════════════════════════════════════════════════════
           Submit Topic Modal — Category-First Cascade
       ══════════════════════════════════════════════════════════════════════════ */}
-      <Modal isOpen={showTopicForm} onClose={() => setShowTopicForm(false)} title="Submit Topic">
+      <Modal isOpen={showTopicForm} onClose={() => setShowTopicForm(false)} title={editTopicId ? "Edit Topic" : "Submit Topic"}>
         <AnimatePresence mode="wait">
           {success ? (
             <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
@@ -654,57 +651,70 @@ export default function TeamLeaderDashboard() {
                 </div>
               )}
 
-              {/* ── Step 1: Category ─────────────────────────────────────────── */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
-                  1 — Select Category
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {topicCategories.length === 0 && (
-                    <p className="text-xs text-[var(--color-text-muted)]">No topic-enabled programmes available.</p>
-                  )}
-                  {topicCategories.map(cat => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => {
-                        setTopicCategory(cat);
-                        setTopicForm(f => ({ ...f, programmeId: '', topic: '', candidateId: '' }));
-                      }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                        topicCategory === cat
-                          ? 'text-white border-transparent'
-                          : 'bg-[var(--color-surface-elevated)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-heading)]'
-                      }`}
-                      style={topicCategory === cat ? { background: teamColor, borderColor: teamColor } : {}}
-                    >
-                      {cat}
-                    </button>
-                  ))}
+              {editTopicId ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Category & Programme</label>
+                    <div className="w-full px-4 py-3 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm font-medium text-[var(--color-text-muted)] opacity-70">
+                      {topicCategory} • {selectedTopicProg?.code} - {selectedTopicProg?.name}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <>
+                  {/* ── Step 1: Category ─────────────────────────────────────────── */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                      1 — Select Category
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {topicCategories.length === 0 && (
+                        <p className="text-xs text-[var(--color-text-muted)]">No topic-enabled programmes available.</p>
+                      )}
+                      {topicCategories.map(cat => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => {
+                            setTopicCategory(cat);
+                            setTopicForm(f => ({ ...f, programmeId: '', topic: '', candidateId: '' }));
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                            topicCategory === cat
+                              ? 'text-white border-transparent'
+                              : 'bg-[var(--color-surface-elevated)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-heading)]'
+                          }`}
+                          style={topicCategory === cat ? { background: teamColor, borderColor: teamColor } : {}}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              {/* ── Step 2: Programme (filtered by category) ──────────────────── */}
-              {topicCategory && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
-                    2 — Select Programme
-                  </label>
-                  {topicProgrammesInCategory.length === 0 ? (
-                    <p className="text-xs text-[var(--color-text-muted)]">No programmes in this category require a topic.</p>
-                  ) : (
-                    <ProgrammeCodePicker
-                      programmes={topicProgrammesInCategory}
-                      value={topicForm.programmeId}
-                      onSelect={(prog) => {
-                        const val = prog?._id || '';
-                        setTopicForm(f => ({ ...f, programmeId: val, topic: '', candidateId: '' }));
-                        if (val) loadOtherTopics(val);
-                      }}
-                      compact
-                    />
+                  {/* ── Step 2: Programme (filtered by category) ──────────────────── */}
+                  {topicCategory && (
+                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                        2 — Select Programme
+                      </label>
+                      {topicProgrammesInCategory.length === 0 ? (
+                        <p className="text-xs text-[var(--color-text-muted)]">No programmes in this category require a topic.</p>
+                      ) : (
+                        <ProgrammeCodePicker
+                          programmes={topicProgrammesInCategory}
+                          value={topicForm.programmeId}
+                          onSelect={(prog) => {
+                            const val = prog?._id || '';
+                            setTopicForm(f => ({ ...f, programmeId: val, topic: '', candidateId: '' }));
+                            if (val) loadOtherTopics(val);
+                          }}
+                          compact
+                        />
+                      )}
+                    </motion.div>
                   )}
-                </motion.div>
+                </>
               )}
 
               {/* ── Step 3: Topic entry ───────────────────────────────────────── */}

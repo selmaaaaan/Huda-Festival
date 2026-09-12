@@ -11,8 +11,8 @@ router.route('/')
   .get(protect, getRegistrations);
 
 router.route('/:id')
-  .patch(protect, authorize('admin', 'judge'), updateRegistration)
-  .delete(protect, authorize('admin', 'judge'), deleteRegistration);
+  .patch(protect, authorize('admin', 'judge', 'team_leader'), updateRegistration)
+  .delete(protect, authorize('admin', 'judge', 'team_leader'), deleteRegistration);
 
 router.patch('/:id/approve', protect, authorize('admin', 'judge'), approveRegistration);
 router.patch('/:id/reject', protect, authorize('admin', 'judge'), rejectRegistration);

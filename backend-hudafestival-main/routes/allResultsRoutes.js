@@ -16,7 +16,13 @@ router.get('/', protect, async (req, res) => {
     }
 });
 
-const { publishBatch } = require('../controllers/resultController');
+const { publishBatch, getJudgmentFeedback } = require('../controllers/resultController');
+
+// @desc    Get all results including remarks
+// @route   GET /api/results/judgment-feedback
+// @access  Private/Admin
+const { authorize } = require('../middlewares/authMiddleware.js');
+router.get('/judgment-feedback', protect, authorize('admin'), getJudgmentFeedback);
 
 // @desc    Get all published results
 // @route   GET /api/results/published

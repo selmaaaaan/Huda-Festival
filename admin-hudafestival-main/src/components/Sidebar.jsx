@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight, Settings, Sun, Moon, Image as ImageIcon, Bell, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight, Settings, Sun, Moon, Image as ImageIcon, Bell, ClipboardList, CalendarClock, Radio, FileSpreadsheet, BookOpen } from 'lucide-react';
 import Logo from './Logo';
 
 const navItems = [
@@ -9,11 +9,13 @@ const navItems = [
   { key: 'registration_review', label: 'Registrations', icon: Clock },
   { key: 'results', label: 'Results', icon: Trophy },
   { key: 'pending results', label: 'Pending Results', icon: Clock },
+  { key: 'judgment_feedback', label: 'Judgment Feedback', icon: FileSpreadsheet },
   { key: 'adjustments', label: 'Point Adjustments', icon: Sliders },
   { key: 'logs', label: 'Activity Logs', icon: Activity },
   { key: 'gallery', label: 'Gallery', icon: ImageIcon },
   { key: 'notifications', label: 'Notifications', icon: Bell },
   { key: 'topic_management', label: 'Topic Mgmt', icon: ClipboardList },
+  { key: 'schedule', label: 'Schedule', icon: CalendarClock },
   { key: 'settings', label: 'Settings', icon: Settings },
 ];
 
@@ -39,13 +41,19 @@ const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
 
   const isTeamLeader = userInfo?.role === 'team_leader';
   const isJudge = userInfo?.role === 'judge';
+  const isVolunteer = userInfo?.role === 'volunteer';
 
-  const visibleNavItems = isJudge 
-    ? [{ key: 'judge_panel', label: 'Judge Panel', icon: Trophy }] 
-    : isTeamLeader 
+  const visibleNavItems = isJudge
+    ? [{ key: 'judge_panel', label: 'Judge Panel', icon: Trophy }]
+    : isTeamLeader
     ? [
         { key: 'candidates', label: 'My Team', icon: Users },
-        { key: 'team_dashboard', label: 'Programme Registration', icon: Calendar }
+        { key: 'team_dashboard', label: 'Programme Registration', icon: Calendar },
+        { key: 'team_topic_registration', label: 'Topic Registration', icon: BookOpen }
+      ]
+    : isVolunteer
+    ? [
+        { key: 'volunteer_portal', label: 'Volunteer Portal', icon: Radio },
       ]
     : navItems;
 

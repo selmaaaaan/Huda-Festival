@@ -97,6 +97,7 @@ const PointAdjustmentPage = () => {
                         <thead className="bg-[var(--color-surface-elevated)] border-b border-[var(--color-border)]">
                             <tr>
                                 <th className="text-left p-4 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Type</th>
+                                <th className="text-left p-4 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Adjusted By</th>
                                 <th className="text-left p-4 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Applies To</th>
                                 <th className="text-left p-4 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Target</th>
                                 <th className="text-left p-4 text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider">Points</th>
@@ -114,6 +115,9 @@ const PointAdjustmentPage = () => {
                                             <span className="flex items-center gap-1.5 text-red-500 font-medium"><ArrowDownCircle size={14} /> Deduct</span>
                                         )}
                                     </td>
+                                    <td className="p-4 text-xs text-[var(--color-text-muted)]">
+                                        {adj.adjustedBy?.userName || '—'}
+                                    </td>
                                     <td className="p-4 capitalize text-[var(--color-text-body)]">{adj.appliesTo}</td>
                                     <td className="p-4 text-[var(--color-text-heading)]">
                                         {adj.appliesTo === 'team' ? adj.team?.name : `${adj.candidate?.name} (${adj.candidate?.admissionNo})`}
@@ -128,7 +132,7 @@ const PointAdjustmentPage = () => {
                                 </tr>
                             ))}
                             {adjustments.length === 0 && (
-                                <tr><td colSpan="6" className="p-8 text-center text-sm text-[var(--color-text-muted)]">No point adjustments found.</td></tr>
+                                <tr><td colSpan="7" className="p-8 text-center text-sm text-[var(--color-text-muted)]">No point adjustments found.</td></tr>
                             )}
                         </tbody>
                     </table>

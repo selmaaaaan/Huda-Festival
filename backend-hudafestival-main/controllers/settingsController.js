@@ -46,6 +46,10 @@ const updateSettings = async (req, res) => {
             settings.maintenanceMessage = maintenanceMessage;
         }
 
+        if (req.body.venues !== undefined) {
+            settings.venues = req.body.venues;
+        }
+
         const updatedSettings = await settings.save();
         res.status(200).json(updatedSettings)
     }

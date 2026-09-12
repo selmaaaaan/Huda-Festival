@@ -126,7 +126,7 @@ const getProgrammeResults = async (req, res) => {
 
 // @desc    Bulk upsert results as 'pending'
 const savePendingResultsBulk = async (req, res) => {
-    const { results, batchId } = req.body; // Array of { candidateId, rank, grade }
+    const { results, batchId } = req.body; // Array of { candidateId, rank, grade, remarks }
     const { id: programmeId } = req.params;
     
     if (!Array.isArray(results)) {
@@ -141,11 +141,10 @@ const savePendingResultsBulk = async (req, res) => {
                     $set: {
                         rank: resultData.rank || null,
                         grade: resultData.grade || null,
+                        remarks: resultData.remarks || null,
                         status: 'pending',
                         batchId: batchId || null,
                         submittedBy: req.user._id,
-                        status: 'pending',
-                        batchId: batchId || null,
                         pointsFromRank: 0,
                         pointsFromGrade: 0,
                         totalPoints: 0
@@ -187,4 +186,50 @@ const updateResult = async (req, res) => {
     }
 };
 
-module.exports = { savePendingResults, savePendingResultsBulk, approvePendingResults, getProgrammeResults, publishBatch, updateResult };
+// @desc    Get all results including remarks (admin only)
+// @route   GET /api/results/judgment-feedback
+// @access  Private/Admin
+const getJudgmentFeedback = async (req, res) => {
+    try {
+        // Query results and explicitly select remarks
+        const results = await Result.find({})
+            .select('+remarks')
+            .populate('programme', 'name code category isStarred format type')
+            .populate({
+                path: 'candidate',
+                select: 'name admissionNo team',
+                populate: { path: 'team', select: 'name' }
+            })
+            .populate('submittedBy', 'name userName')
+            .sort({ updatedAt: -1 });
+            
+        // We also need to map the CodeLetter for each candidate to show what the judge saw
+        const CodeLetter = require('../models/CodeLetter');
+        
+        // Fetch all code letters and create a lookup map
+        const allCodeLetters = await CodeLetter.find({});
+        const codeLetterMap = {}; // "programmeId_candidateId" -> letter
+        
+        allCodeLetters.forEach(cl => {
+            const key = `${cl.programme.toString()}_${cl.candidate.toString()}`;
+            codeLetterMap[key] = cl.letter;
+        });
+        
+        // Attach the code letter to each result for the frontend
+        const enrichedResults = results.map(result => {
+            const resultObj = result.toObject();
+            if (resultObj.programme && resultObj.candidate) {
+                const key = `${resultObj.programme._id.toString()}_${resultObj.candidate._id.toString()}`;
+                resultObj.codeLetter = codeLetterMap[key] || 'N/A';
+            }
+            return resultObj;
+        });
+
+        res.status(200).json(enrichedResults);
+    } catch (error) {
+        console.error("Error fetching judgment feedback:", error);
+        res.status(500).json({ message: 'Failed to fetch judgment feedback', error: error.message || 'Unknown error' });
+    }
+};
+
+module.exports = { savePendingResults, savePendingResultsBulk, approvePendingResults, getProgrammeResults, publishBatch, updateResult, getJudgmentFeedback };

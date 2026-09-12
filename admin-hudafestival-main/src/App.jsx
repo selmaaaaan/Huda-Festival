@@ -10,11 +10,15 @@ import PointAdjustmentPage from './pages/PointAdjustmentPage';
 import Sidebar from './components/Sidebar';
 import Breadcrumbs from './components/Breadcrumbs';
 import SettingsPage from './pages/SettingsPage';
+import SchedulePage from './pages/SchedulePage';
+import VolunteerPortal from './pages/VolunteerPortal';
 import { Search, Bell, AlertTriangle } from 'lucide-react';
 import api from './services/api';
 
 import JudgePanel from './pages/JudgePanel';
+import JudgmentFeedbackPage from './pages/JudgmentFeedbackPage';
 import TeamLeaderDashboard from './pages/TeamLeaderDashboard';
+import TeamTopicRegistrationPage from './pages/TeamTopicRegistrationPage';
 import RegistrationReviewPage from './pages/RegistrationReviewPage';
 import ActivityLogsPage from './pages/ActivityLogsPage';
 import GalleryPage from './pages/GalleryPage';
@@ -25,9 +29,17 @@ function App() {
   const savedInfo = localStorage.getItem('userInfo');
   const initialInfo = savedInfo ? JSON.parse(savedInfo) : null;
   
+  const getInitialPage = (info) => {
+    if (!info) return 'dashboard';
+    if (info.role === 'judge') return 'judge_panel';
+    if (info.role === 'team_leader') return 'candidates';
+    if (info.role === 'volunteer') return 'volunteer_portal';
+    return 'dashboard';
+  };
+
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialInfo);
   const [userInfo, setUserInfo] = useState(initialInfo);
-  const [activePage, setActivePage] = useState(initialInfo?.role === 'judge' ? 'judge_panel' : (initialInfo?.role === 'team_leader' ? 'candidates' : 'dashboard'));
+  const [activePage, setActivePage] = useState(getInitialPage(initialInfo));
   const [appSettings, setAppSettings] = useState({ maintenanceMode: false, maintenanceMessage: '' });
 
   useEffect(() => {
@@ -65,6 +77,9 @@ function App() {
       case 'team_dashboard':
         pageContent = <TeamLeaderDashboard />;
         break;
+      case 'team_topic_registration':
+        pageContent = <TeamTopicRegistrationPage />;
+        break;
       case 'gallery':
         pageContent = <GalleryPage />;
         break;
@@ -92,11 +107,20 @@ function App() {
       case 'adjustments':
         pageContent = <PointAdjustmentPage />;
         break;
+      case 'judgment_feedback':
+        pageContent = <JudgmentFeedbackPage />;
+        break;
       case 'logs':
         pageContent = <ActivityLogsPage />;
         break;
       case 'topic_management':
         pageContent = <TopicManagementPage />;
+        break;
+      case 'schedule':
+        pageContent = <SchedulePage />;
+        break;
+      case 'volunteer_portal':
+        pageContent = <VolunteerPortal />;
         break;
       case 'dashboard':
       default:

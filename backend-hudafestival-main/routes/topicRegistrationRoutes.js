@@ -7,6 +7,7 @@ const {
     getPendingTopics,
     getAllTopics,
     reviewTopic,
+    updateTopic,
     getTopicEnabledProgrammes
 } = require('../controllers/topicRegistrationController');
 const { protect, authorize } = require('../middlewares/authMiddleware');
@@ -19,5 +20,6 @@ router.get('/', protect, authorize('admin'), getAllTopics);
 
 router.post('/', protect, submitTopic);
 router.patch('/:id/review', protect, authorize('admin'), reviewTopic);
+router.patch('/:id', protect, authorize('admin', 'judge', 'team_leader'), updateTopic);
 
 module.exports = router;
