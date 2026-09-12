@@ -102,7 +102,7 @@ const GalleryPage = () => {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto h-full overflow-y-auto">
+    <div className="p-8 w-full h-full overflow-y-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Gallery Management</h1>
         <p className="text-sm text-[var(--color-text-body)] mt-1">Upload images to the public gallery, add captions, and organize by day.</p>

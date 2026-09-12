@@ -7,38 +7,10 @@ import Modal from '../components/Modal';
 import ProgrammeCodePicker from '../components/ProgrammeCodePicker';
 import {
   ClipboardList, Users, Plus, Search, CheckCircle, AlertTriangle,
-  MessageSquare, BookOpen, ChevronRight, X, Filter, Edit3
+  MessageSquare, BookOpen, ChevronRight, X, Filter, Edit3, Trash2
 } from 'lucide-react';
 
 const CATEGORIES = ['All', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
-
-// ─── Preloader ───────────────────────────────────────────────────────────────
-const Preloader = () => {
-  const text = "HUDA FESTIVAL 2K26".split('');
-  return (
-    <motion.div
-      className="fixed inset-0 z-[100] flex items-center justify-center"
-      style={{ background: 'var(--color-surface)' }}
-      initial={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5, ease: 'easeInOut' }}
-    >
-      <div className="flex font-bold text-2xl md:text-4xl tracking-widest overflow-hidden"
-        style={{ color: 'var(--color-primary)' }}>
-        {text.map((letter, i) => (
-          <motion.span key={i}
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.5, delay: i * 0.05, ease: [0.2, 0.65, 0.3, 0.9] }}
-            className="inline-block"
-          >
-            {letter === ' ' ? '\u00A0' : letter}
-          </motion.span>
-        ))}
-      </div>
-    </motion.div>
-  );
-};
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 const StatCard = ({ label, value, accent }) => (
@@ -64,8 +36,8 @@ export default function TeamTopicRegistrationPage() {
   const [myTopics, setMyTopics] = useState([]);
   const [otherTopics, setOtherTopics] = useState({});
   const [loading, setLoading] = useState(true);
-  const [showPreloader, setShowPreloader] = useState(true);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
+  const [isTopicRegistrationEnabled, setIsTopicRegistrationEnabled] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(0);
 
   // ── Modal State ─────────────────────────────────────────────────────────────
@@ -92,12 +64,6 @@ export default function TeamTopicRegistrationPage() {
   const [topicTableStatus, setTopicTableStatus] = useState('all');
   const [topicTableCategory, setTopicTableCategory] = useState('All');
 
-  // ── Preloader timer ─────────────────────────────────────────────────────────
-  useEffect(() => {
-    const t = setTimeout(() => setShowPreloader(false), 2000);
-    return () => clearTimeout(t);
-  }, []);
-
   // ── Data Loading ─────────────────────────────────────────────────────────────
   const loadData = async (isPoll = false) => {
     try {
@@ -115,6 +81,8 @@ export default function TeamTopicRegistrationPage() {
       setMyRegistrations(regRes.data?.registrations || regRes.data || []);
       if (settingsRes.data?.isRegistrationOpen !== undefined)
         setIsRegistrationOpen(settingsRes.data.isRegistrationOpen);
+      if (settingsRes.data?.topicRegistrationEnabled !== undefined)
+        setIsTopicRegistrationEnabled(settingsRes.data.topicRegistrationEnabled);
       setTopicEnabledProgrammes(topicProgRes.data);
       setMyTopics(myTopicRes.data);
       setLastUpdated(0);
@@ -239,7 +207,7 @@ export default function TeamTopicRegistrationPage() {
   };
 
   const openNewRegistration = () => {
-    if (appSettings.isRegistrationOpen === false) return;
+    if (isTopicRegistrationEnabled === false) return;
     setSuccess(false); setError('');
     setEditTopicId(null);
     setTopicForm({ programmeId: '', candidateId: '', topic: '' });
@@ -248,13 +216,27 @@ export default function TeamTopicRegistrationPage() {
   };
 
   const openEditTopic = (t) => {
-    if (appSettings.isRegistrationOpen === false) return;
+    if (isTopicRegistrationEnabled === false) return;
     setSuccess(false); setError('');
     setEditTopicId(t._id);
     setTopicCategory(t.programme?.category || '');
     setTopicForm({ programmeId: t.programme?._id, candidateId: t.candidate?._id, topic: t.topic });
     loadOtherTopics(t.programme?._id);
     setShowTopicForm(true);
+  };
+
+  const handleDeleteTopic = async (topicId) => {
+    if (!window.confirm('Are you sure you want to delete this topic registration?')) return;
+    setSubmitting(true);
+    try {
+      await api.delete(`/topic-registrations/${topicId}`);
+      await loadData();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to delete topic');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // ── Table Filter Logic ─────────────────────────────────────────────────────────
@@ -279,7 +261,7 @@ export default function TeamTopicRegistrationPage() {
   }, [myTopics, topicTableSearch, topicTableStatus, topicTableCategory]);
 
   // ── Loading / No-team guard ────────────────────────────────────────────────────
-  if (loading && !showPreloader && !myRegistrations.length) return (
+  if (loading && !myRegistrations.length) return (
     <div className="flex items-center justify-center h-full min-h-screen">
       <div className="text-[var(--color-text-muted)] animate-pulse">Loading portal...</div>
     </div>
@@ -291,12 +273,10 @@ export default function TeamTopicRegistrationPage() {
       className="min-h-screen pb-16 transition-colors duration-500"
       style={{ background: 'var(--color-bg)', '--color-primary': teamColor, '--color-primary-hover': teamColor }}
     >
-      <AnimatePresence>{showPreloader && <Preloader />}</AnimatePresence>
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5, duration: 0.6 }}
+        transition={{ duration: 0.6 }}
       >
         {/* ── Branded Header ──────────────────────────────────────────────────── */}
         <div
@@ -306,7 +286,7 @@ export default function TeamTopicRegistrationPage() {
           {/* decorative accent bar */}
           <div className="absolute top-0 left-0 right-0 h-1" style={{ background: teamColor }} />
 
-          <div className="max-w-5xl mx-auto px-6 pt-10 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="w-full px-6 pt-10 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: teamColor }} />
@@ -339,7 +319,7 @@ export default function TeamTopicRegistrationPage() {
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto px-6 space-y-8 mt-8">
+        <div className="w-full px-6 space-y-8 mt-8">
 
           {/* ── Stats Strip ─────────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -523,10 +503,15 @@ export default function TeamTopicRegistrationPage() {
                           <td className="px-6 py-4 font-medium" style={{ color: teamColor }}>{t.topic}</td>
                           <td className="px-6 py-4"><StatusBadge status={t.status} /></td>
                           <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] max-w-xs truncate">{t.reviewNote || '—'}</td>
-                          <td className="px-6 py-4 text-right">
-                            {appSettings.isRegistrationOpen !== false && t.status !== 'approved' && (
+                          <td className="px-6 py-4 text-right flex justify-end gap-2">
+                            {isTopicRegistrationEnabled !== false && t.status !== 'approved' && (
                               <button onClick={() => openEditTopic(t)} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1" title="Edit Topic">
                                 <Edit3 size={16} />
+                              </button>
+                            )}
+                            {isTopicRegistrationEnabled !== false && (
+                              <button onClick={() => handleDeleteTopic(t._id)} className="text-[var(--color-text-muted)] hover:text-red-500 transition-colors p-1" title="Delete Topic">
+                                <Trash2 size={16} />
                               </button>
                             )}
                           </td>
@@ -634,7 +619,18 @@ export default function TeamTopicRegistrationPage() {
       ══════════════════════════════════════════════════════════════════════════ */}
       <Modal isOpen={showTopicForm} onClose={() => setShowTopicForm(false)} title={editTopicId ? "Edit Topic" : "Submit Topic"}>
         <AnimatePresence mode="wait">
-          {success ? (
+          {!isTopicRegistrationEnabled ? (
+            <motion.div key="closed" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="py-12 flex flex-col items-center text-center space-y-4">
+              <motion.div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center"
+                animate={{ rotate: [0, -10, 10, -10, 10, 0] }} transition={{ duration: 0.5, delay: 0.2 }}>
+                <AlertTriangle size={32} />
+              </motion.div>
+              <h3 className="text-lg font-bold text-[var(--color-text-heading)]">Topic Registration is closed</h3>
+              <Button variant="ghost" onClick={() => setShowTopicForm(false)}>Close</Button>
+            </motion.div>
+          ) : success ? (
             <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               className="py-12 flex flex-col items-center text-center space-y-4">
@@ -778,3 +774,4 @@ export default function TeamTopicRegistrationPage() {
     </div>
   );
 }
+

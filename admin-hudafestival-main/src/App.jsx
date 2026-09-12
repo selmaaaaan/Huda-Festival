@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage';
 import CandidatePage from './pages/CandidatesPage';
 import ProgrammesPage from './pages/ProgrammesPage';
 import ResultsPage from './pages/ResultsPage';
+import TeamRegistrationListPage from './pages/TeamRegistrationListPage';
 import PendingResultsPage from './pages/PendingResultPage';
 import PointAdjustmentPage from './pages/PointAdjustmentPage';
 import Sidebar from './components/Sidebar';
@@ -24,6 +25,32 @@ import ActivityLogsPage from './pages/ActivityLogsPage';
 import GalleryPage from './pages/GalleryPage';
 import NotificationsPage from './pages/NotificationsPage';
 import TopicManagementPage from './pages/TopicManagementPage';
+import TeamPortalDashboard from './pages/TeamPortalDashboard';
+
+const Preloader = () => {
+  const text = "HUDA FESTIVAL".split('');
+  return (
+    <motion.div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[var(--color-surface)]"
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5, ease: 'easeInOut' }}
+    >
+      <div className="flex font-bold text-2xl md:text-4xl tracking-widest overflow-hidden text-[var(--color-primary)]">
+        {text.map((letter, i) => (
+          <motion.span key={i}
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.5, delay: i * 0.05, ease: [0.2, 0.65, 0.3, 0.9] }}
+            className="inline-block"
+          >
+            {letter === ' ' ? '\u00A0' : letter}
+          </motion.span>
+        ))}
+      </div>
+    </motion.div>
+  );
+};
 
 function App() {
   const savedInfo = localStorage.getItem('userInfo');
@@ -32,7 +59,7 @@ function App() {
   const getInitialPage = (info) => {
     if (!info) return 'dashboard';
     if (info.role === 'judge') return 'judge_panel';
-    if (info.role === 'team_leader') return 'candidates';
+    if (info.role === 'team_leader') return 'team_dashboard';
     if (info.role === 'volunteer') return 'volunteer_portal';
     return 'dashboard';
   };
@@ -41,6 +68,12 @@ function App() {
   const [userInfo, setUserInfo] = useState(initialInfo);
   const [activePage, setActivePage] = useState(getInitialPage(initialInfo));
   const [appSettings, setAppSettings] = useState({ maintenanceMode: false, maintenanceMessage: '' });
+  const [showPreloader, setShowPreloader] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowPreloader(false), 2000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     // Poll settings every 30s
@@ -56,9 +89,16 @@ function App() {
   }, []);
 
   const handleLoginSuccess = () => {
+    setShowPreloader(true);
+    setTimeout(() => setShowPreloader(false), 2000);
+    
     setIsAuthenticated(true);
     const saved = localStorage.getItem('userInfo');
-    if (saved) setUserInfo(JSON.parse(saved));
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setUserInfo(parsed);
+      setActivePage(getInitialPage(parsed));
+    }
   };
 
   const handleLogout = () => {
@@ -75,7 +115,13 @@ function App() {
         pageContent = <JudgePanel />;
         break;
       case 'team_dashboard':
+        pageContent = <TeamPortalDashboard />;
+        break;
+      case 'team_programme_registration':
         pageContent = <TeamLeaderDashboard />;
+        break;
+      case 'team_registration_list':
+        pageContent = <TeamRegistrationListPage />;
         break;
       case 'team_topic_registration':
         pageContent = <TeamTopicRegistrationPage />;
@@ -145,14 +191,21 @@ function App() {
   };
 
   if (!isAuthenticated) {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <>
+        <AnimatePresence>{showPreloader && <Preloader />}</AnimatePresence>
+        <LoginPage onLoginSuccess={handleLoginSuccess} />
+      </>
+    );
   }
 
   const initial = userInfo?.userName?.charAt(0)?.toUpperCase() || 'A';
   const roleName = userInfo?.role?.replace('_', ' ') || 'Admin';
 
   return (
-    <div className="flex flex-col h-screen bg-[var(--color-bg)] text-[var(--color-text-heading)]">
+    <>
+      <AnimatePresence>{showPreloader && <Preloader />}</AnimatePresence>
+      <div className="flex flex-col h-screen bg-[var(--color-bg)] text-[var(--color-text-heading)]">
       {appSettings.maintenanceMode && (
         <div className="bg-red-500 text-white text-xs font-bold uppercase tracking-wider py-1.5 px-4 text-center shadow-md z-50">
           MAINTENANCE MODE ACTIVE - Public site is hidden
@@ -206,6 +259,7 @@ function App() {
         </main>
       </div>
     </div>
+    </>
   );
 }
 

@@ -187,6 +187,9 @@ const updateRegistration = async (req, res) => {
         res.status(200).json(saved);
     } catch (error) {
         console.error('Error updating registration:', error);
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'Duplicate registration for candidate' });
+        }
         res.status(500).json({ message: 'Failed to updateRegistration', error: error.message || 'Unknown error' });
     }
 };

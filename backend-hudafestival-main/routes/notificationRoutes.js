@@ -4,7 +4,8 @@ const {
     createNotification,
     getActiveNotifications,
     getAllNotifications,
-    toggleNotification
+    toggleNotification,
+    deleteNotification
 } = require('../controllers/notificationController');
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
@@ -17,5 +18,8 @@ router.route('/all')
 
 router.route('/:id/toggle')
     .patch(protect, authorize('admin'), toggleNotification);
+
+router.route('/:id')
+    .delete(protect, authorize('admin'), deleteNotification);
 
 module.exports = router;

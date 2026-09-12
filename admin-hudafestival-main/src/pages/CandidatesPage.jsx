@@ -64,11 +64,11 @@ const CandidatesPage = () => {
   if (!isTeamLeader && selectedTeam) {
     filteredCandidates = filteredCandidates.filter(c => c.team?._id === selectedTeam._id);
   }
-  if (selectedCategory) {
+  if (selectedCategory && selectedCategory !== 'ALL') {
     filteredCandidates = filteredCandidates.filter(c => c.category === selectedCategory);
   }
 
-  const headers = ['Image', 'Admission No', 'Name', 'Points', 'Actions'];
+  const headers = ['Image', 'Admission No', 'Name', 'Category', 'Points', 'Actions'];
   const renderRow = (candidate) => (
     <tr key={candidate._id} className="hover:bg-[var(--color-surface-elevated)] transition">
       <td className="px-6 py-4"><img src={candidate.image?.url || `https://ui-avatars.com/api/?name=${candidate.name}`} alt={candidate.name} className="w-10 h-10 rounded-full object-cover bg-[var(--color-surface)] border border-[var(--color-border)]" /></td>
@@ -81,13 +81,12 @@ const CandidatesPage = () => {
           {candidate.name}
         </div>
       </td>
+      <td className="px-6 py-4 text-sm text-[var(--color-text-muted)]">{candidate.category}</td>
       <td className="px-6 py-4 text-sm font-semibold text-[var(--color-text-heading)]">{candidate.totalPoints || 0}</td>
       <td className="px-6 py-4">
         <div className="flex gap-2">
           <Button variant="secondary" size="sm" onClick={() => handleEdit(candidate)}>Edit</Button>
-          {!isTeamLeader && (
-            <Button variant="danger" size="sm" onClick={() => handleDelete(candidate._id)}>Delete</Button>
-          )}
+          <Button variant="danger" size="sm" onClick={() => handleDelete(candidate._id)}>Delete</Button>
         </div>
       </td>
     </tr>

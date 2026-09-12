@@ -17,13 +17,17 @@ const SettingsPage = () => {
   const [showLeaderModal, setShowLeaderModal] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [showConfirmToggleReg, setShowConfirmToggleReg] = useState(false);
+  const [showConfirmToggleTopic, setShowConfirmToggleTopic] = useState(false);
   
   const [editingTeam, setEditingTeam] = useState(null);
   const [deletingTeam, setDeletingTeam] = useState(null);
+  const [deletingLeader, setDeletingLeader] = useState(null);
+  const [showConfirmDeleteLeader, setShowConfirmDeleteLeader] = useState(false);
 
   // Forms state
   const [teamForm, setTeamForm] = useState({ name: '', color: '#000000' });
   const [leaderForm, setLeaderForm] = useState({ userName: '', password: '', team: '' });
+  const [editLeaderId, setEditLeaderId] = useState(null);
 
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -45,6 +49,7 @@ const SettingsPage = () => {
       if (settingsRes.data) {
         setSettings({
           isRegistrationOpen: settingsRes.data.isRegistrationOpen ?? true,
+          topicRegistrationEnabled: settingsRes.data.topicRegistrationEnabled ?? true,
           maintenanceMode: settingsRes.data.maintenanceMode ?? false,
           maintenanceMessage: settingsRes.data.maintenanceMessage ?? '',
           venues: settingsRes.data.venues || []
@@ -54,6 +59,18 @@ const SettingsPage = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  
+  const handleToggleTopic = async () => {
+    try {
+      const newVal = !settings.topicRegistrationEnabled;
+      await api.patch('/settings', { topicRegistrationEnabled: newVal });
+      setSettings({ ...settings, topicRegistrationEnabled: newVal });
+      setShowConfirmToggleTopic(false);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error updating settings');
     }
   };
 
@@ -162,10 +179,33 @@ const SettingsPage = () => {
     }
   };
 
+  const confirmDeleteLeader = (leader) => {
+    setDeletingLeader(leader);
+    setShowConfirmDeleteLeader(true);
+  };
+
+  const handleDeleteLeader = async () => {
+    try {
+      await api.delete(`/auth/team-leaders/${deletingLeader._id}`);
+      setShowConfirmDeleteLeader(false);
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error deleting leader');
+    }
+  };
+
   // Leader Actions
   const handleOpenLeaderModal = () => {
     setError('');
+    setEditLeaderId(null);
     setLeaderForm({ userName: '', password: '', team: '' });
+    setShowLeaderModal(true);
+  };
+
+  const handleEditLeaderModal = (leader) => {
+    setError('');
+    setEditLeaderId(leader._id);
+    setLeaderForm({ userName: leader.userName, password: '', team: leader.team || '' });
     setShowLeaderModal(true);
   };
 
@@ -174,11 +214,17 @@ const SettingsPage = () => {
     setError('');
     setSubmitting(true);
     try {
-      await api.post('/auth/create-team-leader', leaderForm);
+      if (editLeaderId) {
+          const payload = { userName: leaderForm.userName, team: leaderForm.team };
+          if (leaderForm.password) payload.password = leaderForm.password;
+          await api.patch('/auth/team-leaders/' + editLeaderId, payload);
+      } else {
+          await api.post('/auth/create-team-leader', leaderForm);
+      }
       setShowLeaderModal(false);
       fetchData();
     } catch (err) {
-      setError(err.response?.data?.message || 'Error creating team leader');
+      setError(err.response?.data?.message || 'Error saving team leader');
     } finally {
       setSubmitting(false);
     }
@@ -187,7 +233,7 @@ const SettingsPage = () => {
   if (loading) return <div className="p-6">Loading settings...</div>;
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-8">
+    <div className="p-6 w-full space-y-8">
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Settings</h1>
       </div>
@@ -196,16 +242,29 @@ const SettingsPage = () => {
 
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6">
         <h2 className="text-lg font-semibold text-[var(--color-text-heading)] mb-4">Registration Status</h2>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <p className="text-[var(--color-text-heading)] font-medium">Allow New Registrations</p>
             <p className="text-sm text-[var(--color-text-muted)]">When disabled, team leaders will see a "Closed" message and cannot register new candidates.</p>
           </div>
           <button 
             onClick={() => setShowConfirmToggleReg(true)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${settings.isRegistrationOpen ? 'bg-green-500' : 'bg-gray-300'}`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${settings.isRegistrationOpen ? 'bg-green-500' : 'bg-[var(--color-border)]'}`}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.isRegistrationOpen ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[var(--color-text-heading)] font-medium">Allow Topic Registrations</p>
+            <p className="text-sm text-[var(--color-text-muted)]">When disabled, team leaders cannot submit new topic registrations.</p>
+          </div>
+          <button 
+            onClick={() => setShowConfirmToggleTopic(true)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 ${settings.topicRegistrationEnabled ? 'bg-green-500' : 'bg-[var(--color-border)]'}`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.topicRegistrationEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
           </button>
         </div>
       </div>
@@ -297,6 +356,14 @@ const SettingsPage = () => {
                       <div className="font-medium text-[var(--color-text-heading)]">{leader.userName}</div>
                       <div className="text-xs text-[var(--color-text-muted)]">Team: {leaderTeamName}</div>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => handleEditLeaderModal(leader)} className="p-1.5 text-[var(--color-text-muted)] hover:text-blue-500 rounded-md hover:bg-blue-500/10">
+                        <Edit2 size={16} />
+                      </button>
+                      <button onClick={() => confirmDeleteLeader(leader)} className="p-1.5 text-[var(--color-text-muted)] hover:text-red-500 rounded-md hover:bg-red-500/10">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 )
               })
@@ -376,7 +443,7 @@ const SettingsPage = () => {
       </Modal>
 
       {/* Leader Modal */}
-      <Modal isOpen={showLeaderModal} onClose={() => setShowLeaderModal(false)} title="Add Team Leader">
+      <Modal isOpen={showLeaderModal} onClose={() => setShowLeaderModal(false)} title={editLeaderId ? "Edit Team Leader" : "Add Team Leader"}>
         <form onSubmit={handleSaveLeader} className="space-y-4">
           {error && <div className="text-sm text-red-400 bg-red-900/20 p-2 rounded">{error}</div>}
           
@@ -429,6 +496,15 @@ const SettingsPage = () => {
       />
 
       <ConfirmDialog
+        open={showConfirmDeleteLeader}
+        title="Delete Team Leader"
+        message={`Are you sure you want to delete the leader account for ${deletingLeader?.userName}?`}
+        onConfirm={handleDeleteLeader}
+        onCancel={() => setShowConfirmDeleteLeader(false)}
+        confirmText="Delete"
+      />
+
+      <ConfirmDialog
         open={showConfirmToggleReg}
         title={settings.isRegistrationOpen ? "Close Registration" : "Open Registration"}
         message={settings.isRegistrationOpen 
@@ -437,6 +513,17 @@ const SettingsPage = () => {
         onConfirm={handleToggleRegistration}
         onCancel={() => setShowConfirmToggleReg(false)}
         confirmText={settings.isRegistrationOpen ? "Close Registration" : "Open Registration"}
+      />
+
+      <ConfirmDialog
+        open={showConfirmToggleTopic}
+        title={settings.topicRegistrationEnabled ? "Close Topic Registration" : "Open Topic Registration"}
+        message={settings.topicRegistrationEnabled 
+          ? "Are you sure you want to close topic registration? Team leaders will no longer be able to submit topics." 
+          : "Are you sure you want to open topic registration? Team leaders will be able to submit topics again."}
+        onConfirm={handleToggleTopic}
+        onCancel={() => setShowConfirmToggleTopic(false)}
+        confirmText={settings.topicRegistrationEnabled ? "Close Topic Registration" : "Open Topic Registration"}
       />
     </div>
   );

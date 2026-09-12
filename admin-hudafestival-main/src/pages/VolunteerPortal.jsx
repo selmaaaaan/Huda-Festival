@@ -251,7 +251,7 @@ const VolunteerPortal = () => {
   if (loading) return <div className="p-6 text-[var(--color-text-muted)]">Loading…</div>;
 
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-8">
+    <div className="p-6 w-full space-y-8">
       <div className="mb-2">
         <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Volunteer Portal</h1>
         <p className="text-sm text-[var(--color-text-muted)] mt-1">

@@ -3,6 +3,11 @@ const Programme = require('../models/Programme');
 
 const submitTopic = async (req, res) => {
     try {
+        const Settings = require('../models/Settings');
+        const settings = await Settings.findOne();
+        if (settings && settings.topicRegistrationEnabled === false && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Topic Registration is closed by Fest Admins' });
+        }
         const { programmeId, teamId, candidateId, topic } = req.body;
         
         const existing = await TopicRegistration.findOne({ programme: programmeId, team: teamId });
@@ -113,8 +118,8 @@ const updateTopic = async (req, res) => {
     try {
         const Settings = require('../models/Settings');
         const settings = await Settings.findOne();
-        if (settings && settings.isRegistrationOpen === false && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Registration is closed by Fest Admins' });
+        if (settings && settings.topicRegistrationEnabled === false && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Topic Registration is closed by Fest Admins' });
         }
 
         const { topic } = req.body;
@@ -146,13 +151,34 @@ const updateTopic = async (req, res) => {
     }
 };
 
+const deleteTopic = async (req, res) => {
+    try {
+        const topicId = req.params.id;
+        const registration = await TopicRegistration.findById(topicId);
+        
+        if (!registration) {
+            return res.status(404).json({ message: 'Topic registration not found' });
+        }
+        
+        if (req.user.role === 'team_leader' && registration.team.toString() !== req.user.team.toString()) {
+            return res.status(403).json({ message: 'You can only delete your own team\'s topics' });
+        }
+        
+        await TopicRegistration.findByIdAndDelete(topicId);
+        res.status(200).json({ message: 'Topic deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete topic', error: error.message });
+    }
+};
+
 module.exports = {
-    updateTopic,
     submitTopic,
     getTopicsForProgramme,
     getMyTopicSubmissions,
     getPendingTopics,
     getAllTopics,
     reviewTopic,
+    updateTopic,
+    deleteTopic,
     getTopicEnabledProgrammes
 };

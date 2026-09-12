@@ -98,6 +98,10 @@ const updateCandidate = async (req, res) => {
             return res.status(404).json({ message: 'Candidate not found'})
         }
 
+        if (req.user.role === 'team_leader' && candidate.team.toString() !== req.user.team.toString()) {
+            return res.status(403).json({ message: 'You can only update your own team\'s candidates' });
+        }
+
         if(req.file) {
             await cloudinary.uploader.destroy(candidate.image.public_id);
             candidate.image.url =  req.file.path
@@ -127,6 +131,10 @@ const deleteCandidate = async (req, res) => {
         const candidate = await Candidate.findById(req.params.id);
         if(!candidate) {
             return res.status(404).json({ message: 'Candidate not found'});
+        }
+
+        if (req.user.role === 'team_leader' && candidate.team.toString() !== req.user.team.toString()) {
+            return res.status(403).json({ message: 'You can only delete your own team\'s candidates' });
         }
 
         const approvedResults = await Result.find({ candidate: candidate._id, status: 'approved' });

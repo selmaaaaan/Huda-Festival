@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Bell, Plus, Power, Clock } from 'lucide-react';
+import { Bell, Plus, Power, Clock, XCircle } from 'lucide-react';
 import Button from '../components/Button';
 import EmptyState from '../components/EmptyState';
 
-const NotificationsPage = () => {
+const NotificationsPage = ({ inline = false }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -14,13 +14,16 @@ const NotificationsPage = () => {
   const [body, setBody] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+  const isAdmin = userInfo?.role === 'admin';
+
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/notifications/all');
+      const res = await api.get(isAdmin ? '/notifications/all' : '/notifications');
       setNotifications(res.data);
     } catch (err) {
-      setError('Failed to fetch notifications.');
+      setError('Failed to fetch notifications');
     } finally {
       setLoading(false);
     }
@@ -32,22 +35,16 @@ const NotificationsPage = () => {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!title.trim() || !body.trim()) return;
-
+    setError(''); setSuccess('');
+    if (!title) return setError('Title is required');
     setSubmitting(true);
-    setError('');
-    setSuccess('');
-
     try {
       await api.post('/notifications', { title, body });
-      setSuccess('Notification published successfully!');
-      setTitle('');
-      setBody('');
+      setSuccess('Notification created');
+      setTitle(''); setBody('');
       fetchNotifications();
-      setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create notification.');
-      setTimeout(() => setError(''), 3000);
+      setError(err.response?.data?.message || 'Failed to create notification');
     } finally {
       setSubmitting(false);
     }
@@ -63,26 +60,41 @@ const NotificationsPage = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this notification?')) return;
+    try {
+      await api.delete(`/notifications/${id}`);
+      fetchNotifications();
+    } catch (err) {
+      alert('Failed to delete notification');
+    }
+  };
+
+  if (loading) return <div className="p-8">Loading notifications...</div>;
+
   return (
-    <div className="p-8 max-w-5xl mx-auto h-full overflow-y-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Notifications</h1>
-        <p className="text-sm text-[var(--color-text-body)] mt-1">Manage global alerts pushed to the public website.</p>
-      </div>
+    <div className={inline ? "w-full h-full p-4 overflow-y-auto" : "p-8 w-full h-full overflow-y-auto"}>
+      {!inline && (
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Notifications</h1>
+          <p className="text-sm text-[var(--color-text-body)] mt-1">Manage global alerts pushed to the public website.</p>
+        </div>
+      )}
 
       {error && <div className="mb-4 p-3 bg-red-900/20 border border-red-800/40 text-red-400 rounded-lg text-sm">{error}</div>}
       {success && <div className="mb-4 p-3 bg-green-900/20 border border-green-800/40 text-green-400 rounded-lg text-sm">{success}</div>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className={`grid grid-cols-1 ${isAdmin && !inline ? 'lg:grid-cols-3' : ''} gap-8`}>
         
         {/* Create Form */}
-        <div className="lg:col-span-1">
-          <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl p-5 shadow-sm sticky top-6">
-            <h2 className="text-lg font-semibold text-[var(--color-text-heading)] mb-4 flex items-center gap-2">
-              <Plus size={18} className="text-[var(--color-primary)]" />
-              New Notification
-            </h2>
-            <form onSubmit={handleCreate} className="space-y-4">
+        {isAdmin && !inline && (
+          <div className="lg:col-span-1">
+            <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl p-5 shadow-sm sticky top-6">
+              <h2 className="text-lg font-semibold text-[var(--color-text-heading)] mb-4 flex items-center gap-2">
+                <Plus size={18} className="text-[var(--color-primary)]" />
+                New Notification
+              </h2>
+              <form onSubmit={handleCreate} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[var(--color-text-heading)] mb-1">Title</label>
                 <input
@@ -108,17 +120,16 @@ const NotificationsPage = () => {
             </form>
           </div>
         </div>
+        )}
 
         {/* List */}
-        <div className="lg:col-span-2">
+        <div className={isAdmin && !inline ? "lg:col-span-2" : ""}>
           <h2 className="text-lg font-semibold text-[var(--color-text-heading)] mb-4 flex items-center gap-2">
             <Bell size={18} className="text-[var(--color-text-muted)]" />
             History
           </h2>
           
-          {loading ? (
-            <p className="text-[var(--color-text-muted)]">Loading notifications...</p>
-          ) : notifications.length > 0 ? (
+          {notifications.length > 0 ? (
             <div className="space-y-3">
               {notifications.map(notif => (
                 <div key={notif._id} className={`p-4 rounded-xl border transition-colors ${notif.isActive ? 'bg-[var(--color-primary)]/5 border-[var(--color-primary)]/30' : 'bg-[var(--color-surface-elevated)] border-[var(--color-border)] opacity-75'}`}>
@@ -136,13 +147,24 @@ const NotificationsPage = () => {
                       </div>
                     </div>
                     
-                    <button
-                      onClick={() => handleToggle(notif._id, notif.isActive)}
-                      className={`p-2 rounded-full shrink-0 transition-colors ${notif.isActive ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white' : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-elevated)] hover:text-[var(--color-text-heading)]'}`}
-                      title={notif.isActive ? "Deactivate" : "Reactivate"}
-                    >
-                      <Power size={18} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {isAdmin && (
+                        <button
+                          onClick={() => handleDelete(notif._id)}
+                          className="text-[var(--color-text-muted)] hover:text-red-500 p-2 rounded-full transition-colors bg-[var(--color-surface)] hover:bg-[var(--color-surface-elevated)]"
+                          title="Delete Notification"
+                        >
+                          <XCircle size={18} />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleToggle(notif._id, notif.isActive)}
+                        className={`p-2 rounded-full shrink-0 transition-colors ${notif.isActive ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white' : 'bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-elevated)] hover:text-[var(--color-text-heading)]'}`}
+                        title={notif.isActive ? "Deactivate" : "Reactivate"}
+                      >
+                        <Power size={18} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

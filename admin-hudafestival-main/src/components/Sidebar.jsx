@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight, Settings, Sun, Moon, Image as ImageIcon, Bell, ClipboardList, CalendarClock, Radio, FileSpreadsheet, BookOpen } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight, Settings, Sun, Moon, Image as ImageIcon, Bell, ClipboardList, CalendarClock, Radio, FileSpreadsheet, BookOpen, Table2 } from 'lucide-react';
 import Logo from './Logo';
 
 const navItems = [
@@ -7,6 +7,7 @@ const navItems = [
   { key: 'candidates', label: 'Candidates', icon: Users },
   { key: 'programmes', label: 'Programmes', icon: Calendar },
   { key: 'registration_review', label: 'Registrations', icon: Clock },
+  { key: 'team_registration_list', label: 'Registration List', icon: Table2 },
   { key: 'results', label: 'Results', icon: Trophy },
   { key: 'pending results', label: 'Pending Results', icon: Clock },
   { key: 'judgment_feedback', label: 'Judgment Feedback', icon: FileSpreadsheet },
@@ -47,8 +48,10 @@ const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
     ? [{ key: 'judge_panel', label: 'Judge Panel', icon: Trophy }]
     : isTeamLeader
     ? [
+        { key: 'team_dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { key: 'candidates', label: 'My Team', icon: Users },
-        { key: 'team_dashboard', label: 'Programme Registration', icon: Calendar },
+        { key: 'team_programme_registration', label: 'Programme Registration', icon: Calendar },
+        { key: 'team_registration_list', label: 'Registration List', icon: Table2 },
         { key: 'team_topic_registration', label: 'Topic Registration', icon: BookOpen }
       ]
     : isVolunteer

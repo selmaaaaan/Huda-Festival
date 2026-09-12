@@ -103,7 +103,7 @@ const SchedulePage = () => {
   }, [programmes, selectedDate]);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-8">
+    <div className="p-6 w-full space-y-8">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Schedule Builder</h1>
       </div>

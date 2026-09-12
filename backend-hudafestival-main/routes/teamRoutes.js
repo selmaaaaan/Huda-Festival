@@ -6,7 +6,8 @@ const {
     deleteTeamById,
     getTeamById,
     updateTeamById,
-    getUnregisteredProgrammes
+    getUnregisteredProgrammes,
+    getRegistrationGrid
 } = require('../controllers/teamController');
 const { protect, authorize } = require('../middlewares/authMiddleware');
 
@@ -15,6 +16,7 @@ router.route('/')
     .post(protect, authorize('admin'), createTeam);
 
 router.get('/:id/unregistered-programmes', protect, getUnregisteredProgrammes);
+router.get('/:id/registration-grid', protect, getRegistrationGrid);
 
 router.route('/:id')
     .get(getTeamById)

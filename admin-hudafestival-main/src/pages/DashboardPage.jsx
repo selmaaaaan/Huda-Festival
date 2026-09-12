@@ -36,7 +36,7 @@ const DashboardPage = () => {
   }, []);
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-8 w-full">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">
           Welcome back, {userInfo?.userName || 'Admin'}

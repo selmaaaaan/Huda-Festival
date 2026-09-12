@@ -21,7 +21,7 @@ const getSettings = async (req, res) => {
 }
 
 const updateSettings = async (req, res) => {
-    const { gradePoints, isRegistrationOpen, maintenanceMode, maintenanceMessage } = req.body;
+    const { gradePoints, isRegistrationOpen, maintenanceMode, maintenanceMessage, topicRegistrationEnabled } = req.body;
 
     try {
         let settings = await Settings.findOne();

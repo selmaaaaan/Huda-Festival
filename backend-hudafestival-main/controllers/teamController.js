@@ -133,11 +133,84 @@ const getUnregisteredProgrammes = async (req, res) => {
     }
 }
 
+const getRegistrationGrid = async (req, res) => {
+    try {
+        const teamId = req.params.id;
+        const { category, stageType } = req.query;
+
+        if (!category) {
+            return res.status(400).json({ message: 'Category is required' });
+        }
+
+        // 1. Fetch Candidates for this team & category
+        const candidates = await Candidate.find({ team: teamId, category }).lean();
+        
+        // 2. Fetch Programmes for this category (and KULLIYYAH since they are general)
+        const progQuery = { category: { $in: [category, 'KULLIYYAH'] } };
+        if (stageType && stageType !== 'All Stages') {
+            progQuery.type = stageType;
+        }
+        const programmes = await Programme.find(progQuery).lean();
+        
+        // 3. Fetch ALL Registrations for this team (to calculate compliance and grid)
+        const registrations = await Registration.find({ team: teamId }).populate('programme', 'type maxParticipants groupSize').lean();
+
+        // 4. Calculate Compliance per candidate
+        // Min 1 Stage + 1 Non-Stage
+        candidates.forEach(cand => {
+            let stageCount = 0;
+            let nonStageCount = 0;
+            
+            registrations.forEach(reg => {
+                if (reg.candidates && reg.candidates.map(c => c.toString()).includes(cand._id.toString())) {
+                    if (reg.programme && reg.programme.type === 'Stage') stageCount++;
+                    if (reg.programme && reg.programme.type === 'Non-Stage') nonStageCount++;
+                }
+            });
+            
+            cand.bylawStatus = {
+                isCompliant: stageCount >= 1 && nonStageCount >= 1,
+                stageCount,
+                nonStageCount
+            };
+        });
+
+        // 5. Calculate Quota info per programme
+        const gridData = {};
+        
+        const responseProgrammes = programmes.map(prog => {
+            const progRegs = registrations.filter(r => r.programme && r.programme._id.toString() === prog._id.toString());
+            const registeredCount = progRegs.length;
+            const maxAllowed = prog.maxParticipants || Infinity;
+            
+            return {
+                ...prog,
+                quotaInfo: {
+                    registeredCount,
+                    maxAllowed,
+                    status: registeredCount >= maxAllowed ? 'FULL' : 'OPEN'
+                }
+            };
+        });
+
+        res.status(200).json({
+            candidates,
+            programmes: responseProgrammes,
+            registrations // returning flat list so frontend can build the cell mapping easily
+        });
+        
+    } catch (error) {
+        console.error(`Error in getRegistrationGrid: ${error.message}`);
+        res.status(500).json({ message: 'Failed to fetch registration grid', error: error.message });
+    }
+};
+
 module.exports = {
     createTeam,
     getAllTeams,
     getTeamById,
     updateTeamById,
     deleteTeamById,
-    getUnregisteredProgrammes
+    getUnregisteredProgrammes,
+    getRegistrationGrid
 }

@@ -7,38 +7,10 @@ import Modal from '../components/Modal';
 import ProgrammeCodePicker from '../components/ProgrammeCodePicker';
 import {
   ClipboardList, Users, Plus, Search, CheckCircle, AlertTriangle,
-  MessageSquare, BookOpen, ChevronRight, X, Filter, Edit3
+  MessageSquare, BookOpen, ChevronRight, X, Filter, Edit3, Trash2
 } from 'lucide-react';
 
 const CATEGORIES = ['All', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
-
-// ─── Preloader ───────────────────────────────────────────────────────────────
-const Preloader = () => {
-  const text = "HUDA FESTIVAL 2K26".split('');
-  return (
-    <motion.div
-      className="fixed inset-0 z-[100] flex items-center justify-center"
-      style={{ background: 'var(--color-surface)' }}
-      initial={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5, ease: 'easeInOut' }}
-    >
-      <div className="flex font-bold text-2xl md:text-4xl tracking-widest overflow-hidden"
-        style={{ color: 'var(--color-primary)' }}>
-        {text.map((letter, i) => (
-          <motion.span key={i}
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.5, delay: i * 0.05, ease: [0.2, 0.65, 0.3, 0.9] }}
-            className="inline-block"
-          >
-            {letter === ' ' ? '\u00A0' : letter}
-          </motion.span>
-        ))}
-      </div>
-    </motion.div>
-  );
-};
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 const StatCard = ({ label, value, accent }) => (
@@ -64,7 +36,6 @@ export default function TeamLeaderDashboard() {
   const [myTopics, setMyTopics] = useState([]);
   const [otherTopics, setOtherTopics] = useState({});
   const [loading, setLoading] = useState(true);
-  const [showPreloader, setShowPreloader] = useState(true);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(0);
 
@@ -91,12 +62,6 @@ export default function TeamLeaderDashboard() {
   const [topicTableSearch, setTopicTableSearch] = useState('');
   const [topicTableStatus, setTopicTableStatus] = useState('all');
   const [topicTableCategory, setTopicTableCategory] = useState('All');
-
-  // ── Preloader timer ─────────────────────────────────────────────────────────
-  useEffect(() => {
-    const t = setTimeout(() => setShowPreloader(false), 2000);
-    return () => clearTimeout(t);
-  }, []);
 
   // ── Data Loading ─────────────────────────────────────────────────────────────
   const loadData = async (isPoll = false) => {
@@ -146,16 +111,25 @@ export default function TeamLeaderDashboard() {
   // ── Registration Form Logic ───────────────────────────────────────────────────
   const selectedProg = programmes.find(p => p._id === form.programmeId);
   const requiredCandidates = selectedProg?.format === 'Group' ? (selectedProg?.groupSize || 1) : 1;
+  
+  const alreadyRegisteredCandidateIds = useMemo(() => {
+    if (!form.programmeId) return [];
+    return myRegistrations
+      .filter(r => r.programme?._id === form.programmeId && r._id !== editId && r.status !== 'rejected')
+      .flatMap(r => r.candidates.map(c => c._id));
+  }, [myRegistrations, form.programmeId, editId]);
+
   const filteredFormCandidates = useMemo(() => {
     if (!selectedProg) return [];
     return candidates.filter(c => {
-      if (c.category !== selectedProg.category) return false;
+      if (selectedProg.category !== 'KULLIYYAH' && c.category !== selectedProg.category) return false;
+      if (alreadyRegisteredCandidateIds.includes(c._id)) return false;
       const q = regSearchQuery.toLowerCase();
       return c.name.toLowerCase().includes(q) ||
              c.admissionNo?.toLowerCase().includes(q) ||
              c.category?.toLowerCase().includes(q);
     });
-  }, [candidates, regSearchQuery, selectedProg]);
+  }, [candidates, regSearchQuery, selectedProg, alreadyRegisteredCandidateIds]);
 
   const handleCandidateToggle = id => {
     setForm(f => {
@@ -208,7 +182,7 @@ export default function TeamLeaderDashboard() {
   // Programmes within the selected category
   const topicProgrammesInCategory = useMemo(() =>
     topicCategory
-      ? eligibleTopicProgrammes.filter(p => p.category === topicCategory)
+      ? eligibleTopicProgrammes.filter(p => p.category === topicCategory || p.category === 'KULLIYYAH')
       : [],
     [eligibleTopicProgrammes, topicCategory]);
 
@@ -238,7 +212,7 @@ export default function TeamLeaderDashboard() {
   };
 
   const openNewRegistration = () => {
-    if (appSettings.isRegistrationOpen === false) return;
+    if (isRegistrationOpen === false) return;
     setSuccess(false); setError('');
     setEditId(null);
     setForm({ programmeId: '', candidateIds: [] });
@@ -247,11 +221,25 @@ export default function TeamLeaderDashboard() {
   };
 
   const openEditRegistration = (reg) => {
-    if (appSettings.isRegistrationOpen === false) return;
+    if (isRegistrationOpen === false) return;
     setSuccess(false); setError('');
     setEditId(reg._id);
     setForm({ programmeId: reg.programme._id, candidateIds: reg.candidates.map(c => c._id) });
     setShowForm(true);
+  };
+
+  const handleDeleteRegistration = async (regId) => {
+    if (!window.confirm('Are you sure you want to delete this registration?')) return;
+    setSubmitting(true);
+    try {
+      await api.delete(`/registrations/${regId}`);
+      await loadData();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to delete registration');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // ── Table Filter Logic ─────────────────────────────────────────────────────────
@@ -276,7 +264,7 @@ export default function TeamLeaderDashboard() {
   }, [myTopics, topicTableSearch, topicTableStatus, topicTableCategory]);
 
   // ── Loading / No-team guard ────────────────────────────────────────────────────
-  if (loading && !showPreloader && !myRegistrations.length) return (
+  if (loading && !myRegistrations.length) return (
     <div className="flex items-center justify-center h-full min-h-screen">
       <div className="text-[var(--color-text-muted)] animate-pulse">Loading portal...</div>
     </div>
@@ -288,12 +276,10 @@ export default function TeamLeaderDashboard() {
       className="min-h-screen pb-16 transition-colors duration-500"
       style={{ background: 'var(--color-bg)', '--color-primary': teamColor, '--color-primary-hover': teamColor }}
     >
-      <AnimatePresence>{showPreloader && <Preloader />}</AnimatePresence>
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5, duration: 0.6 }}
+        transition={{ duration: 0.6 }}
       >
         {/* ── Branded Header ──────────────────────────────────────────────────── */}
         <div
@@ -303,7 +289,7 @@ export default function TeamLeaderDashboard() {
           {/* decorative accent bar */}
           <div className="absolute top-0 left-0 right-0 h-1" style={{ background: teamColor }} />
 
-          <div className="max-w-5xl mx-auto px-6 pt-10 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="w-full px-6 pt-10 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: teamColor }} />
@@ -336,7 +322,7 @@ export default function TeamLeaderDashboard() {
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto px-6 space-y-8 mt-8">
+        <div className="w-full px-6 space-y-8 mt-8">
 
           {/* ── Stats Strip ─────────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -434,10 +420,15 @@ export default function TeamLeaderDashboard() {
                           </td>
                           <td className="px-6 py-4"><StatusBadge status={reg.status} /></td>
                           <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] max-w-xs truncate">{reg.rejectionReason || '—'}</td>
-                          <td className="px-6 py-4 text-right">
-                            {appSettings.isRegistrationOpen !== false && reg.status !== 'approved' && (
+                          <td className="px-6 py-4 text-right flex justify-end gap-2">
+                            {isRegistrationOpen !== false && reg.status !== 'approved' && (
                               <button onClick={() => openEditRegistration(reg)} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1" title="Edit Registration">
                                 <Edit3 size={16} />
+                              </button>
+                            )}
+                            {isRegistrationOpen !== false && (
+                              <button onClick={() => handleDeleteRegistration(reg._id)} className="text-[var(--color-text-muted)] hover:text-red-500 transition-colors p-1" title="Delete Registration">
+                                <Trash2 size={16} />
                               </button>
                             )}
                           </td>
@@ -768,3 +759,4 @@ export default function TeamLeaderDashboard() {
     </div>
   );
 }
+

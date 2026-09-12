@@ -12,6 +12,10 @@ const settingsSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    topicRegistrationEnabled: {
+        type: Boolean,
+        default: true
+    },
     maintenanceMode: {
         type: Boolean,
         default: false

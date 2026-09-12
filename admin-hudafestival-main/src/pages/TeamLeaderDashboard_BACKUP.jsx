@@ -289,7 +289,7 @@ export default function TeamLeaderDashboard() {
           {/* decorative accent bar */}
           <div className="absolute top-0 left-0 right-0 h-1" style={{ background: teamColor }} />
 
-          <div className="max-w-5xl mx-auto px-6 pt-10 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="w-full px-6 pt-10 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: teamColor }} />
@@ -322,7 +322,7 @@ export default function TeamLeaderDashboard() {
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto px-6 space-y-8 mt-8">
+        <div className="w-full px-6 space-y-8 mt-8">
 
           {/* ── Stats Strip ─────────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

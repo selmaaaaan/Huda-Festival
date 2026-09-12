@@ -5,7 +5,9 @@ const {
     registerAdmin,
     teamLeaderLogin,
     createTeamLeader,
-    getAllTeamLeaders
+    getAllTeamLeaders,
+    updateTeamLeader,
+    deleteTeamLeader
 } = require('../controllers/authController')
 
 const { protect, authorize } = require('../middlewares/authMiddleware');
@@ -23,5 +25,8 @@ router.post('/team-leader/login', loginLimiter, teamLeaderLogin);
 router.post('/signup', registerAdmin);
 router.post('/create-team-leader', protect, authorize('admin'), createTeamLeader);
 router.get('/team-leaders', protect, authorize('admin'), getAllTeamLeaders);
+router.route('/team-leaders/:id')
+    .patch(protect, authorize('admin'), updateTeamLeader)
+    .delete(protect, authorize('admin'), deleteTeamLeader);
 
 module.exports = router;
