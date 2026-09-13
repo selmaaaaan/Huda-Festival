@@ -54,7 +54,7 @@ const CandidatesPage = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this candidate?')) {
-      try { await api.delete(`/candidates/${id}`); api.get('/candidates').then(res => setCandidates(res.data)); } catch { setError('Failed to delete candidate.'); }
+      try { await api.delete(`/candidates/${id}`); api.get('/candidates').then(res => setCandidates(res.data)); } catch (err) { setError(err.response?.data?.message || 'Failed to delete candidate.'); }
     }
   };
 

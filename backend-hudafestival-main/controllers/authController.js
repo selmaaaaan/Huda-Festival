@@ -19,8 +19,7 @@ const registerAdmin = async (req, res) => {
         const user = await User.create({
             userName,
             password,
-            role: req.body.role || 'admin',
-            team: req.body.team || undefined
+            role: 'admin'
         })
         if (user) {
             res.status(201).json({

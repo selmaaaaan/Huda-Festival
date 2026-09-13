@@ -14,7 +14,7 @@ router.get('/code/:code/judging', protect, getProgrammeByCodeForJudging);
 
 router.route('/')
   .get(getAllProgrammes)
-  .post(protect, createProgramme);
+  .post(protect, authorize('admin'), createProgramme);
 
 // --- Approve / Publish Routes (Admin Only) ---
 const { publishBatch } = require('../controllers/resultController.js');

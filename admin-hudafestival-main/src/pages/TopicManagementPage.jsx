@@ -62,7 +62,7 @@ export default function TopicManagementPage() {
       alert('Settings saved!');
       await fetchProgrammes();
     } catch (e) {
-      alert('Failed to save settings');
+      alert(e.response?.data?.message || 'Failed to save settings');
     }
   };
 
@@ -76,7 +76,7 @@ export default function TopicManagementPage() {
       });
       if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id);
     } catch (e) {
-      alert('Failed to review topic');
+      alert(e.response?.data?.message || 'Failed to review topic');
     }
   };
 
@@ -91,7 +91,7 @@ export default function TopicManagementPage() {
       setEditingTopicId(null);
       if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id);
     } catch (e) {
-      alert('Failed to update topic');
+      alert(e.response?.data?.message || 'Failed to update topic');
     }
   };
 
@@ -101,7 +101,7 @@ export default function TopicManagementPage() {
       await api.delete(`/topic-registrations/${id}`);
       if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id);
     } catch (e) {
-      alert('Failed to delete topic');
+      alert(e.response?.data?.message || 'Failed to delete topic');
     }
   };
 

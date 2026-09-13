@@ -45,8 +45,7 @@ router.get('/published', async (req, res) => {
 // @desc    Publish a batch of results
 // @route   POST /api/results/batch-publish
 // @access  Private/Admin
-router.post('/batch-publish', protect, publishBatch);
-
+router.post('/batch-publish', protect, authorize('admin'), publishBatch);
 
 // @desc    Get current judge's submitted results
 // @route   GET /api/results/my-submissions
@@ -70,7 +69,7 @@ router.get('/my-submissions', protect, async (req, res) => {
 // @desc    Delete a batch of pending results
 // @route   DELETE /api/results/batch/:batchId
 // @access  Private/Admin
-router.delete('/batch/:batchId', protect, async (req, res) => {
+router.delete('/batch/:batchId', protect, authorize('admin'), async (req, res) => {
     try {
         await Result.deleteMany({ batchId: req.params.batchId, status: 'pending' });
         res.json({ message: 'Batch deleted' });

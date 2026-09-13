@@ -12,18 +12,18 @@ const {
 } = require('../controllers/candidateController');
 
 const upload = require('../config/cloudinary');
-const { protect, optionalProtect, scopeToOwnTeam } = require('../middlewares/authMiddleware');
+const { protect, authorize, optionalProtect, scopeToOwnTeam } = require('../middlewares/authMiddleware');
 
 router.route('/')
     .get(optionalProtect, scopeToOwnTeam, getAllCandidates)
-    .post(protect, upload.single('image'), createCandidate);
+    .post(protect, authorize('admin'), upload.single('image'), createCandidate);
 
 router.route('/search').get(searchCandidates);
 
 router.route('/:id')
     .get(getCandidateById)
-    .put(protect, upload.single('image'), updateCandidate)
-    .delete(protect, deleteCandidate);
+    .put(protect, authorize('admin'), upload.single('image'), updateCandidate)
+    .delete(protect, authorize('admin'), deleteCandidate);
 
 router.route('/:id/minus-points').post(protect, addMinusPoints);
 

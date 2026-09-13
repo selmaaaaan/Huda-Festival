@@ -28,7 +28,7 @@ const ProgrammesPage = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this programme?')) {
-      try { await api.delete(`/programmes/${id}`); fetchProgrammes(); } catch { setError('Failed to delete programme.'); }
+      try { await api.delete(`/programmes/${id}`); fetchProgrammes(); } catch (err) { setError(err.response?.data?.message || 'Failed to delete programme.'); }
     }
   };
 

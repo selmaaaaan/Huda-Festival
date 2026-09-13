@@ -22,7 +22,7 @@ const loginLimiter = rateLimit({
 
 router.post('/login', loginLimiter, loginAdmin);
 router.post('/team-leader/login', loginLimiter, teamLeaderLogin);
-router.post('/signup', registerAdmin);
+router.post('/signup', protect, authorize('admin'), registerAdmin);
 router.post('/create-team-leader', protect, authorize('admin'), createTeamLeader);
 router.get('/team-leaders', protect, authorize('admin'), getAllTeamLeaders);
 router.route('/team-leaders/:id')

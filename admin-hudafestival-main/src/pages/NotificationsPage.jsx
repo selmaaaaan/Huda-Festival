@@ -56,7 +56,7 @@ const NotificationsPage = ({ inline = false }) => {
       // Update local state directly for snappy UI
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, isActive: !currentStatus } : n));
     } catch (err) {
-      alert('Failed to toggle notification status.');
+      alert(err.response?.data?.message || 'Failed to toggle notification status.');
     }
   };
 
@@ -66,7 +66,7 @@ const NotificationsPage = ({ inline = false }) => {
       await api.delete(`/notifications/${id}`);
       fetchNotifications();
     } catch (err) {
-      alert('Failed to delete notification');
+      alert(err.response?.data?.message || 'Failed to delete notification.');
     }
   };
 

@@ -61,7 +61,7 @@ const PendingResultsPage = () => {
             await api.delete(`/results/batch/${batch.batchId}`);
             alert('Batch deleted.');
             fetchPendingData();
-        } catch (err) { alert('Error deleting some results.'); }
+        } catch (err) { alert(err.response?.data?.message || 'Error deleting batch.'); }
     }
   };
 

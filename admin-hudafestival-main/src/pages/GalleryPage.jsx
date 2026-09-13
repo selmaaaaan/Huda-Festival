@@ -96,7 +96,7 @@ const GalleryPage = () => {
       setSuccess('Image deleted.');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
-      setError('Failed to delete image.');
+      setError(err.response?.data?.message || 'Failed to delete image.');
       setTimeout(() => setError(''), 3000);
     }
   };

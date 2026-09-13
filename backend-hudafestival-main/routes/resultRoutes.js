@@ -15,9 +15,9 @@ const certificateRouter = require('./certificateRoutes.js');
 // This route now correctly handles GET, POST, and DELETE for a programme's results
 router.route('/')
     .get(getProgrammeResults)
-    .post(protect, savePendingResults)
+    .post(protect, authorize('admin', 'judge'), savePendingResults)
 
-router.post('/bulk', protect, savePendingResultsBulk);
+router.post('/bulk', protect, authorize('admin', 'judge'), savePendingResultsBulk);
 
 router.patch('/:resultId', protect, authorize('admin', 'judge'), updateResult);
 

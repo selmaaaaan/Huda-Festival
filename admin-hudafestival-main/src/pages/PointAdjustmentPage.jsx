@@ -62,7 +62,7 @@ const PointAdjustmentPage = () => {
             setFormData({ appliesTo: 'team', teamId: '', candidateId: '', type: 'add', points: '', reason: '', remarks: '' });
             fetchData();
         } catch (err) {
-            alert('Failed to save adjustment');
+            alert(err.response?.data?.message || 'Failed to save adjustment');
         } finally {
             setSubmitting(false);
         }
@@ -74,7 +74,7 @@ const PointAdjustmentPage = () => {
             await api.delete(`/point-adjustments/${id}`);
             fetchData();
         } catch (err) {
-            alert('Failed to delete adjustment');
+            alert(err.response?.data?.message || 'Failed to delete adjustment');
         }
     };
 

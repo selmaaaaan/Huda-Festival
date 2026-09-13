@@ -174,6 +174,18 @@ function App() {
     let pageContent = null;
     let pageKey = activePage;
 
+    const role = userInfo?.role;
+    const isAdmin = role === 'admin';
+    const isTeamLeader = role === 'team_leader';
+    const isJudge = role === 'judge';
+    const isVolunteer = role === 'volunteer';
+
+    // Route Guards
+    if (activePage === 'judge_panel' && !isJudge && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
+    if (activePage === 'volunteer_portal' && !isVolunteer && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
+    if (activePage.startsWith('team_') && !isTeamLeader && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
+    if (!['judge_panel', 'volunteer_portal', 'settings', 'notifications'].includes(activePage) && !activePage.startsWith('team_') && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
+
     switch (activePage) {
       case 'judge_panel':
         pageContent = <JudgePanel />;
