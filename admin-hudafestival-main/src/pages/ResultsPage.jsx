@@ -200,6 +200,20 @@ export default function ResultsPage() {
         }
     };
 
+    const handleUnpublish = async () => {
+        if (!confirm('Are you sure you want to UNPUBLISH these results? This will revert team/candidate scores and allow editing again.')) return;
+        
+        try {
+            await api.post(`/programmes/${selectedProg._id}/unpublish`);
+            alert("Results unpublished successfully! You can now edit them.");
+            // Update programme status locally
+            setProgrammes(prev => prev.map(p => p._id === selectedProg._id ? { ...p, isResultPublished: false } : p));
+            loadProgrammeData(selectedProg);
+        } catch (err) {
+            alert(err.response?.data?.message || 'Failed to unpublish results');
+        }
+    };
+
     const handlePublish = async () => {
         if (!confirm('Are you sure you want to PUBLISH these results? This will lock edits and update team scores.')) return;
         
@@ -392,9 +406,16 @@ export default function ResultsPage() {
                                         <div className="flex items-center gap-3 pb-2">
                                             <Button variant="ghost" className="text-xs font-semibold" onClick={resetAll} disabled={isPublished}><XCircle size={14} className="mr-1.5" /> Reset All</Button>
                                             <Button variant="outline" className="text-xs font-semibold" onClick={handleSaveDraft} disabled={isPublished}><Save size={14} className="mr-1.5" /> Save Draft</Button>
+                                            {isPublished && (
+                                                <Button variant="danger" className="text-xs font-semibold" onClick={handleUnpublish}>
+                                                    Unlock for Editing
+                                                </Button>
+                                            )}
+                                            {!isPublished && (
                                             <Button variant="primary" className="text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 border-none shadow-md shadow-indigo-600/20" onClick={handlePublish} disabled={isPublished}>
                                                 <CheckCircle size={14} className="mr-1.5" /> Publish Results
                                             </Button>
+                                            )}
                                         </div>
                                     )}
                                 </div>

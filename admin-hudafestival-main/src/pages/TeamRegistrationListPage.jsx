@@ -325,7 +325,20 @@ export default function TeamRegistrationListPage() {
                                             <td className="px-4 py-3 border-r border-[var(--color-border)] font-medium text-[var(--color-text-muted)] bg-[var(--color-surface)] sticky left-12 z-20">{cand.admissionNo}</td>
                                             <td className="px-4 py-3 border-r border-[var(--color-border)] bg-[var(--color-surface)] sticky left-36 z-20">
                                                 <div className="font-semibold text-[var(--color-text-heading)] truncate">{cand.name}</div>
-                                                <div className="text-[10px] text-[var(--color-text-muted)]">{cand.classLevel || '-'}</div>
+                                                <div className="flex flex-col gap-1 mt-1">
+                                                    <div className="text-[10px] text-[var(--color-text-muted)]">{cand.classLevel || '-'}</div>
+                                                    {cand.bylawStatus?.limits && (
+                                                        <div className="flex gap-1.5 text-[9px] font-semibold tracking-wide">
+                                                            <span className={cand.bylawStatus.individualStageCount >= cand.bylawStatus.limits.stage ? "text-red-500" : "text-[var(--color-primary)]"}>
+                                                                {cand.bylawStatus.individualStageCount}/{cand.bylawStatus.limits.stage} STG
+                                                            </span>
+                                                            <span className="text-[var(--color-border)]">•</span>
+                                                            <span className={cand.bylawStatus.individualNonStageCount >= cand.bylawStatus.limits.nonStage ? "text-red-500" : "text-amber-500"}>
+                                                                {cand.bylawStatus.individualNonStageCount}/{cand.bylawStatus.limits.nonStage} NSTG
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="px-4 py-3 border-r border-[var(--color-border)] bg-[var(--color-surface)] sticky left-[21rem] z-20">
                                                 <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold ${isCompliant ? 'bg-green-500/10 text-green-600' : 'bg-orange-500/10 text-orange-600'}`}>

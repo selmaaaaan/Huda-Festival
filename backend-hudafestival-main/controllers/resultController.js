@@ -81,6 +81,50 @@ const approveForProgramme = async (programmeId, user) => {
 };
 
 // @desc    Approve pending results and calculate points
+const unpublishResults = async (req, res) => {
+    const { id: programmeId } = req.params;
+    try {
+        const programme = await Programme.findById(programmeId);
+        if (!programme) return res.status(404).json({ message: 'Programme not found' });
+        
+        if (!programme.isResultPublished) {
+            return res.status(400).json({ message: 'Results are not currently published.' });
+        }
+
+        const approvedResults = await Result.find({ programme: programmeId, status: 'approved' });
+        
+        for (const result of approvedResults) {
+            const pointsToRevert = result.totalPoints || 0;
+            
+            // Revert candidate points
+            await Candidate.updateOne({ _id: result.candidate }, { $inc: { totalPoints: -pointsToRevert } });
+            
+            // Revert team points
+            const candidate = await Candidate.findById(result.candidate);
+            if (candidate) {
+                await Team.updateOne({ _id: candidate.team }, { $inc: { totalPoints: -pointsToRevert } });
+            }
+            
+            // Set result back to pending
+            result.status = 'pending';
+            result.pointsFromRank = 0;
+            result.pointsFromGrade = 0;
+            result.totalPoints = 0;
+            await result.save();
+        }
+
+        programme.isResultPublished = false;
+        await programme.save();
+
+        await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'RESULT_UNPUBLISHED', entityType: 'Result', details: { programmeId }, req });
+
+        res.status(200).json({ message: 'Results unpublished successfully! You can now edit them.' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to unpublishResults', error: error.message || 'Unknown error' });
+    }
+};
+
 const approvePendingResults = async (req, res) => {
     const { id: programmeId } = req.params;
     try {
@@ -232,4 +276,4 @@ const getJudgmentFeedback = async (req, res) => {
     }
 };
 
-module.exports = { savePendingResults, savePendingResultsBulk, approvePendingResults, getProgrammeResults, publishBatch, updateResult, getJudgmentFeedback };
+module.exports = { savePendingResults, savePendingResultsBulk, approvePendingResults, unpublishResults, getProgrammeResults, publishBatch, updateResult, getJudgmentFeedback };

@@ -19,7 +19,7 @@ module.exports = {
     "BIDĀYAH":      { total: 12, stage: 4, nonStage: 8 },
     "ʾŪLĀ":         { total: 9,  stage: 4, nonStage: 5 },
     "THĀNIYAH":     { total: 9,  stage: 4, nonStage: 5 },
-    "THĀNAWIYYAH":  { total: 10, stage: 4, nonStage: 6 },
+    "THĀNAWIYYAH":  { total: 11, stage: 5, nonStage: 6 },
     "ʿĀLIYAH":      { total: 9,  stage: 4, nonStage: 5 },
   },
 

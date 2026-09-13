@@ -55,6 +55,48 @@ const createRegistration = async (req, res) => {
             }
         }
 
+        
+        const { CATEGORY_ITEM_LIMITS } = require('../config/bylawRules');
+        if (programme.format === 'Individual' && programme.type !== 'Kulliyyah') {
+            for (const candidate of candidates) {
+                const limits = CATEGORY_ITEM_LIMITS[candidate.category];
+                if (limits) {
+                    const existingRegs = await Registration.find({
+                        candidates: candidate._id,
+                        status: { $in: ['pending', 'approved'] }
+                    }).populate('programme');
+
+                    let stageCount = 0;
+                    let nonStageCount = 0;
+
+                    for (const reg of existingRegs) {
+                        const p = reg.programme;
+                        if (p && p.format === 'Individual' && p.type !== 'Kulliyyah' && p.category === candidate.category) {
+                            if (p.stageType.toLowerCase() === 'stage') stageCount++;
+                            if (p.stageType.toLowerCase() === 'non-stage') nonStageCount++;
+                        }
+                    }
+
+                    const isStage = programme.stageType.toLowerCase() === 'stage';
+                    const isNonStage = programme.stageType.toLowerCase() === 'non-stage';
+
+                    const newStageCount = stageCount + (isStage ? 1 : 0);
+                    const newNonStageCount = nonStageCount + (isNonStage ? 1 : 0);
+                    const newTotalCount = newStageCount + newNonStageCount;
+
+                    if (newStageCount > limits.stage) {
+                        return res.status(400).json({ message: `This candidate has already reached the maximum of ${limits.stage} stage items for ${candidate.category}` });
+                    }
+                    if (newNonStageCount > limits.nonStage) {
+                        return res.status(400).json({ message: `This candidate has already reached the maximum of ${limits.nonStage} non-stage items for ${candidate.category}` });
+                    }
+                    if (newTotalCount > limits.total) {
+                        return res.status(400).json({ message: `This candidate has already reached the maximum of ${limits.total} total items for ${candidate.category}` });
+                    }
+                }
+            }
+        }
+
         const newRegistration = new Registration({
             programme: programmeId,
             team: teamId,

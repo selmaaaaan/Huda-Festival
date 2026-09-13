@@ -17,10 +17,11 @@ router.route('/')
   .post(protect, authorize('admin'), createProgramme);
 
 // --- Approve / Publish Routes (Admin Only) ---
-const { publishBatch } = require('../controllers/resultController.js');
+const { publishBatch, unpublishResults } = require('../controllers/resultController.js');
 
 router.post('/publish-batch', protect, authorize('admin'), publishBatch);
 router.route('/:id/approve').post(protect, authorize('admin'), approvePendingResults);
+router.route('/:id/unpublish').post(protect, authorize('admin'), unpublishResults);
 
 // --- Nested Result Routes ---
 router.use('/:id/results', resultRouter);
