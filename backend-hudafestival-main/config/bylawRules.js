@@ -16,7 +16,7 @@ module.exports = {
   // Section VI - max individual ARTS items per category, split between stage/non-stage.
   // Group items and Kulliyyah items are NOT counted against these caps.
   CATEGORY_ITEM_LIMITS: {
-    "BIDĀYAH":      { total: 12, stage: 4, nonStage: 8 },
+    "BIDĀYAH":      { total: 9, stage: 4, nonStage: 5 },
     "ʾŪLĀ":         { total: 9,  stage: 4, nonStage: 5 },
     "THĀNIYAH":     { total: 9,  stage: 4, nonStage: 5 },
     "THĀNAWIYYAH":  { total: 11, stage: 5, nonStage: 6 },

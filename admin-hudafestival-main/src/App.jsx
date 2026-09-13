@@ -184,7 +184,8 @@ function App() {
     if (activePage === 'judge_panel' && !isJudge && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
     if (activePage === 'volunteer_portal' && !isVolunteer && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
     if (activePage.startsWith('team_') && !isTeamLeader && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
-    if (!['judge_panel', 'volunteer_portal', 'settings', 'notifications'].includes(activePage) && !activePage.startsWith('team_') && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
+    if (activePage === 'candidates' && !isTeamLeader && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
+    if (!['judge_panel', 'volunteer_portal', 'settings', 'notifications', 'candidates'].includes(activePage) && !activePage.startsWith('team_') && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
 
     switch (activePage) {
       case 'judge_panel':

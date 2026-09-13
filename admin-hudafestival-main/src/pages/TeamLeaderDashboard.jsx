@@ -132,6 +132,22 @@ export default function TeamLeaderDashboard() {
   }, [candidates, regSearchQuery, selectedProg, alreadyRegisteredCandidateIds]);
 
   const handleCandidateToggle = id => {
+    // Check individual candidate limits before adding
+    const cand = candidates.find(c => c._id === id);
+    if (cand && selectedProg && !form.candidateIds.includes(id)) {
+        if (selectedProg.format !== 'Group' && selectedProg.category !== 'KULLIYYAH') {
+            const isStage = selectedProg.stageType === 'stage';
+            const baseCount = isStage ? cand.bylawStatus?.individualStageCount : cand.bylawStatus?.individualNonStageCount;
+            const limit = isStage ? cand.bylawStatus?.limits?.stage : cand.bylawStatus?.limits?.nonStage;
+            
+            if (limit && baseCount >= limit) {
+                setError(`${cand.name} reached max ${isStage ? 'STG' : 'NSTG'} quota (${limit})`);
+                setTimeout(() => setError(''), 3000);
+                return;
+            }
+        }
+    }
+
     setForm(f => {
       const ids = f.candidateIds.includes(id)
         ? f.candidateIds.filter(c => c !== id)
