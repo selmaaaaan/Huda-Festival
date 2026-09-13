@@ -8,7 +8,7 @@ const programmeSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enum: ['Stage', 'Non-Stage', 'Starred', 'Group', 'General', 'Special'],
+        enum: ['Stage', 'Non-Stage', 'Starred', 'Group', 'General', 'Special', 'Individual', 'Kulliyyah'],
      },
      category: {
         type: String,

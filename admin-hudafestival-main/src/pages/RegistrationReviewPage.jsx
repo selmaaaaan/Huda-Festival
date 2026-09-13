@@ -1,93 +1,74 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import api from '../services/api';
-import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 import ConfirmDialog from '../components/ConfirmDialog';
-import EmptyState from '../components/EmptyState';
 import Modal from '../components/Modal';
-import { ClipboardList, Users, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Users, Plus, Search, CheckCircle, XCircle, Edit3, Trash2, Shield, AlertTriangle, ClipboardList } from 'lucide-react';
+import { motion } from 'framer-motion';
 import ProgrammeCodePicker from '../components/ProgrammeCodePicker';
+import Button from '../components/Button';
+
+const CATEGORIES = ['All', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
+
+const StatCard = ({ label, value, accent }) => (
+  <div className="flex flex-col gap-0.5 px-5 py-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)]">
+    <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">{label}</span>
+    <span className="text-2xl font-bold" style={{ color: accent || 'var(--color-text-heading)' }}>{value}</span>
+  </div>
+);
 
 export default function RegistrationReviewPage() {
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+  const isAdminOrJudge = ['admin', 'judge'].includes(userInfo.role);
+
+  const [registrations, setRegistrations] = useState([]);
   const [programmes, setProgrammes] = useState([]);
   const [teams, setTeams] = useState([]);
-  const [selectedProg, setSelectedProg] = useState(null);
-  const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // Table Filters
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [teamFilter, setTeamFilter] = useState('all');
+
+  // Dialogs & Modals
   const [rejectDialog, setRejectDialog] = useState({ open: false, id: null });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
   const [rejectReason, setRejectReason] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
 
+  // Assign Modal state
   const [assignModal, setAssignModal] = useState({ isOpen: false, mode: 'create', editId: null });
-
   const [assignForm, setAssignForm] = useState({ teamId: '', programmeId: '', candidateIds: [] });
   const [assignSubmitting, setAssignSubmitting] = useState(false);
   const [assignError, setAssignError] = useState('');
   const [teamCandidates, setTeamCandidates] = useState([]);
-  
-  const [filterStatus, setFilterStatus] = useState('ALL');
-  const [filterTeam, setFilterTeam] = useState('');
-  const [filterCategory, setFilterCategory] = useState('ALL');
-  const [filterStageType, setFilterStageType] = useState('ALL');
-  const [visibleProgrammes, setVisibleProgrammes] = useState([]);
-  const [isFiltering, setIsFiltering] = useState(false);
 
-
-  const CATEGORIES = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
-
-  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-  const isAdminOrJudge = ['admin', 'judge'].includes(userInfo.role);
-
-  
-  useEffect(() => {
-    const computeVisibleProgrammes = async () => {
-      setIsFiltering(true);
-      let baseProgrammes = [...programmes];
-
-      if (filterTeam) {
-        if (filterStatus === 'UNREGISTERED') {
-          try {
-            const { data } = await api.get(`/teams/${filterTeam}/unregistered-programmes`);
-            baseProgrammes = data;
-          } catch(e) { console.error(e); }
-        } else if (filterStatus === 'REGISTERED') {
-          try {
-            const { data } = await api.get(`/registrations?team=${filterTeam}&limit=1000`);
-            const regs = data.registrations || data || [];
-            const registeredProgIds = regs.map(r => r.programme._id || r.programme);
-            baseProgrammes = baseProgrammes.filter(p => registeredProgIds.includes(p._id));
-          } catch(e) { console.error(e); }
-        }
-      }
-
-      if (filterCategory !== 'ALL') {
-        baseProgrammes = baseProgrammes.filter(p => p.category === filterCategory);
-      }
-      
-      setVisibleProgrammes(baseProgrammes);
-      setIsFiltering(false);
-    };
-
-    if (programmes.length > 0) {
-       computeVisibleProgrammes();
-    } else {
-       setVisibleProgrammes([]);
-    }
-  }, [filterStatus, filterTeam, filterCategory, programmes]);
-
-  // Fetch programmes and teams
-  useEffect(() => {
-    Promise.all([
-      api.get('/programmes'),
-      api.get('/teams')
-    ]).then(([progRes, teamRes]) => {
+  // Fetch Core Data
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [progRes, teamRes, regRes] = await Promise.all([
+        api.get('/programmes'),
+        api.get('/teams'),
+        api.get('/registrations?limit=10000')
+      ]);
       setProgrammes(progRes.data);
       setTeams(teamRes.data);
-    }).catch(console.error).finally(() => setLoading(false));
+      setRegistrations(regRes.data?.registrations || regRes.data || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
   }, []);
 
-  // Fetch candidates for selected team and programme category
+  // Fetch candidates for assign modal
   useEffect(() => {
     const prog = programmes.find(p => p._id === assignForm.programmeId);
     if (assignForm.teamId && prog) {
@@ -99,15 +80,45 @@ export default function RegistrationReviewPage() {
     }
   }, [assignForm.teamId, assignForm.programmeId, programmes]);
 
-  // Fetch registrations for selected programme
-  useEffect(() => {
-    if (!selectedProg) return;
-    api.get(`/registrations?programme=${selectedProg._id}`).then(r => {
-      const regs = r.data?.registrations || r.data || [];
-      setRegistrations(regs);
-    }).catch(console.error);
-  }, [selectedProg]);
+  // Filtered List for Table (Includes Status Filter)
+  const filteredRegistrations = useMemo(() => {
+    return registrations.filter(r => {
+      const q = searchQuery.toLowerCase();
+      const matchSearch = !q || 
+        r.programme?.name?.toLowerCase().includes(q) || 
+        r.programme?.code?.toLowerCase().includes(q) ||
+        r.team?.name?.toLowerCase().includes(q);
+      
+      const matchStatus = statusFilter === 'all' || r.status === statusFilter;
+      const matchCat = categoryFilter === 'All' || r.programme?.category === categoryFilter;
+      const matchTeam = teamFilter === 'all' || r.team?._id === teamFilter || r.team === teamFilter;
 
+      return matchSearch && matchStatus && matchCat && matchTeam;
+    });
+  }, [registrations, searchQuery, statusFilter, categoryFilter, teamFilter]);
+
+  // Derived Stats (Respects Team, Category, and Search, but ignores Status so the counts remain stable)
+  const statsRegistrations = useMemo(() => {
+    return registrations.filter(r => {
+      const q = searchQuery.toLowerCase();
+      const matchSearch = !q || 
+        r.programme?.name?.toLowerCase().includes(q) || 
+        r.programme?.code?.toLowerCase().includes(q) ||
+        r.team?.name?.toLowerCase().includes(q);
+      
+      const matchCat = categoryFilter === 'All' || r.programme?.category === categoryFilter;
+      const matchTeam = teamFilter === 'all' || r.team?._id === teamFilter || r.team === teamFilter;
+
+      return matchSearch && matchCat && matchTeam;
+    });
+  }, [registrations, searchQuery, categoryFilter, teamFilter]);
+
+  const totalCount = statsRegistrations.length;
+  const approvedCount = statsRegistrations.filter(r => r.status === 'approved').length;
+  const pendingCount = statsRegistrations.filter(r => r.status === 'pending').length;
+  const rejectedCount = statsRegistrations.filter(r => r.status === 'rejected').length;
+
+  // Handlers
   const handleApprove = async (id) => {
     setActionLoading(id);
     try {
@@ -129,13 +140,14 @@ export default function RegistrationReviewPage() {
     finally { setActionLoading(null); }
   };
 
-  const handleCandidateToggle = (id) => {
-    setAssignForm(f => {
-      const ids = f.candidateIds.includes(id)
-        ? f.candidateIds.filter(c => c !== id)
-        : [...f.candidateIds, id];
-      return { ...f, candidateIds: ids };
-    });
+  const handleDeleteConfirm = async () => {
+    setActionLoading(deleteDialog.id);
+    try {
+      await api.delete(`/registrations/${deleteDialog.id}`);
+      setRegistrations(prev => prev.filter(r => r._id !== deleteDialog.id));
+      setDeleteDialog({ open: false, id: null });
+    } catch(e) { alert(e.response?.data?.message || 'Failed to delete'); }
+    finally { setActionLoading(null); }
   };
 
   const openAssignModal = (mode, reg = null) => {
@@ -148,9 +160,18 @@ export default function RegistrationReviewPage() {
       });
       setAssignModal({ isOpen: true, mode: 'edit', editId: reg._id });
     } else {
-      setAssignForm({ teamId: filterTeam || '', programmeId: selectedProg ? selectedProg._id : '', candidateIds: [] });
+      setAssignForm({ teamId: '', programmeId: '', candidateIds: [] });
       setAssignModal({ isOpen: true, mode: 'create', editId: null });
     }
+  };
+
+  const handleCandidateToggle = (id) => {
+    setAssignForm(f => {
+      const ids = f.candidateIds.includes(id)
+        ? f.candidateIds.filter(c => c !== id)
+        : [...f.candidateIds, id];
+      return { ...f, candidateIds: ids };
+    });
   };
 
   const handleAssignSubmit = async (e) => {
@@ -169,299 +190,340 @@ export default function RegistrationReviewPage() {
     
     setAssignSubmitting(true);
     try {
+      // Create/Update Registration
+      let newReg;
       if (assignModal.mode === 'create') {
         const { data } = await api.post('/registrations', {
           programmeId: assignForm.programmeId,
           teamId: assignForm.teamId,
           candidateIds: assignForm.candidateIds,
         });
-        if (selectedProg && assignForm.programmeId === selectedProg._id) {
-          // Add newly created to current view
-          setRegistrations(prev => [data, ...prev]);
-        }
+        newReg = data;
       } else {
         const { data } = await api.patch(`/registrations/${assignModal.editId}`, {
           programmeId: assignForm.programmeId,
           teamId: assignForm.teamId,
           candidateIds: assignForm.candidateIds,
         });
-        if (selectedProg && assignForm.programmeId === selectedProg._id) {
-          setRegistrations(prev => prev.map(r => r._id === assignModal.editId ? data : r));
-        } else if (selectedProg) {
-          // If we edited the programme to a different one, remove it from the current view
-          setRegistrations(prev => prev.filter(r => r._id !== assignModal.editId));
-        }
+        newReg = data;
       }
+
+      // Manually populate missing fields since backend doesn't populate on create/update
+      const t = teams.find(t => t._id === assignForm.teamId);
+      if (t) newReg.team = t;
+      if (prog) newReg.programme = prog;
+      
+      const cands = teamCandidates.filter(c => assignForm.candidateIds.includes(c._id));
+      if (cands.length > 0) newReg.candidates = cands;
+
+      if (assignModal.mode === 'create') {
+        setRegistrations(prev => [newReg, ...prev]);
+      } else {
+        setRegistrations(prev => prev.map(r => r._id === assignModal.editId ? newReg : r));
+      }
+
       setAssignModal({ isOpen: false, mode: 'create', editId: null });
     } catch(err) {
       setAssignError(err.response?.data?.message || 'Submission failed');
     } finally { setAssignSubmitting(false); }
   };
 
-  const handleDeleteConfirm = async () => {
-    setActionLoading(deleteDialog.id);
-    try {
-      await api.delete(`/registrations/${deleteDialog.id}`);
-      setRegistrations(prev => prev.filter(r => r._id !== deleteDialog.id));
-      setDeleteDialog({ open: false, id: null });
-    } catch(e) { alert(e.response?.data?.message || 'Failed to delete'); }
-    finally { setActionLoading(null); }
-  };
-
-  const pendingCount = (prog) => registrations.filter(r => r.programme === prog._id || r.programme?._id === prog._id).filter(r => r.status === 'pending').length;
+  if (loading) return (
+    <div className="flex items-center justify-center h-full min-h-screen">
+      <div className="text-[var(--color-text-muted)] animate-pulse">Loading registrations...</div>
+    </div>
+  );
 
   return (
-    <div className="flex h-full overflow-hidden">
-      {/* Left: Programme list */}
-      <div className="w-72 border-r border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col">
-        <div className="p-4 border-b border-[var(--color-border)]">
-          <h2 className="font-semibold text-[var(--color-text-heading)] flex items-center gap-2">
-            <ClipboardList size={16} /> Programmes
-          </h2>
-        </div>
-        <div className="p-4 border-b border-[var(--color-border)] bg-[var(--color-surface-elevated)] space-y-3">
-            <select
-              value={filterStatus}
-              onChange={e => setFilterStatus(e.target.value)}
-              className="w-full text-xs px-2 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
-            >
-              <option value="ALL">All Status</option>
-              <option value="REGISTERED" disabled={!filterTeam}>Registered (Requires Team)</option>
-              <option value="UNREGISTERED" disabled={!filterTeam}>Unregistered (Requires Team)</option>
-            </select>
-            
-            <select
-              value={filterTeam}
-              onChange={e => {
-                setFilterTeam(e.target.value);
-                if (!e.target.value && filterStatus !== 'ALL') setFilterStatus('ALL');
-              }}
-              className="w-full text-xs px-2 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
-            >
-              <option value="">All Teams</option>
-              {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
-            </select>
-
-            <select
-              value={filterCategory}
-              onChange={e => setFilterCategory(e.target.value)}
-              className="w-full text-xs px-2 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
-            >
-              <option value="ALL">All Categories</option>
-              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <select
-              value={filterStageType}
-              onChange={e => setFilterStageType(e.target.value)}
-              className="w-full text-xs px-2 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)] mt-3"
-            >
-              <option value="ALL">All Stages</option>
-              <option value="Stage">Stage</option>
-              <option value="Non-Stage">Non-Stage</option>
-            </select>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-          {loading || isFiltering ? (
-            <div className="p-4 text-sm text-[var(--color-text-muted)]">Loading...</div>
-          ) : visibleProgrammes.map(prog => (
-            <button key={prog._id} onClick={() => setSelectedProg(prog)}
-              className={`w-full text-left px-4 py-3 border-b border-[var(--color-border)] transition-colors flex items-center justify-between ${
-                selectedProg?._id === prog._id ? 'bg-[var(--color-primary)]/10 border-l-2 border-l-[var(--color-primary)]' : 'hover:bg-[var(--color-surface-elevated)]'
-              }`}>
-              <div>
-                <div className="text-sm font-medium text-[var(--color-text-heading)]">{prog.name}</div>
-                <div className="text-xs text-[var(--color-text-muted)]">{prog.category}</div>
+    <div className="min-h-screen pb-16 bg-[var(--color-bg)] transition-colors duration-500">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+        {/* Header */}
+        <div className="relative overflow-hidden border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+          <div className="w-full px-6 pt-10 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Shield size={16} className="text-[var(--color-primary)]" />
+                <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+                  Admin Control
+                </span>
               </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Right: Registration queue */}
-      <div className="flex-1 overflow-y-auto p-6">
-        {!selectedProg ? (
-          <EmptyState title="Select a Programme" description="Choose a programme from the left to review its registrations" />
-        ) : (
-          <>
-            <div className="mb-6 flex items-start justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-[var(--color-text-heading)]">{selectedProg.name}</h2>
-                <p className="text-sm text-[var(--color-text-muted)]">{selectedProg.category} · {selectedProg.format} · Max {selectedProg.maxParticipants} entries</p>
-              </div>
-              {isAdminOrJudge && (
-                <Button onClick={() => openAssignModal('create')} variant="primary">
-                  <Plus size={14} /> Assign Candidate
-                </Button>
-              )}
+              <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-none text-[var(--color-text-heading)]">
+                Registrations
+              </h1>
+              <p className="mt-3 text-[var(--color-text-body)] max-w-xl text-sm md:text-base">
+                Manage and review all team programme registrations.
+              </p>
             </div>
-            {registrations.length === 0 ? (
-              <EmptyState title="No Registrations" description="No registrations submitted for this programme yet" />
+            
+            {isAdminOrJudge && (
+              <button 
+                onClick={() => openAssignModal('create')}
+                className="flex items-center gap-2 bg-[var(--color-primary)] text-white px-5 py-3 rounded-full font-bold shadow-lg hover:shadow-xl hover:bg-[var(--color-primary-hover)] transition-all active:scale-95"
+              >
+                <Plus size={18} /> New Registration
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="p-6 max-w-[1600px] mx-auto space-y-8">
+          
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard label="Total Submitted" value={totalCount} />
+            <StatCard label="Approved" value={approvedCount} accent="#10b981" />
+            <StatCard label="Pending Review" value={pendingCount} accent="#f59e0b" />
+            <StatCard label="Rejected" value={rejectedCount} accent="#ef4444" />
+          </div>
+
+          {/* Table Header & Filters */}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-[var(--color-surface-elevated)] p-2 rounded-2xl border border-[var(--color-border)]">
+              <div className="relative flex-1 w-full md:max-w-md">
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+                <input
+                  type="text"
+                  placeholder="Search by programme or team..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent border-none pl-11 pr-4 py-2 text-[var(--color-text-heading)] focus:ring-0 placeholder:text-[var(--color-text-muted)]"
+                />
+              </div>
+              
+              <div className="flex flex-wrap items-center gap-2 pr-2">
+                <select
+                  value={teamFilter}
+                  onChange={e => setTeamFilter(e.target.value)}
+                  className="px-3 py-1.5 text-xs font-semibold rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-heading)] outline-none"
+                >
+                  <option value="all">All Teams</option>
+                  {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+                </select>
+
+                <div className="h-6 w-px bg-[var(--color-border)] mx-1" />
+
+                {['all', 'pending', 'approved', 'rejected'].map(status => (
+                  <button key={status} onClick={() => setStatusFilter(status)}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-full capitalize transition-colors ${
+                      statusFilter === status 
+                        ? 'bg-[var(--color-primary)] text-white shadow-md'
+                        : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]'
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.map(cat => (
+                <button key={cat} onClick={() => setCategoryFilter(cat)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${
+                    categoryFilter === cat 
+                      ? 'border-transparent bg-[var(--color-primary)] text-white shadow-md'
+                      : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:border-[var(--color-primary)]'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm">
+            {filteredRegistrations.length === 0 ? (
+              <div className="py-20 flex flex-col items-center justify-center text-center px-4">
+                <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] flex items-center justify-center mb-4">
+                  <ClipboardList size={32} className="text-[var(--color-text-muted)] opacity-50" />
+                </div>
+                <h3 className="text-lg font-bold text-[var(--color-text-heading)]">No registrations found</h3>
+                <p className="text-[var(--color-text-muted)] text-sm mt-1 max-w-sm">
+                  Try adjusting your search or filters to find what you're looking for.
+                </p>
+              </div>
             ) : (
-              <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead className="bg-[var(--color-surface-elevated)]">
-                    <tr>
-                      {['Team','Candidates','Submitted By','Date','Status','Actions'].map(h => (
-                        <th key={h} className="px-4 py-3 text-left text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider border-b border-[var(--color-border)]">{h}</th>
-                      ))}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-[var(--color-surface)] border-b border-[var(--color-border)] text-xs uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
+                      <th className="px-6 py-4">Programme</th>
+                      <th className="px-6 py-4">Team</th>
+                      <th className="px-6 py-4">Candidates</th>
+                      <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {registrations.map(reg => (
-                      <tr key={reg._id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-surface-elevated)] transition-colors">
-                        <td className="px-4 py-3 font-medium">{reg.team?.name || 'N/A'}</td>
-                        <td className="px-4 py-3 text-[var(--color-text-muted)]">
-                          <div className="flex items-center gap-1">
-                            <Users size={12} />
-                            {reg.candidates?.length || 0} candidate(s)
+                  <tbody className="divide-y divide-[var(--color-border)]">
+                    {filteredRegistrations.map(reg => (
+                      <motion.tr key={reg._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                        className="hover:bg-[var(--color-surface)] transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="font-semibold text-[var(--color-text-heading)]">{reg.programme?.name || '—'}</div>
+                          <div className="text-xs text-[var(--color-text-muted)] mt-0.5">{reg.programme?.code || ''}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: reg.team?.color || '#ccc' }}></span>
+                            <span className="text-sm font-medium text-[var(--color-text-heading)]">{reg.team?.name || '—'}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-[var(--color-text-muted)]">{reg.submittedBy?.userName || 'N/A'}</td>
-                        <td className="px-4 py-3 text-[var(--color-text-muted)] whitespace-nowrap">{new Date(reg.createdAt).toLocaleDateString()}</td>
-                        <td className="px-4 py-3"><StatusBadge status={reg.status} /></td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            {reg.status === 'pending' && (
+                        <td className="px-6 py-4 text-[var(--color-text-muted)]">
+                          <div className="flex items-center gap-1.5 bg-[var(--color-surface)] px-2 py-1 rounded-md border border-[var(--color-border)] w-fit text-xs mb-2">
+                            <Users size={12} className="text-[var(--color-primary)]" />
+                            {reg.candidates?.length || 0}
+                          </div>
+                          {reg.candidates?.map(c => (
+                            <div key={c._id || c} className="text-xs truncate max-w-[200px]">{c.name || 'Unknown'}</div>
+                          ))}
+                        </td>
+                        <td className="px-6 py-4">
+                          <StatusBadge status={reg.status} />
+                          {reg.status === 'rejected' && reg.rejectionReason && (
+                             <div className="text-[10px] text-red-500 mt-1 max-w-[120px] truncate" title={reg.rejectionReason}>
+                               {reg.rejectionReason}
+                             </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end gap-2 items-center">
+                            {reg.status === 'pending' && isAdminOrJudge && (
                               <>
-                                <Button size="sm" variant="primary" loading={actionLoading === reg._id} onClick={() => handleApprove(reg._id)}>Approve</Button>
-                                <Button size="sm" variant="danger" onClick={() => setRejectDialog({ open: true, id: reg._id })}>Reject</Button>
+                                <button onClick={() => handleApprove(reg._id)} disabled={actionLoading === reg._id}
+                                  className="p-1.5 text-emerald-500 hover:bg-emerald-500/10 rounded-md transition" title="Approve">
+                                  <CheckCircle size={16} />
+                                </button>
+                                <button onClick={() => setRejectDialog({ open: true, id: reg._id })} disabled={actionLoading === reg._id}
+                                  className="p-1.5 text-amber-500 hover:bg-amber-500/10 rounded-md transition" title="Reject">
+                                  <XCircle size={16} />
+                                </button>
                               </>
                             )}
-                            {reg.status === 'rejected' && (
-                              <span className="text-xs text-[var(--color-text-muted)] mr-2">{reg.rejectionReason}</span>
-                            )}
                             {isAdminOrJudge && (
-                              <div className="flex gap-2 items-center">
-                                <Button 
-                                  size="sm"
-                                  variant="secondary"
-                                  onClick={() => reg.status !== 'approved' && openAssignModal('edit', reg)}
-                                  disabled={reg.status === 'approved'}
-                                  title={reg.status === 'approved' ? "Cannot edit approved registration" : "Edit"}
-                                >
-                                  <Edit2 size={16} />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="danger"
-                                  onClick={() => setDeleteDialog({ open: true, id: reg._id })}
-                                  title="Delete"
-                                >
+                              <>
+                                <button onClick={() => openAssignModal('edit', reg)} className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded-md transition" title="Edit">
+                                  <Edit3 size={16} />
+                                </button>
+                                <button onClick={() => setDeleteDialog({ open: true, id: reg._id })} className="p-1.5 text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-md transition" title="Delete">
                                   <Trash2 size={16} />
-                                </Button>
-                              </div>
+                                </button>
+                              </>
                             )}
                           </div>
                         </td>
-                      </tr>
+                      </motion.tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             )}
-          </>
-        )}
-      </div>
-
-      {/* Reject Dialog */}
-      <ConfirmDialog
-        open={rejectDialog.open}
-        title="Reject Registration"
-        confirmLabel="Reject"
-        variant="danger"
-        onConfirm={handleReject}
-        onCancel={() => { setRejectDialog({ open: false, id: null }); setRejectReason(''); }}
-      >
-        <textarea
-          value={rejectReason}
-          onChange={e => setRejectReason(e.target.value)}
-          placeholder="Enter rejection reason (required)"
-          rows={3}
-          className="w-full px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)] resize-none"
-        />
-      </ConfirmDialog>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Delete Dialog */}
       <ConfirmDialog
         open={deleteDialog.open}
         title="Delete Registration"
+        message="Are you sure you want to delete this registration? This action cannot be undone."
         confirmLabel="Delete"
-        variant="danger"
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteDialog({ open: false, id: null })}
-      >
-        <p className="text-sm text-[var(--color-text-body)]">Are you sure you want to delete this registration? This action cannot be undone.</p>
-      </ConfirmDialog>
+      />
 
-      {/* Assign Candidate Modal */}
-      <Modal isOpen={assignModal.isOpen} onClose={() => setAssignModal({ isOpen: false, mode: 'create', editId: null })} title={assignModal.mode === 'edit' ? "Edit Registration" : "Assign Candidate"}>
+      {/* Reject Dialog */}
+      <Modal isOpen={rejectDialog.open} onClose={() => setRejectDialog({ open: false, id: null })} title="Reject Registration">
+        <div className="space-y-4 text-[var(--color-text-heading)]">
+          <p className="text-sm">Please provide a reason for rejecting this registration.</p>
+          <textarea
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-3 text-sm focus:outline-none focus:border-[var(--color-primary)]"
+            rows="3"
+            placeholder="E.g. Invalid candidate, exceeds limit, etc."
+          />
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="secondary" onClick={() => setRejectDialog({ open: false, id: null })}>Cancel</Button>
+            <Button variant="danger" onClick={handleReject} disabled={actionLoading === rejectDialog.id || !rejectReason.trim()}>
+              {actionLoading === rejectDialog.id ? 'Rejecting...' : 'Reject'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Assign Modal */}
+      <Modal 
+        isOpen={assignModal.isOpen} 
+        onClose={() => setAssignModal({ isOpen: false, mode: 'create', editId: null })}
+        title={assignModal.mode === 'create' ? 'New Registration' : 'Edit Registration'}
+      >
         <form onSubmit={handleAssignSubmit} className="space-y-4">
-          {assignError && <div className="text-sm text-red-400 bg-red-900/20 border border-red-800/40 rounded-lg px-3 py-2">{assignError}</div>}
+          <div>
+            <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">Team</label>
+            <select
+              value={assignForm.teamId}
+              onChange={e => setAssignForm({ ...assignForm, teamId: e.target.value, candidateIds: [] })}
+              className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] text-[var(--color-text-heading)] rounded-xl px-4 py-2.5 focus:outline-none focus:border-[var(--color-primary)]"
+              required
+            >
+              <option value="">Select a team</option>
+              {teams.map(t => (
+                <option key={t._id} value={t._id}>{t.name}</option>
+              ))}
+            </select>
+          </div>
 
           <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">1. Programme Code</label>
+            <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">Programme</label>
             <ProgrammeCodePicker
               programmes={programmes}
               value={assignForm.programmeId}
-              onSelect={(prog) => setAssignForm(f => ({ ...f, programmeId: prog?._id || '', candidateIds: [] }))}
+              onSelect={(prog) => setAssignForm({ ...assignForm, programmeId: prog ? prog._id : '', candidateIds: [] })}
             />
-          </div>
-
-          {(() => {
-            const prog = programmes.find(p => p._id === assignForm.programmeId);
-            const reqCands = prog?.format === 'Group' ? (prog?.groupSize || 1) : 1;
-            return prog && (
-              <div className="p-3 bg-[var(--color-surface-elevated)] rounded-lg text-xs text-[var(--color-text-muted)] space-y-1">
-                <div>Format: <span className="text-[var(--color-text-heading)]">{prog.format}</span></div>
-                <div>Required candidates: <span className="text-[var(--color-text-heading)]">{reqCands}</span></div>
-                <div>Max entries per team: <span className="text-[var(--color-text-heading)]">{prog.maxParticipants}</span></div>
-              </div>
-            );
-          })()}
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">3. Team</label>
-            <select 
-              value={assignForm.teamId} 
-              onChange={e => setAssignForm(f => ({ ...f, teamId: e.target.value, candidateIds: [] }))}
-              className="w-full px-3 py-2 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]">
-              <option value="">Select a team...</option>
-              {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
-            </select>
           </div>
 
           {assignForm.teamId && assignForm.programmeId && (
             <div>
-              <div className="flex items-center justify-between mb-2">
-                {(() => {
-                  const prog = programmes.find(p => p._id === assignForm.programmeId);
-                  const reqCands = prog?.format === 'Group' ? (prog?.groupSize || 1) : 1;
-                  return (
-                    <label className="block text-xs font-medium text-[var(--color-text-muted)]">
-                      4. Select {reqCands} Candidate(s) <span className="text-[var(--color-primary)]">{assignForm.candidateIds.length}/{reqCands}</span>
-                    </label>
-                  );
-                })()}
-              </div>
-              <div className="max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-lg">
+              <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">Select Candidates</label>
+              <div className="max-h-64 overflow-y-auto border border-[var(--color-border)] rounded-xl bg-[var(--color-surface)]">
                 {teamCandidates.length === 0 ? (
-                  <div className="p-4 text-center text-xs text-[var(--color-text-muted)]">No candidates found for this team in the selected category.</div>
-                ) : teamCandidates.map(c => (
-                  <label key={c._id} className="flex items-center gap-3 px-3 py-2 hover:bg-[var(--color-surface-elevated)] cursor-pointer border-b border-[var(--color-border)] last:border-0">
-                    <input type="checkbox" checked={assignForm.candidateIds.includes(c._id)} onChange={() => handleCandidateToggle(c._id)} className="rounded" />
-                    <div>
-                      <div className="text-sm text-[var(--color-text-heading)]">{c.name}</div>
-                      <div className="text-xs text-[var(--color-text-muted)]">{c.admissionNo} · {c.category}</div>
-                    </div>
-                  </label>
-                ))}
+                  <div className="p-4 text-sm text-[var(--color-text-muted)] text-center">No eligible candidates found for this team and category.</div>
+                ) : (
+                  teamCandidates.map(c => {
+                    const isSelected = assignForm.candidateIds.includes(c._id);
+                    return (
+                      <div 
+                        key={c._id} 
+                        onClick={() => handleCandidateToggle(c._id)}
+                        className={`p-3 border-b border-[var(--color-border)] last:border-0 cursor-pointer flex items-center justify-between transition-colors ${isSelected ? 'bg-[var(--color-primary)]/10' : 'hover:bg-[var(--color-surface-elevated)]'}`}
+                      >
+                        <div>
+                          <div className={`text-sm font-medium ${isSelected ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-heading)]'}`}>{c.name}</div>
+                          <div className="text-xs text-[var(--color-text-muted)]">{c.admissionNo}</div>
+                        </div>
+                        {isSelected && <CheckCircle size={16} className="text-[var(--color-primary)]" />}
+                      </div>
+                    )
+                  })
+                )}
               </div>
             </div>
           )}
-          
-          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)] mt-6">
-            <Button type="button" variant="secondary" onClick={() => setAssignModal({ isOpen: false, mode: 'create', editId: null })}>Cancel</Button>
-            <Button type="submit" variant="primary" loading={assignSubmitting}>{assignModal.mode === 'edit' ? 'Update Registration' : 'Assign Candidate'}</Button>
+
+          {assignError && (
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm flex items-center gap-2">
+              <AlertTriangle size={16} /> {assignError}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="secondary" onClick={() => setAssignModal({ isOpen: false, mode: 'create', editId: null })}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" disabled={assignSubmitting}>
+              {assignSubmitting ? 'Saving...' : (assignModal.mode === 'create' ? 'Register' : 'Save Changes')}
+            </Button>
           </div>
         </form>
       </Modal>

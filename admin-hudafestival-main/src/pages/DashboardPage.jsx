@@ -3,9 +3,11 @@ import { Users, Calendar, Trophy, BarChart3 } from 'lucide-react';
 import api from '../services/api';
 import StatCard from '../components/StatCard';
 import GettingStartedCard from '../components/GettingStartedCard';
+import DashboardHero from '../components/DashboardHero';
 
 const DashboardPage = () => {
   const [stats, setStats] = useState({ teams: 0, programmes: 0, candidates: 0, published: 0 });
+  const [progressData, setProgressData] = useState(null);
   const [leaderboard, setLeaderboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
@@ -13,11 +15,12 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [teamsRes, progsRes, candsRes, lbRes] = await Promise.all([
+        const [teamsRes, progsRes, candsRes, lbRes, progRes] = await Promise.all([
           api.get('/teams'),
           api.get('/programmes'),
           api.get('/candidates'),
-          api.get('/leaderboards')
+          api.get('/leaderboards'),
+          api.get('/settings/dashboard-progress')
         ]);
         setStats({
           teams: teamsRes.data.length,
@@ -26,6 +29,7 @@ const DashboardPage = () => {
           published: progsRes.data.filter(p => p.isResultPublished).length,
         });
         setLeaderboard(lbRes.data);
+        setProgressData(progRes.data);
       } catch (err) {
         console.error('Failed to load dashboard stats:', err);
       } finally {
@@ -36,29 +40,27 @@ const DashboardPage = () => {
   }, []);
 
   return (
-    <div className="p-8 w-full">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">
-          Welcome back, {userInfo?.userName || 'Admin'}
-        </h1>
-        <p className="text-sm text-[var(--color-text-body)] mt-1">Operations dashboard overview.</p>
-      </div>
+    <div className="p-8 w-full max-w-[1600px] mx-auto">
+      <DashboardHero 
+        userName={userInfo?.userName || 'Admin'} 
+        roleName={userInfo?.role?.replace('_', ' ') || 'Admin'} 
+      />
 
       {loading ? (
         <p className="text-[var(--color-text-body)]">Loading metrics...</p>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <StatCard icon={Users} label="Active Teams" value={stats.teams} color="text-[var(--color-primary)]" />
-            <StatCard icon={Calendar} label="Programmes" value={stats.programmes} color="text-amber-500" />
-            <StatCard icon={Trophy} label="Candidates" value={stats.candidates} color="text-emerald-500" />
-            <StatCard icon={BarChart3} label="Published Results" value={stats.published} color="text-indigo-500" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <StatCard icon={Users} label="Active Teams" value={stats.teams} color="bg-red-500 text-white" />
+            <StatCard icon={Calendar} label="Programmes" value={stats.programmes} color="bg-orange-500 text-white" />
+            <StatCard icon={Trophy} label="Candidates" value={stats.candidates} color="bg-emerald-500 text-white" />
+            <StatCard icon={BarChart3} label="Published Results" value={stats.published} color="bg-indigo-600 text-white" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Getting Started Guide */}
             <div className="lg:col-span-1">
-               <GettingStartedCard counts={stats} />
+               <GettingStartedCard progressData={progressData} />
             </div>
 
             {/* Scoreboard */}

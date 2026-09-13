@@ -24,7 +24,7 @@ const StatCard = ({ label, value, accent }) => (
 export default function TeamTopicRegistrationPage() {
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const teamId = userInfo.team?._id || userInfo.team;
-  const teamColor = userInfo.team?.color || '#4f46e5';
+  const teamColor = 'var(--color-primary)';
   const teamName = userInfo.team?.name || 'Your Team';
 
   // ── Core State ─────────────────────────────────────────────────────────────
@@ -271,55 +271,56 @@ export default function TeamTopicRegistrationPage() {
   return (
     <div
       className="min-h-screen pb-16 transition-colors duration-500"
-      style={{ background: 'var(--color-bg)', '--color-primary': teamColor, '--color-primary-hover': teamColor }}
+      style={{ background: 'var(--color-bg)' }}
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
+        <div className="p-8 w-full max-w-[1600px] mx-auto">
         {/* ── Branded Header ──────────────────────────────────────────────────── */}
         <div
-          className="relative overflow-hidden border-b border-[var(--color-border)]"
+          className="relative overflow-hidden rounded-2xl border border-[var(--color-border)] shadow-sm mb-8"
           style={{ background: `linear-gradient(135deg, color-mix(in srgb, ${teamColor} 12%, transparent), transparent)` }}
         >
-          {/* decorative accent bar */}
-          <div className="absolute top-0 left-0 right-0 h-1" style={{ background: teamColor }} />
+          {/* Decorative Mosque Silhouette */}
+          <div className="absolute right-0 bottom-0 opacity-10 pointer-events-none w-2/3 h-full overflow-hidden flex justify-end items-end">
+            <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="w-full h-full fill-current mix-blend-multiply dark:mix-blend-screen" style={{ color: teamColor }}>
+              <path d="M70,50 L70,30 Q70,25 65,25 Q60,25 60,30 L60,50 Z M80,50 L80,10 Q80,0 85,0 Q90,0 90,10 L90,50 Z M40,50 L40,20 Q40,10 45,10 Q50,10 50,20 L50,50 Z M10,50 L10,35 Q10,30 15,30 Q20,30 20,35 L20,50 Z" />
+            </svg>
+          </div>
 
-          <div className="w-full px-6 pt-10 pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="relative z-10 w-full px-8 py-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: teamColor }} />
-                <span className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
-                  Team Portal
-                </span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/60 dark:bg-black/20 backdrop-blur-sm rounded-full text-xs font-semibold border border-white/40 dark:border-white/10 mb-4 shadow-sm" style={{ color: teamColor }}>
+                ✨ <span className="uppercase tracking-wider">Team Portal</span>
               </div>
-              <h1 className="text-3xl md:text-5xl font-black tracking-tight leading-none text-[var(--color-text-heading)]">
-                Programme<br />
-                <span style={{ color: teamColor }}>Registration</span>
+              <h1 className="text-3xl md:text-4xl font-bold text-[var(--color-text-heading)]">
+                Topic Registration
               </h1>
-              <p className="mt-3 text-[var(--color-text-body)] text-sm max-w-md">
-                Submit and track your team's programme registrations and topic applications for Huda Festival.
+              <p className="text-[var(--color-text-muted)] mt-2 font-medium">
+                Submit and track your team's topic applications for Huda Festival.
               </p>
             </div>
 
             <div className="flex flex-col items-start md:items-end gap-2 shrink-0">
-              <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-heading)]">
-                <span className="w-3 h-3 rounded-full shadow" style={{ background: teamColor }} />
+              <div className="flex items-center gap-2 text-sm font-bold text-[var(--color-text-heading)] px-4 py-2 bg-white/50 dark:bg-black/20 rounded-full border border-white/30 backdrop-blur-sm shadow-sm">
+                <span className="w-3 h-3 rounded-full" style={{ background: teamColor }} />
                 {teamName}
               </div>
-              <span className="text-xs text-[var(--color-text-muted)]">
+              <span className="text-xs text-[var(--color-text-muted)] font-medium mb-1">
                 Updated {lastUpdated}s ago
               </span>
-              <Button onClick={openNewRegistration} variant="primary" className="mt-1">
+              <Button onClick={() => setShowTopicForm(true)} variant="primary" className="shadow-md">
                 <Plus size={15} />
-                {activeTab === 'topics' ? 'Submit Topic' : 'New Registration'}
+                Submit Topic
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="w-full px-6 space-y-8 mt-8">
+        <div className="w-full space-y-8">
 
           {/* ── Stats Strip ─────────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -524,6 +525,7 @@ export default function TeamTopicRegistrationPage() {
             </div>
           )}
         </div>
+        </div>
       </motion.div>
 
       {/* ═══════════════════════════════════════════════════════════════════════
@@ -573,7 +575,7 @@ export default function TeamTopicRegistrationPage() {
                   <div className="flex justify-between items-center">
                     <label className="text-sm font-medium text-[var(--color-text-heading)]">Assign Candidates</label>
                     <div className="text-xs font-semibold px-2 py-1 rounded-full"
-                      style={{ background: `${teamColor}20`, color: teamColor }}>
+                      style={{ background: `color-mix(in srgb, ${teamColor} 20%, transparent)`, color: teamColor }}>
                       {form.candidateIds.length} / {requiredCandidates} Selected
                     </div>
                   </div>

@@ -48,6 +48,26 @@ export default function ResultsPage() {
         loadInitial();
     }, []);
 
+    const handleCodeLetterChange = async (candidateId, newLetter) => {
+        if (!selectedProg) return;
+        try {
+            await api.post(`/programmes/${selectedProg._id}/code-letters`, {
+                assignments: [{ candidateId, letter: newLetter }]
+            });
+            // Update local state without full reload
+            setCodeLetters(prev => {
+                const existing = prev.find(cl => cl.candidate?._id === candidateId);
+                if (existing) {
+                    return prev.map(cl => cl.candidate?._id === candidateId ? { ...cl, letter: newLetter.toUpperCase() } : cl);
+                }
+                return [...prev, { candidate: { _id: candidateId }, letter: newLetter.toUpperCase() }];
+            });
+        } catch (err) {
+            console.error('Failed to update code letter', err);
+            alert('Failed to update code letter');
+        }
+    };
+
     const loadProgrammeData = async (prog) => {
         if (hasUnsavedChanges) {
             if (!confirm('You have unsaved changes. Discard?')) return;
@@ -60,7 +80,7 @@ export default function ResultsPage() {
         try {
             const [resultsRes, regsRes, codesRes] = await Promise.all([
                 api.get(`/programmes/${prog._id}/results`),
-                api.get(`/registrations?programme=${prog._id}&status=approved`),
+                api.get(`/registrations?programme=${prog._id}`),
                 api.get(`/programmes/${prog._id}/code-letters`).catch(() => ({ data: [] }))
             ]);
 
@@ -190,7 +210,7 @@ export default function ResultsPage() {
             await api.post(`/programmes/${selectedProg._id}/approve`);
             alert("Results published successfully!");
             // Update programme status locally
-            setProgrammes(prev => prev.map(p => p._id === selectedProg._id ? { ...p, resultPublished: true } : p));
+            setProgrammes(prev => prev.map(p => p._id === selectedProg._id ? { ...p, isResultPublished: true } : p));
             loadProgrammeData(selectedProg);
         } catch (err) {
             alert(err.response?.data?.message || 'Failed to publish results');
@@ -205,7 +225,7 @@ export default function ResultsPage() {
         return sum + calculatePoints(selectedProg, r.rank, r.grade);
     }, 0);
 
-    const isPublished = programmes.find(p => p._id === selectedProg?._id)?.resultPublished;
+    const isPublished = programmes.find(p => p._id === selectedProg?._id)?.isResultPublished;
 
     return (
         <div className="p-8 h-full flex flex-col space-y-6 w-full bg-[var(--color-background)]">
@@ -266,8 +286,8 @@ export default function ResultsPage() {
                                         <Trophy size={14} className="text-[var(--color-primary)]" />
                                         {prog.name}
                                     </div>
-                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${prog.resultPublished ? 'bg-green-500/10 text-green-600' : 'bg-gray-500/10 text-gray-500'}`}>
-                                        {prog.resultPublished ? 'Published' : 'Draft'}
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${prog.isResultPublished ? 'bg-green-500/10 text-green-600' : 'bg-gray-500/10 text-gray-500'}`}>
+                                        {prog.isResultPublished ? 'Published' : 'Draft'}
                                     </span>
                                 </div>
                                 <div className="text-[11px] text-[var(--color-text-muted)] flex justify-between items-center pl-5">
@@ -381,15 +401,6 @@ export default function ResultsPage() {
                                 
                                 <div className="flex-1 overflow-y-auto">
                                     {activeTab === 'Results Entry' && (
-                                        codeLetters.length === 0 && participants.length > 0 ? (
-                                            <div className="p-16 text-center flex flex-col items-center justify-center h-full">
-                                                <div className="w-20 h-20 bg-yellow-500/10 text-yellow-600 rounded-full flex items-center justify-center mb-6">
-                                                    <AlertTriangle size={40} />
-                                                </div>
-                                                <h3 className="text-xl font-bold text-[var(--color-text-heading)]">No Code Letters Assigned</h3>
-                                                <p className="text-[var(--color-text-muted)] mt-2 max-w-md">Code letters must be assigned to participants before entering results to maintain blind judging protocols. Please assign them via the Volunteer portal.</p>
-                                            </div>
-                                        ) : (
                                             <table className="w-full text-left text-sm border-collapse">
                                                 <thead className="bg-[var(--color-surface-elevated)] sticky top-0 z-10 shadow-sm border-b border-[var(--color-border)]">
                                                     <tr>
@@ -407,27 +418,31 @@ export default function ResultsPage() {
                                                     {participants.map((cand, idx) => {
                                                         const res = resultsMap[cand._id] || { rank: '', grade: '', remarks: '' };
                                                         const codeObj = codeLetters.find(cl => cl.candidate?._id === cand._id);
-                                                        const codeLetter = codeObj ? codeObj.letter : '—';
+                                                        const codeLetter = codeObj ? codeObj.letter : '';
                                                         const pts = calculatePoints(selectedProg, res.rank, res.grade);
                                                         
                                                         return (
                                                             <tr key={cand._id} className="hover:bg-[var(--color-surface-elevated)]/30 transition-colors">
                                                                 <td className="px-6 py-5 font-bold text-[var(--color-text-heading)]">{idx + 1}</td>
                                                                 <td className="px-6 py-5">
-                                                                    <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-bold flex items-center justify-center text-lg shadow-sm">
-                                                                        {codeLetter}
-                                                                    </div>
+                                                                    <input
+                                                                        type="text"
+                                                                        defaultValue={codeLetter}
+                                                                        placeholder="—"
+                                                                        onBlur={(e) => handleCodeLetterChange(cand._id, e.target.value)}
+                                                                        className="w-16 h-10 text-center rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-bold text-lg shadow-sm border border-transparent focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] focus:outline-none uppercase"
+                                                                    />
                                                                 </td>
                                                                 <td className="px-6 py-5">
-                                                                    <div className="font-bold text-[var(--color-text-heading)] text-sm mb-1">{cand.name}</div>
-                                                                    <div className="text-xs text-[var(--color-text-muted)] font-medium">{cand.team?.name || 'Unknown Team'} • {selectedProg.category}</div>
+                                                                    <div className="font-bold text-[var(--color-text-heading)] mb-1">{cand.name}</div>
+                                                                    <div className="text-xs font-semibold text-[var(--color-text-muted)] bg-gray-100 inline-block px-2 py-1 rounded-md">{cand.team?.name}</div>
                                                                 </td>
                                                                 <td className="px-6 py-5">
                                                                     <div className="flex gap-4">
-                                                                        {['1', '2', '3'].map(rank => (
-                                                                            <label key={rank} className={`flex items-center gap-2 cursor-pointer transition-opacity ${isPublished ? 'opacity-50' : 'hover:opacity-80'}`}>
-                                                                                <input type="radio" name={`rank-${cand._id}`} value={rank} checked={res.rank == rank} onChange={() => handleResultChange(cand._id, 'rank', rank)} disabled={isPublished} className="w-4 h-4 accent-[var(--color-primary)]" />
-                                                                                <span className="text-sm font-medium text-[var(--color-text-muted)]">{rank === '1' ? 'First' : rank === '2' ? 'Second' : 'Third'}</span>
+                                                                        {[1, 2, 3].map(pos => (
+                                                                            <label key={pos} className={`flex items-center gap-2 cursor-pointer transition-opacity ${isPublished ? 'opacity-50' : 'hover:opacity-80'}`}>
+                                                                                <input type="radio" name={`rank-${cand._id}`} value={pos} checked={res.rank == pos} onChange={() => handleResultChange(cand._id, 'rank', pos)} disabled={isPublished} className="w-4 h-4 accent-[var(--color-primary)]" />
+                                                                                <span className="text-sm font-bold text-[var(--color-text-heading)]">{pos}</span>
                                                                             </label>
                                                                         ))}
                                                                     </div>
@@ -465,7 +480,6 @@ export default function ResultsPage() {
                                                     })}
                                                 </tbody>
                                             </table>
-                                        )
                                     )}
 
                                     {activeTab === 'Participants' && (

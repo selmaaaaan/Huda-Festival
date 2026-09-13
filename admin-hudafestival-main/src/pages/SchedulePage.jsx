@@ -130,7 +130,11 @@ const SchedulePage = () => {
 
           <div className="lg:col-span-2 space-y-1">
              <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">Programme</label>
-             <ProgrammeCodePicker onSelect={setSelectedProgramme} selectedCode={selectedProgramme?.code} />
+             <ProgrammeCodePicker 
+               programmes={programmes}
+               value={selectedProgramme?._id}
+               onSelect={setSelectedProgramme} 
+             />
           </div>
           
           <div className="lg:col-span-1">

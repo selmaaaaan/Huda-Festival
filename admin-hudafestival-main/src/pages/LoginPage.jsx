@@ -34,13 +34,6 @@ const LoginPage = ({ onLoginSuccess }) => {
     }
   };
 
-  const handleDemoFill = () => {
-    setUserName(import.meta.env.VITE_DEMO_ADMIN_USERNAME || 'admin');
-    setPassword(import.meta.env.VITE_DEMO_ADMIN_PASSWORD || 'admin');
-  };
-
-  const showDemoButton = import.meta.env.MODE !== 'production' || import.meta.env.VITE_SHOW_DEMO_LOGIN === 'true';
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] text-[var(--color-text-heading)]">
       <div className="w-full max-w-md p-10 space-y-8 bg-[var(--color-surface)] rounded-2xl shadow-2xl border border-[var(--color-border)]">
@@ -100,16 +93,6 @@ const LoginPage = ({ onLoginSuccess }) => {
           </Button>
         </form>
 
-        {showDemoButton && (
-          <div className="text-center mt-6">
-            <button
-              onClick={handleDemoFill}
-              className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-heading)] underline decoration-[var(--color-border)] underline-offset-2 transition-colors"
-            >
-              Load test credentials
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

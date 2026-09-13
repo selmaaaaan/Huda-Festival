@@ -3,7 +3,7 @@ const Candidate = require('../models/Candidate');
 const Programme = require('../models/Programme');
 const Settings = require('../models/Settings');
 const { CATEGORIES, STARRED_ITEMS, REGISTRATION_REQUIRED, CURB_GROUPS } = require('../config/bylawRules');
-const cloudinary = require('../config/cloudinary');
+const cloudinary = require('cloudinary').v2;
 
 function normalize(str) {
     if (!str) return "";
@@ -289,6 +289,7 @@ const getBylawUrl = async (req, res) => {
         const settings = await Settings.findOne();
         res.json({ url: settings ? settings.get('bylawUrl') : null });
     } catch (error) {
+        console.error('getBylawUrl error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };

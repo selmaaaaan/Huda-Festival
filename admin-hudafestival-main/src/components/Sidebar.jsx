@@ -20,25 +20,27 @@ const navItems = [
   { key: 'settings', label: 'Settings', icon: Settings },
 ];
 
+import api from '../services/api';
+
 const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const [teamColor, setTeamColor] = useState('var(--color-primary)');
 
   useEffect(() => {
-    setIsDark(document.documentElement.getAttribute('data-theme') === 'dark');
-  }, []);
-
-  const toggleTheme = () => {
-    if (isDark) {
-      document.documentElement.removeAttribute('data-theme');
-      localStorage.setItem('huda-admin-theme', 'light');
-      setIsDark(false);
+    // If team_leader, fetch team to get color
+    if (userInfo?.role === 'team_leader' && userInfo?.team) {
+      api.get('/teams')
+        .then(res => {
+          const myTeam = res.data.find(t => t._id === userInfo.team);
+          if (myTeam && myTeam.color) {
+            setTeamColor(myTeam.color);
+          }
+        })
+        .catch(console.error);
     } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('huda-admin-theme', 'dark');
-      setIsDark(true);
+       setTeamColor('var(--color-primary)');
     }
-  };
+  }, [userInfo]);
 
   const isTeamLeader = userInfo?.role === 'team_leader';
   const isJudge = userInfo?.role === 'judge';
@@ -52,7 +54,8 @@ const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
         { key: 'candidates', label: 'My Team', icon: Users },
         { key: 'team_programme_registration', label: 'Programme Registration', icon: Calendar },
         { key: 'team_registration_list', label: 'Registration List', icon: Table2 },
-        { key: 'team_topic_registration', label: 'Topic Registration', icon: BookOpen }
+        { key: 'team_topic_registration', label: 'Topic Registration', icon: BookOpen },
+        { key: 'notifications', label: 'Notifications', icon: Bell }
       ]
     : isVolunteer
     ? [
@@ -89,32 +92,27 @@ const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
         })}
       </nav>
 
-      {/* Logout & Collapse */}
-      <div className="px-3 py-4 border-t border-[var(--color-border)] space-y-2">
-        <button
-          onClick={onLogout}
-          title={collapsed ? "Logout" : undefined}
-          className={`w-full flex items-center ${collapsed ? 'justify-center' : 'gap-3 px-4'} py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/10 transition-colors duration-150`}
-        >
-          <LogOut size={18} className="shrink-0" />
-          {!collapsed && <span>Logout</span>}
+      {/* User Profile & Controls */}
+      <div className="p-3 border-t border-[var(--color-border)] space-y-2">
+        <button onClick={() => setActivePage('settings')} className={`w-full flex items-center ${collapsed ? 'justify-center' : 'gap-3 px-3'} py-2 rounded-xl text-sm transition-colors hover:bg-[var(--color-surface-elevated)] cursor-pointer`} title="Settings">
+          <div className="w-9 h-9 rounded-full text-white flex items-center justify-center font-bold shrink-0" style={{ backgroundColor: teamColor }}>
+            {userInfo?.userName?.charAt(0)?.toUpperCase() || 'U'}
+          </div>
+          {!collapsed && (
+            <div className="flex-1 overflow-hidden text-left">
+              <div className="font-semibold text-[var(--color-text-heading)] truncate leading-tight">{userInfo?.userName || 'User'}</div>
+              <div className="text-[10px] text-[var(--color-text-muted)] capitalize truncate mt-0.5">{userInfo?.role?.replace('_', ' ') || 'Admin'}</div>
+            </div>
+          )}
         </button>
         
-        <div className="flex gap-2">
-          <button
-            onClick={toggleTheme}
-            title={collapsed ? (isDark ? "Light Mode" : "Dark Mode") : undefined}
-            className={`flex-1 flex items-center justify-center py-2.5 rounded-xl text-sm text-[var(--color-text-body)] hover:bg-[var(--color-surface-elevated)] hover:text-[var(--color-text-heading)] transition-colors`}
-          >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className={`flex-1 flex items-center justify-center py-2.5 rounded-xl text-sm text-[var(--color-text-body)] hover:bg-[var(--color-surface-elevated)] hover:text-[var(--color-text-heading)] transition-colors`}
-          >
-            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          </button>
-        </div>
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          className={`w-full flex items-center justify-center py-2.5 rounded-xl text-sm text-[var(--color-text-body)] hover:bg-[var(--color-surface-elevated)] hover:text-[var(--color-text-heading)] transition-colors`}
+        >
+          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
       </div>
     </aside>
   );

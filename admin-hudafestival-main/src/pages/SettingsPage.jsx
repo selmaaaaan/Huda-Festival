@@ -232,6 +232,28 @@ const SettingsPage = () => {
 
   if (loading) return <div className="p-6">Loading settings...</div>;
 
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+  const isAdmin = userInfo.role === 'admin' || userInfo.role === 'super_admin';
+
+  const THEME_COLORS = [
+    { name: 'Red', hex: '#E11D48', hover: '#BE123C' },
+    { name: 'Blue', hex: '#2563EB', hover: '#1D4ED8' },
+    { name: 'Green', hex: '#16A34A', hover: '#15803D' },
+    { name: 'Purple', hex: '#9333EA', hover: '#7E22CE' },
+    { name: 'Orange', hex: '#EA580C', hover: '#C2410C' },
+    { name: 'Teal', hex: '#0D9488', hover: '#0F766E' },
+  ];
+
+  const handleThemeSelect = (theme) => {
+    document.documentElement.style.setProperty('--color-primary', theme.hex);
+    document.documentElement.style.setProperty('--color-primary-hover', theme.hover);
+    localStorage.setItem('huda-admin-primary-theme', JSON.stringify(theme));
+    // Force a re-render to update the active circle state if we want, but CSS handles it
+    setSettings({ ...settings }); 
+  };
+
+  const currentTheme = JSON.parse(localStorage.getItem('huda-admin-primary-theme')) || THEME_COLORS[0];
+
   return (
     <div className="p-6 w-full space-y-8">
       <div className="flex items-center justify-between mb-2">
@@ -240,8 +262,27 @@ const SettingsPage = () => {
 
       {error && <div className="p-4 bg-red-50 text-red-600 rounded-lg">{error}</div>}
 
+      {/* Theme Preferences (Visible to everyone) */}
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-[var(--color-text-heading)] mb-4">Registration Status</h2>
+        <h2 className="text-lg font-semibold text-[var(--color-text-heading)] mb-4">Theme Preferences</h2>
+        <p className="text-sm text-[var(--color-text-muted)] mb-4">Select your preferred accent color for the application.</p>
+        <div className="flex items-center gap-4">
+          {THEME_COLORS.map(theme => (
+            <button
+              key={theme.name}
+              onClick={() => handleThemeSelect(theme)}
+              className={`w-10 h-10 rounded-full cursor-pointer transition-transform hover:scale-110 flex items-center justify-center ${currentTheme.hex === theme.hex ? 'ring-2 ring-offset-2 ring-offset-[var(--color-bg)]' : ''}`}
+              style={{ backgroundColor: theme.hex, '--tw-ring-color': theme.hex }}
+              title={theme.name}
+            />
+          ))}
+        </div>
+      </div>
+
+      {isAdmin && (
+        <>
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6">
+            <h2 className="text-lg font-semibold text-[var(--color-text-heading)] mb-4">Registration Status</h2>
         <div className="flex items-center justify-between mb-6">
           <div>
             <p className="text-[var(--color-text-heading)] font-medium">Allow New Registrations</p>
@@ -525,6 +566,8 @@ const SettingsPage = () => {
         onCancel={() => setShowConfirmToggleTopic(false)}
         confirmText={settings.topicRegistrationEnabled ? "Close Topic Registration" : "Open Topic Registration"}
       />
+      </>
+      )}
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { Users, Calendar, Trophy, Star, Bell } from 'lucide-react';
 import api from '../services/api';
 import StatCard from '../components/StatCard';
 import NotificationsPage from './NotificationsPage';
+import DashboardHero from '../components/DashboardHero';
 
 export default function TeamPortalDashboard() {
   const [stats, setStats] = useState({ candidates: 0, programmes: 0, points: 0, rank: 0 });
@@ -71,13 +72,12 @@ export default function TeamPortalDashboard() {
   return (
     <div className="w-full flex flex-col h-full bg-[var(--color-bg)]">
       {/* Scrollable Content Wrapper */}
-      <div className="flex-1 overflow-y-auto p-8 space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Team Dashboard</h1>
-            <p className="text-[var(--color-text-muted)] mt-1">Welcome back, {team?.name}!</p>
-          </div>
-        </div>
+      <div className="flex-1 overflow-y-auto p-8 max-w-[1600px] mx-auto w-full space-y-8">
+        <DashboardHero 
+          userName={team?.name || userInfo.userName || 'Team Leader'} 
+          roleName="Team Portal"
+          subtitle="Welcome to your team's dashboard. Track points, ranks, and performance." 
+        />
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -3,6 +3,7 @@ import { Radio, Save, AlertCircle, CheckCircle, Loader2, ChevronDown } from 'luc
 import api from '../services/api';
 import ProgrammeCodePicker from '../components/ProgrammeCodePicker';
 import Button from '../components/Button';
+import DashboardHero from '../components/DashboardHero';
 
 const STATUS_OPTIONS = [
   { value: 'upcoming',  label: 'Upcoming',  color: 'bg-blue-100 text-blue-700' },
@@ -251,13 +252,12 @@ const VolunteerPortal = () => {
   if (loading) return <div className="p-6 text-[var(--color-text-muted)]">Loading…</div>;
 
   return (
-    <div className="p-6 w-full space-y-8">
-      <div className="mb-2">
-        <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Volunteer Portal</h1>
-        <p className="text-sm text-[var(--color-text-muted)] mt-1">
-          Update programme statuses live and assign blind-judging code letters.
-        </p>
-      </div>
+    <div className="p-8 w-full max-w-[1600px] mx-auto space-y-8">
+      <DashboardHero 
+        userName={JSON.parse(localStorage.getItem('userInfo') || '{}').userName || 'Volunteer'} 
+        roleName="Volunteer"
+        subtitle="Update programme statuses live and assign blind-judging code letters." 
+      />
 
       <StatusSection programmes={programmes} />
       <CodeLetterSection programmes={programmes} />

@@ -160,10 +160,6 @@ const updateRegistration = async (req, res) => {
         const registration = await Registration.findById(req.params.id).populate('programme');
         if (!registration) return res.status(404).json({ message: 'Registration not found' });
 
-        if (registration.status === 'approved') {
-            return res.status(400).json({ message: 'Cannot update approved registration' });
-        }
-
         if (candidateIds && Array.isArray(candidateIds)) {
             if (registration.programme.format === 'Group' && candidateIds.length !== registration.programme.groupSize) {
                 return res.status(400).json({ message: `Group programme requires exactly ${registration.programme.groupSize} candidates` });

@@ -8,7 +8,7 @@ const Candidate = require('../models/Candidate');
 // @route POST /api/programmes
 // @access Private/Admin
 const createProgramme = async (req, res) => {
-    const { name, type, date, category, code, stageType, participantsRaw } = req.body;
+    const { name, type, date, category, code, stageType, participantsRaw, format, isStarred } = req.body;
     if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({ message: 'Request body is missing' });
     }
@@ -16,7 +16,6 @@ const createProgramme = async (req, res) => {
     // Check specific fields and return explicit error messages
     if (!name) return res.status(400).json({ message: 'Please provide programme name' });
     if (!type) return res.status(400).json({ message: 'Please provide programme type' });
-    if (!date) return res.status(400).json({ message: 'Please provide programme date' });
     if (!category) return res.status(400).json({ message: 'Please provide programme category' });
     if (!code) return res.status(400).json({ message: 'Please provide programme code' });
     if (!stageType) return res.status(400).json({ message: 'Please provide programme stageType' });
@@ -30,7 +29,9 @@ const createProgramme = async (req, res) => {
             category,
             code,
             stageType,
-            participantsRaw
+            participantsRaw,
+            format,
+            isStarred
         });
        
         const savedProgramme = await newProgramme.save();
@@ -39,7 +40,10 @@ const createProgramme = async (req, res) => {
     }
     catch (error) {
         console.error(`Error while creating programme: ${error.message}`);
-        res.status(500).json({ message: 'Failed to createProgramme', error: error.message || 'Unknown error' })
+        if (error.code === 11000) {
+            return res.status(400).json({ message: `The programme code "${code}" already exists. Please use a unique code.` });
+        }
+        res.status(500).json({ message: error.message || 'Unknown error', error: error.message || 'Unknown error' })
     }
 }
 
@@ -59,8 +63,26 @@ const getAllProgrammes = async (req, res) => {
                 ]
             };
         }
-        const programmes = await Programme.find(filter);
-        res.status(200).json(programmes)
+        const programmes = await Programme.find(filter).lean();
+        
+        // Fetch all registrations to calculate participant count
+        const registrations = await Registration.find({}, 'programme candidates');
+        
+        // Group candidate counts by programme
+        const countMap = {};
+        for (const reg of registrations) {
+            if (reg.programme) {
+                const progId = reg.programme.toString();
+                countMap[progId] = (countMap[progId] || 0) + (reg.candidates ? reg.candidates.length : 0);
+            }
+        }
+
+        const enrichedProgrammes = programmes.map(prog => ({
+            ...prog,
+            participantCount: countMap[prog._id.toString()] || 0
+        }));
+
+        res.status(200).json(enrichedProgrammes);
     }
     catch (error) {
         console.error(`Error while fetching programmes: ${error.message}`);

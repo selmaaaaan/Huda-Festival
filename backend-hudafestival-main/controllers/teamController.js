@@ -142,13 +142,17 @@ const getRegistrationGrid = async (req, res) => {
             return res.status(400).json({ message: 'Category is required' });
         }
 
-        // 1. Fetch Candidates for this team & category
-        const candidates = await Candidate.find({ team: teamId, category }).lean();
+        // 1. Fetch Candidates for this team & category (or all if KULLIYYAH)
+        let candQuery = { team: teamId };
+        if (category !== 'KULLIYYAH') {
+            candQuery.category = category;
+        }
+        const candidates = await Candidate.find(candQuery).lean();
         
-        // 2. Fetch Programmes for this category (and KULLIYYAH since they are general)
-        const progQuery = { category: { $in: [category, 'KULLIYYAH'] } };
+        // 2. Fetch Programmes for exactly this category
+        const progQuery = { category: category };
         if (stageType && stageType !== 'All Stages') {
-            progQuery.type = stageType;
+            progQuery.stageType = stageType.toLowerCase();
         }
         const programmes = await Programme.find(progQuery).lean();
         
@@ -163,8 +167,8 @@ const getRegistrationGrid = async (req, res) => {
             
             registrations.forEach(reg => {
                 if (reg.candidates && reg.candidates.map(c => c.toString()).includes(cand._id.toString())) {
-                    if (reg.programme && reg.programme.type === 'Stage') stageCount++;
-                    if (reg.programme && reg.programme.type === 'Non-Stage') nonStageCount++;
+                    if (reg.programme && (reg.programme.stageType === 'stage' || reg.programme.type === 'Stage')) stageCount++;
+                    if (reg.programme && (reg.programme.stageType === 'non-stage' || reg.programme.type === 'Non-Stage')) nonStageCount++;
                 }
             });
             

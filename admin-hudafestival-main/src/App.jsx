@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import GlobalSearch from './components/GlobalSearch';
 import { motion, AnimatePresence } from 'framer-motion';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
@@ -13,7 +14,7 @@ import Breadcrumbs from './components/Breadcrumbs';
 import SettingsPage from './pages/SettingsPage';
 import SchedulePage from './pages/SchedulePage';
 import VolunteerPortal from './pages/VolunteerPortal';
-import { Search, Bell, AlertTriangle } from 'lucide-react';
+import { Search, Bell, AlertTriangle, LogOut, Sun, Moon } from 'lucide-react';
 import api from './services/api';
 
 import JudgePanel from './pages/JudgePanel';
@@ -68,7 +69,40 @@ function App() {
   const [userInfo, setUserInfo] = useState(initialInfo);
   const [activePage, setActivePage] = useState(getInitialPage(initialInfo));
   const [appSettings, setAppSettings] = useState({ maintenanceMode: false, maintenanceMessage: '' });
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('huda-admin-primary-theme');
+    if (savedTheme) {
+      try {
+        const theme = JSON.parse(savedTheme);
+        document.documentElement.style.setProperty('--color-primary', theme.hex);
+        document.documentElement.style.setProperty('--color-primary-hover', theme.hover);
+      } catch (e) {
+        console.error('Failed to parse saved theme');
+      }
+    }
+    const savedMode = localStorage.getItem('huda-admin-theme');
+    if (savedMode === 'dark' || (!savedMode && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      setIsDark(true);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('huda-admin-theme', 'light');
+      setIsDark(false);
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('huda-admin-theme', 'dark');
+      setIsDark(true);
+    }
+  };
   const [showPreloader, setShowPreloader] = useState(true);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [activeNotifications, setActiveNotifications] = useState([]);
 
   useEffect(() => {
     const t = setTimeout(() => setShowPreloader(false), 2000);
@@ -87,6 +121,36 @@ function App() {
     const int = setInterval(fetchSettings, 30000);
     return () => clearInterval(int);
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchNotifications = async () => {
+      try {
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        const isAdmin = userInfo?.role === 'admin';
+        const { data } = await api.get(isAdmin ? '/notifications/all' : '/notifications');
+        if (Array.isArray(data)) {
+          setActiveNotifications(data);
+          const readIds = JSON.parse(localStorage.getItem('huda_read_notifications') || '[]');
+          const unread = data.filter(n => !readIds.includes(n._id)).length;
+          setUnreadNotifications(unread);
+        }
+      } catch (e) {}
+    };
+    fetchNotifications();
+    const int = setInterval(fetchNotifications, 60000);
+    return () => clearInterval(int);
+  }, [isAuthenticated, activePage]);
+
+  const handleNotificationClick = () => {
+    if (activeNotifications.length > 0) {
+      const readIds = JSON.parse(localStorage.getItem('huda_read_notifications') || '[]');
+      const newReadIds = [...new Set([...readIds, ...activeNotifications.map(n => n._id)])];
+      localStorage.setItem('huda_read_notifications', JSON.stringify(newReadIds));
+      setUnreadNotifications(0);
+    }
+    setActivePage('notifications');
+  };
 
   const handleLoginSuccess = () => {
     setShowPreloader(true);
@@ -205,60 +269,59 @@ function App() {
   return (
     <>
       <AnimatePresence>{showPreloader && <Preloader />}</AnimatePresence>
-      <div className="flex flex-col h-screen bg-[var(--color-bg)] text-[var(--color-text-heading)]">
-      {appSettings.maintenanceMode && (
-        <div className="bg-red-500 text-white text-xs font-bold uppercase tracking-wider py-1.5 px-4 text-center shadow-md z-50">
-          MAINTENANCE MODE ACTIVE - Public site is hidden
-        </div>
-      )}
-      {/* Utility Bar */}
-      <div className="flex items-center justify-between px-6 py-3 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
-        {userInfo?.role === 'team_leader' ? (
-          <div className="text-sm font-medium text-[var(--color-text-heading)]">Team Portal</div>
-        ) : (
-          <Breadcrumbs activePage={activePage} />
-        )}
-
-        {/* Search */}
-        <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)] w-80">
-          <Search size={16} className="text-[var(--color-text-muted)]" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="bg-transparent text-sm outline-none flex-1 text-[var(--color-text-heading)] placeholder:text-[var(--color-text-muted)]"
-          />
-        </div>
-
-        {/* User */}
-        <div className="flex items-center gap-4">
-          <button className="text-[var(--color-text-body)] hover:text-[var(--color-text-heading)] transition-colors">
-            <Bell size={18} />
-          </button>
-          <div className="flex items-center gap-3 cursor-pointer" onClick={handleLogout} title="Logout">
-            <div className="text-right hidden sm:block">
-              <div className="text-sm font-medium leading-none">{userInfo?.userName || 'User'}</div>
-              <div className="text-xs text-[var(--color-text-muted)] mt-1 capitalize">{roleName}</div>
-            </div>
-            <div className="w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-sm font-semibold">
-              {initial}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Body */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex h-screen bg-[var(--color-bg)] text-[var(--color-text-heading)]">
         <Sidebar
           activePage={activePage}
           setActivePage={setActivePage}
           onLogout={handleLogout}
           userInfo={userInfo}
         />
-        <main className="flex-1 overflow-y-auto bg-[var(--color-bg)]">
-          {renderPage()}
-        </main>
+        
+        <div className="flex flex-col flex-1 overflow-hidden">
+          {appSettings.maintenanceMode && (
+            <div className="bg-red-500 text-white text-xs font-bold uppercase tracking-wider py-1.5 px-4 text-center shadow-md z-50">
+              MAINTENANCE MODE ACTIVE - Public site is hidden
+            </div>
+          )}
+          
+          {/* Utility Bar */}
+          <div className="flex items-center justify-between px-6 py-4 bg-[var(--color-surface)] border-b border-[var(--color-border)]">
+            
+            {/* Left Side: Search */}
+            <div className="flex-1 flex items-center gap-4">
+              <GlobalSearch onNavigate={(type) => { if (type === 'teams') setActivePage('dashboard'); else setActivePage(type); }} />
+            </div>
+
+            {/* Right Side: Theme, Notifications, Logout */}
+            <div className="flex items-center gap-5">
+              <button onClick={toggleTheme} className="text-[var(--color-text-muted)] hover:text-[var(--color-text-heading)] transition-colors cursor-pointer" title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+                {isDark ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              
+              <button className="relative text-[var(--color-text-muted)] hover:text-[var(--color-text-heading)] transition-colors cursor-pointer" title="Notifications" onClick={handleNotificationClick}>
+                <Bell size={20} />
+                {unreadNotifications > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-[var(--color-surface)]">
+                    {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                  </span>
+                )}
+              </button>
+
+              <button 
+                onClick={handleLogout} 
+                className="flex items-center gap-2 bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white px-5 py-2 rounded-full transition-all font-semibold text-sm border border-red-500/20 hover:border-red-500 cursor-pointer"
+              >
+                <LogOut size={16} />
+                <span className="hidden sm:inline">Log Out</span>
+              </button>
+            </div>
+          </div>
+
+          <main className="flex-1 overflow-y-auto bg-[var(--color-bg)]">
+            {renderPage()}
+          </main>
+        </div>
       </div>
-    </div>
     </>
   );
 }

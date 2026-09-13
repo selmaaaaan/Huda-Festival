@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Table2, CheckCircle, Clock, AlertTriangle, Users } from 'lucide-react';
 import api from '../services/api';
 import Button from '../components/Button';
+import Modal from '../components/Modal';
 
 
 const CATEGORIES = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
@@ -29,7 +30,20 @@ export default function TeamRegistrationListPage() {
     const [cellError, setCellError] = useState({ cellId: null, message: '' });
     const [pendingChanges, setPendingChanges] = useState({});
     const [saving, setSaving] = useState(false);
+    const [groupModal, setGroupModal] = useState({ isOpen: false, prog: null, candidate: null, selectedIds: [] });
+    const [groupSaving, setGroupSaving] = useState(false);
     const [saveError, setSaveError] = useState('');
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (Object.keys(pendingChanges).length > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [pendingChanges]);
 
     useEffect(() => {
         if (isAdmin) {
@@ -62,8 +76,7 @@ export default function TeamRegistrationListPage() {
     const handleCellClick = (cand, prog) => {
         const cellId = `${cand._id}-${prog._id}`;
         if (prog.format === 'Group' || prog.type === 'Group') {
-            setCellError({ cellId, message: 'Use main Registration Desk for groups' });
-            setTimeout(() => setCellError({ cellId: null, message: '' }), 3000);
+            setGroupModal({ isOpen: true, prog, candidate: cand, selectedIds: [cand._id] });
             return;
         }
 
@@ -96,6 +109,31 @@ export default function TeamRegistrationListPage() {
             }
             return next;
         });
+    };
+
+    const handleGroupSave = async (e) => {
+        e.preventDefault();
+        const { prog, selectedIds } = groupModal;
+        if (selectedIds.length !== prog.groupSize) {
+            alert(`Please select exactly ${prog.groupSize} candidates.`);
+            return;
+        }
+
+        setGroupSaving(true);
+        try {
+            await api.post('/registrations', {
+                programmeId: prog._id,
+                teamId: selectedTeam,
+                candidateIds: selectedIds
+            });
+            await fetchGrid();
+            setGroupModal({ isOpen: false, prog: null, candidate: null, selectedIds: [] });
+        } catch (err) {
+            console.error('Failed to create group registration', err);
+            alert(err.response?.data?.message || 'Failed to create group registration');
+        } finally {
+            setGroupSaving(false);
+        }
     };
 
     const handleSave = async () => {
@@ -164,6 +202,21 @@ export default function TeamRegistrationListPage() {
                 <div className="mb-6 p-4 bg-red-50 text-red-600 border border-red-200 rounded-xl flex items-center gap-3">
                     <AlertTriangle size={20} />
                     <span className="font-medium">{saveError}</span>
+                </div>
+            )}
+
+            {Object.keys(pendingChanges).length > 0 && (
+                <div className="mb-6 p-4 bg-orange-50 text-orange-800 border border-orange-200 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm animate-pulse">
+                    <div className="flex items-center gap-3">
+                        <AlertTriangle size={24} className="text-orange-500" />
+                        <div>
+                            <h3 className="font-bold">Unsaved Changes!</h3>
+                            <p className="text-sm opacity-90">You have {Object.keys(pendingChanges).length} pending change(s). Please click "Save Changes" or your changes will be lost.</p>
+                        </div>
+                    </div>
+                    <Button variant="primary" onClick={handleSave} loading={saving}>
+                        Save Now
+                    </Button>
                 </div>
             )}
 
@@ -354,6 +407,59 @@ export default function TeamRegistrationListPage() {
                     </div>
                 )}
             </div>
+
+            <Modal 
+                isOpen={groupModal.isOpen} 
+                onClose={() => setGroupModal({ isOpen: false, prog: null, candidate: null, selectedIds: [] })} 
+                title="Group Registration"
+            >
+                {groupModal.prog && (
+                    <form onSubmit={handleGroupSave} className="space-y-6">
+                        <div className="bg-[var(--color-primary)]/10 text-[var(--color-primary)] p-4 rounded-xl border border-[var(--color-primary)]/20">
+                            <h3 className="font-bold mb-1">{groupModal.prog.name}</h3>
+                            <p className="text-sm">Requires exactly <strong>{groupModal.prog.groupSize}</strong> candidates.</p>
+                        </div>
+
+                        <div className="space-y-4">
+                            <label className="block text-sm font-bold text-[var(--color-text-heading)]">Select Candidates ({groupModal.selectedIds.length}/{groupModal.prog.groupSize})</label>
+                            <div className="border border-[var(--color-border)] rounded-xl divide-y divide-[var(--color-border)] max-h-60 overflow-y-auto">
+                                {candidates.map(c => (
+                                    <label key={c._id} className="flex items-center gap-3 p-3 hover:bg-[var(--color-surface-elevated)] cursor-pointer transition-colors">
+                                        <input
+                                            type="checkbox"
+                                            className="w-5 h-5 accent-[var(--color-primary)] rounded border-[var(--color-border)]"
+                                            checked={groupModal.selectedIds.includes(c._id)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    if (groupModal.selectedIds.length < groupModal.prog.groupSize) {
+                                                        setGroupModal(prev => ({ ...prev, selectedIds: [...prev.selectedIds, c._id] }));
+                                                    }
+                                                } else {
+                                                    setGroupModal(prev => ({ ...prev, selectedIds: prev.selectedIds.filter(id => id !== c._id) }));
+                                                }
+                                            }}
+                                            disabled={!groupModal.selectedIds.includes(c._id) && groupModal.selectedIds.length >= groupModal.prog.groupSize}
+                                        />
+                                        <div>
+                                            <div className="font-bold text-sm text-[var(--color-text-heading)]">{c.name}</div>
+                                            <div className="text-xs text-[var(--color-text-muted)]">AD NO: {c.admissionNo}</div>
+                                        </div>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
+                            <Button type="button" variant="ghost" onClick={() => setGroupModal({ isOpen: false, prog: null, candidate: null, selectedIds: [] })}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" variant="primary" loading={groupSaving} disabled={groupModal.selectedIds.length !== groupModal.prog.groupSize}>
+                                Register Group
+                            </Button>
+                        </div>
+                    </form>
+                )}
+            </Modal>
         </div>
     );
 }

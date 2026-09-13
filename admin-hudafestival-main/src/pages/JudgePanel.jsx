@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Trophy, FileText, Check, AlertTriangle, Save, Loader2 } from 'lucide-react';
 import api from '../services/api';
-import { Trophy, Clock, AlertTriangle, ClipboardList, Send, FileText } from 'lucide-react';
-import { motion } from 'framer-motion';
 import ProgrammeCodePicker from '../components/ProgrammeCodePicker';
+import DashboardHero from '../components/DashboardHero';
 
 const JudgePanel = () => {
   const [loading, setLoading] = useState(false);
@@ -14,15 +14,20 @@ const JudgePanel = () => {
   const [overrideWarning, setOverrideWarning] = useState(false);
   
   const [results, setResults] = useState({});
+  const [programmes, setProgrammes] = useState([]);
   
   const [submissions, setSubmissions] = useState([]);
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
 
-  const fetchSubmissions = async () => {
+  const fetchData = async () => {
     setLoadingSubmissions(true);
     try {
-      const res = await api.get('/results/my-submissions');
-      setSubmissions(res.data);
+      const [resSub, resProg] = await Promise.all([
+        api.get('/results/my-submissions'),
+        api.get('/programmes')
+      ]);
+      setSubmissions(resSub.data);
+      setProgrammes(resProg.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -31,7 +36,7 @@ const JudgePanel = () => {
   };
 
   useEffect(() => {
-    fetchSubmissions();
+    fetchData();
   }, []);
 
   const handleProgrammeSelect = async (programme) => {
@@ -112,14 +117,12 @@ const JudgePanel = () => {
   };
 
   return (
-    <div className="p-8 w-full space-y-8">
-      <div className="flex items-center gap-3 mb-2">
-        <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-          <Trophy size={20} />
-        </div>
-        <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">Judge Panel (Blind Evaluation)</h1>
-      </div>
-      <p className="text-[var(--color-text-body)]">Select a programme to evaluate its candidates using their blind code letters.</p>
+    <div className="p-8 w-full max-w-[1600px] mx-auto space-y-8">
+      <DashboardHero 
+        userName={JSON.parse(localStorage.getItem('userInfo') || '{}').userName || 'Judge'} 
+        roleName="Judge"
+        subtitle="Evaluate programme candidates securely using blind code letters." 
+      />
 
       {error && (
         <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-sm flex items-center gap-2">
@@ -132,7 +135,7 @@ const JudgePanel = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
             <label className="block text-sm font-semibold text-[var(--color-text-heading)] mb-2">Select Programme</label>
-            <ProgrammeCodePicker onSelect={handleProgrammeSelect} />
+            <ProgrammeCodePicker programmes={programmes} value={activeProgramme?._id} onSelect={handleProgrammeSelect} />
 
             {activeProgramme && (
               <div className="mt-6 p-4 bg-[var(--color-surface-elevated)] rounded-xl border border-[var(--color-border)]">

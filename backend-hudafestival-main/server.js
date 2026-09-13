@@ -44,6 +44,8 @@ app.use('/api/audit-logs', auditLogRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/topic-registrations', topicRegistrationRoutes);
+const searchRoutes = require('./routes/searchRoutes');
+app.use('/api/search', searchRoutes);
 
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 
