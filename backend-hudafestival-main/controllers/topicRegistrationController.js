@@ -11,14 +11,18 @@ const submitTopic = async (req, res) => {
             return res.status(403).json({ message: 'Topic Registration is closed for your team' });
         }
         
-        if (settings && settings.topicRegistrationEnabled === false && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Topic Registration is closed by Fest Admins' });
-        }
+        // Global check moved below programme lookup
         const { programmeId, teamId, candidateId, topic } = req.body;
         
-        const existing = await TopicRegistration.findOne({ programme: programmeId, team: teamId });
-        if (existing) {
-            return res.status(400).json({ message: 'Team has already submitted a topic for this programme' });
+        const existingCandidateTopic = await TopicRegistration.findOne({ programme: programmeId, candidate: candidateId });
+        if (existingCandidateTopic) {
+            return res.status(400).json({ message: 'This candidate already has a topic submitted for this programme' });
+        }
+        
+        // Ensure the team doesn't select the same topic for two different candidates
+        const existingTeamTopic = await TopicRegistration.findOne({ programme: programmeId, team: teamId, topic: topic });
+        if (existingTeamTopic) {
+            return res.status(400).json({ message: 'Your team has already selected this topic for another candidate in this programme' });
         }
 
         const registration = new TopicRegistration({
@@ -93,9 +97,18 @@ const reviewTopic = async (req, res) => {
         const { status, reviewNote } = req.body;
         const topicId = req.params.id;
         
-        const registration = await TopicRegistration.findById(topicId);
+        const registration = await TopicRegistration.findById(topicId).populate('programme');
         if (!registration) {
             return res.status(404).json({ message: 'Topic registration not found' });
+        }
+
+        if (settings && req.user.role !== 'admin') {
+            if (settings.topicRegistrationEnabled === false) {
+                return res.status(403).json({ message: 'Topic Registration is closed globally by Fest Admins' });
+            }
+            if (registration.programme && settings.categoryTopicRegistrationStatus && settings.categoryTopicRegistrationStatus.get(registration.programme.category) === false) {
+                return res.status(403).json({ message: `Topic Registration is closed for category ${registration.programme.category}` });
+            }
         }
         
         registration.status = status;
@@ -124,9 +137,7 @@ const updateTopic = async (req, res) => {
     try {
         const Settings = require('../models/Settings');
         const settings = await Settings.findOne();
-        if (settings && settings.topicRegistrationEnabled === false && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Topic Registration is closed by Fest Admins' });
-        }
+        // Global check moved below programme lookup
 
         const { topic } = req.body;
         const topicId = req.params.id;
@@ -144,7 +155,17 @@ const updateTopic = async (req, res) => {
             return res.status(400).json({ message: 'Cannot update approved topic' });
         }
         
-        if (topic) {
+        if (topic && topic !== registration.topic) {
+            // Check if the team already picked this new topic for someone else
+            const existingTeamTopic = await TopicRegistration.findOne({ 
+                programme: registration.programme, 
+                team: registration.team, 
+                topic: topic,
+                _id: { $ne: registration._id }
+            });
+            if (existingTeamTopic) {
+                return res.status(400).json({ message: 'Your team has already selected this topic for another candidate in this programme' });
+            }
             registration.topic = topic;
             registration.status = 'pending'; // Reset to pending if edited
             registration.reviewNote = null;

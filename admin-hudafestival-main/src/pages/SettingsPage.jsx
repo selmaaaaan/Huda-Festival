@@ -21,15 +21,26 @@ const SettingsPage = () => {
     maintenanceMode: false, 
     maintenanceMessage: '',
     categoryRegistrationStatus: {
-      'BIDĀYAH': true, 'ŪLĀ': true, 'THĀNIYAH': true, 'THĀNAWIYYAH': true, 'ĀLIYAH': true, 'KULLIYYAH': true
-    }
-  });
+        'BIDĀYAH': true, 'ŪLĀ': true, 'THĀNIYAH': true, 'THĀNAWIYYAH': true, 'ĀLIYAH': true, 'KULLIYYAH': true
+      },
+      categoryTopicRegistrationStatus: {
+        'BIDĀYAH': true, 'ŪLĀ': true, 'THĀNIYAH': true, 'THĀNAWIYYAH': true, 'ĀLIYAH': true, 'KULLIYYAH': true
+      },
+      categoryItemLimits: {
+        'BIDĀYAH': { total: 9, stage: 4, nonStage: 5 },
+        'E_ŪLĀ': { total: 9, stage: 4, nonStage: 5 },
+        'THĀNIYAH': { total: 9, stage: 4, nonStage: 5 },
+        'THĀNAWIYYAH': { total: 11, stage: 5, nonStage: 6 },
+        'EĀLIYAH': { total: 9, stage: 4, nonStage: 5 }
+      }
+    });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const [showConfirmToggleReg, setShowConfirmToggleReg] = useState(false);
   const [showConfirmToggleTopic, setShowConfirmToggleTopic] = useState(false);
   const [savingMaintenance, setSavingMaintenance] = useState(false);
+  const [savingLimits, setSavingLimits] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -39,16 +50,17 @@ const SettingsPage = () => {
     try {
       const res = await api.get('/settings');
       if (res.data) {
-        setSettings({
-          isRegistrationOpen: res.data.isRegistrationOpen ?? true,
-          topicRegistrationEnabled: res.data.topicRegistrationEnabled ?? true,
-          maintenanceMode: res.data.maintenanceMode ?? false,
-          maintenanceMessage: res.data.maintenanceMessage ?? '',
-          categoryRegistrationStatus: res.data.categoryRegistrationStatus || {
-            'BIDĀYAH': true, 'ŪLĀ': true, 'THĀNIYAH': true, 'THĀNAWIYYAH': true, 'ĀLIYAH': true, 'KULLIYYAH': true
-          },
-          venues: res.data.venues || []
-        });
+        setSettings(prev => ({
+            ...prev,
+            isRegistrationOpen: res.data.isRegistrationOpen ?? true,
+            topicRegistrationEnabled: res.data.topicRegistrationEnabled ?? true,
+            maintenanceMode: res.data.maintenanceMode ?? false,
+            maintenanceMessage: res.data.maintenanceMessage ?? '',
+            categoryRegistrationStatus: res.data.categoryRegistrationStatus || prev.categoryRegistrationStatus,
+            categoryTopicRegistrationStatus: res.data.categoryTopicRegistrationStatus || prev.categoryTopicRegistrationStatus,
+            categoryItemLimits: res.data.categoryItemLimits || prev.categoryItemLimits,
+            venues: res.data.venues || []
+          }));
       }
     } catch (err) {
       console.error(err);
@@ -78,6 +90,49 @@ const SettingsPage = () => {
       setShowConfirmToggleTopic(false);
     } catch (err) {
       alert(err.response?.data?.message || 'Error updating settings');
+    }
+  };
+
+  const handleUpdateCategoryLimits = async (cat, field, value) => {
+    try {
+      const currentLimits = settings.categoryItemLimits || {};
+      const newLimits = { 
+          ...currentLimits, 
+          [cat]: { ...(currentLimits[cat] || { total: cat === 'THĀNAWIYYAH' ? 11 : 9, stage: cat === 'THĀNAWIYYAH' ? 5 : 4, nonStage: cat === 'THĀNAWIYYAH' ? 6 : 5 }), [field]: parseInt(value, 10) || 0 } 
+      };
+      // Auto update total
+      if (field === 'stage' || field === 'nonStage') {
+          newLimits[cat].total = newLimits[cat].stage + newLimits[cat].nonStage;
+      }
+      
+      setSettings(s => ({ ...s, categoryItemLimits: newLimits }));
+      
+      // Save to backend immediately or we can have a save button. Let's just have a save button for all limits.
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSaveAllLimits = async () => {
+    try {
+      setSavingLimits(true);
+      await api.patch('/settings', { categoryItemLimits: settings.categoryItemLimits });
+    } catch (err) {
+      setError('Failed to save category limits');
+    } finally {
+      setSavingLimits(false);
+    }
+  };
+
+  const handleToggleTopicCategory = async (cat) => {
+    try {
+      const currentStatus = settings.categoryTopicRegistrationStatus || {};
+      const newStatus = { ...currentStatus, [cat]: !(currentStatus[cat] !== false) };
+      await api.patch('/settings', { categoryTopicRegistrationStatus: newStatus });
+      setSettings(s => ({ ...s, categoryTopicRegistrationStatus: newStatus }));
+    } catch (err) {
+      console.error(err);
+      setError('Failed to update category topic registration status');
     }
   };
 
@@ -143,12 +198,11 @@ const SettingsPage = () => {
             <p className="text-sm text-[var(--color-text-muted)] mb-4">Select your preferred accent color for the application.</p>
             <div className="flex gap-4">
               {THEME_COLORS.map(theme => (
-                <button
-                  key={theme.name}
+                <button 
+                  key={theme.bg}
                   onClick={() => applyTheme(theme)}
-                  className={`w-10 h-10 rounded-full transition-transform hover:scale-110 flex items-center justify-center \${currentTheme.name === theme.name ? 'ring-2 ring-offset-2 ring-offset-[var(--color-bg)] ring-[var(--color-text-heading)]' : ''}`}
+                  className={`w-10 h-10 rounded-full transition-transform hover:scale-110 flex items-center justify-center ${currentTheme?.bg === theme.bg ? 'ring-4 ring-offset-2 ring-blue-500' : ''}`}
                   style={{ backgroundColor: theme.bg }}
-                  title={theme.name}
                 />
               ))}
             </div>
@@ -165,9 +219,9 @@ const SettingsPage = () => {
               </div>
               <button 
                 onClick={() => setShowConfirmToggleReg(true)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 \${settings.isRegistrationOpen ? 'bg-green-500' : 'bg-[var(--color-border)]'}`}
+                style={{ backgroundColor: settings.isRegistrationOpen ? '#10b981' : '#ef4444', width: '44px', height: '24px', borderRadius: '9999px', position: 'relative', transition: 'background-color 0.2s', cursor: 'pointer', border: 'none' }}
               >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform \${settings.isRegistrationOpen ? 'translate-x-6' : 'translate-x-1'}`} />
+                <span style={{ display: 'inline-block', width: '18px', height: '18px', backgroundColor: 'white', borderRadius: '50%', position: 'absolute', top: '3px', left: settings.isRegistrationOpen ? '23px' : '3px', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
               </button>
             </div>
 
@@ -182,11 +236,24 @@ const SettingsPage = () => {
                       <div key={cat} className="flex items-center justify-between bg-[var(--color-surface-elevated)] p-3 rounded-lg border border-[var(--color-border)]">
                         <span className="text-sm font-medium text-[var(--color-text-heading)]">{cat}</span>
                         <button 
-                          onClick={() => handleToggleCategory(cat)}
-                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none \${isOpen ? 'bg-green-500' : 'bg-red-500'}`}
-                        >
-                          <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform \${isOpen ? 'translate-x-5' : 'translate-x-1'}`} />
-                        </button>
+                            onClick={() => handleToggleCategory(cat)}
+                            style={{ backgroundColor: isOpen ? '#10b981' : '#ef4444', width: '44px', height: '24px', borderRadius: '9999px', position: 'relative', transition: 'background-color 0.2s', cursor: 'pointer', border: 'none' }}
+                          >
+                            <span 
+                                style={{ 
+                                    display: 'inline-block', 
+                                    width: '18px', 
+                                    height: '18px', 
+                                    backgroundColor: 'white', 
+                                    borderRadius: '50%', 
+                                    position: 'absolute', 
+                                    top: '3px', 
+                                    left: isOpen ? '23px' : '3px',
+                                    transition: 'left 0.2s',
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                                }} 
+                            />
+                          </button>
                       </div>
                     )
                   })}
@@ -201,10 +268,93 @@ const SettingsPage = () => {
               </div>
               <button 
                 onClick={() => setShowConfirmToggleTopic(true)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:ring-offset-2 \${settings.topicRegistrationEnabled ? 'bg-green-500' : 'bg-[var(--color-border)]'}`}
+                style={{ backgroundColor: settings.topicRegistrationEnabled ? '#10b981' : '#ef4444', width: '44px', height: '24px', borderRadius: '9999px', position: 'relative', transition: 'background-color 0.2s', cursor: 'pointer', border: 'none' }}
               >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform \${settings.topicRegistrationEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                <span style={{ display: 'inline-block', width: '18px', height: '18px', backgroundColor: 'white', borderRadius: '50%', position: 'absolute', top: '3px', left: settings.topicRegistrationEnabled ? '23px' : '3px', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
               </button>
+            </div>
+          
+            {/* Topic Category Toggles */}
+            {settings.topicRegistrationEnabled && (
+              <div className="mb-6 pt-6 border-t border-[var(--color-border)]">
+                <p className="text-[var(--color-text-heading)] font-medium mb-4">Category-Wise Topic Registration Status</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {['BIDĀYAH', 'ŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ĀLIYAH', 'KULLIYYAH'].map(cat => {
+                    const isOpen = settings.categoryTopicRegistrationStatus ? settings.categoryTopicRegistrationStatus[cat] !== false : true;
+                    return (
+                      <div key={cat} className="flex items-center justify-between bg-[var(--color-surface-elevated)] p-3 rounded-lg border border-[var(--color-border)]">
+                        <span className="text-sm font-medium text-[var(--color-text-heading)]">{cat}</span>
+                        <button 
+                            onClick={() => handleToggleTopicCategory(cat)}
+                            style={{ backgroundColor: isOpen ? '#10b981' : '#ef4444', width: '44px', height: '24px', borderRadius: '9999px', position: 'relative', transition: 'background-color 0.2s', cursor: 'pointer', border: 'none' }}
+                          >
+                            <span 
+                                style={{ display: 'inline-block', width: '18px', height: '18px', backgroundColor: 'white', borderRadius: '50%', position: 'absolute', top: '3px', left: isOpen ? '23px' : '3px', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} 
+                            />
+                          </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          
+          {/* Category Limits */}
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6">
+            <h2 className="text-lg font-semibold text-[var(--color-text-heading)] mb-6">Category-Wise Item Limits (Individual)</h2>
+            <div className="space-y-4">
+              {['BIDĀYAH', 'E_ŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'EĀLIYAH'].map(cat => {
+                
+                  const defaultLimits = {
+                    'BIDĀYAH': { total: 9, stage: 4, nonStage: 5 },
+                    'E_ŪLĀ': { total: 9, stage: 4, nonStage: 5 },
+                    'THĀNIYAH': { total: 9, stage: 4, nonStage: 5 },
+                    'THĀNAWIYYAH': { total: 11, stage: 5, nonStage: 6 },
+                    'EĀLIYAH': { total: 9, stage: 4, nonStage: 5 }
+                  };
+                  const limits = settings.categoryItemLimits && settings.categoryItemLimits[cat] ? settings.categoryItemLimits[cat] : defaultLimits[cat];
+                return (
+                  <div key={cat} className="flex flex-col md:flex-row items-center gap-4 bg-[var(--color-surface-elevated)] p-4 rounded-lg border border-[var(--color-border)]">
+                    <span className="w-full md:w-1/4 text-sm font-medium text-[var(--color-text-heading)]">{cat.replace('E_', '')}</span>
+                    <div className="w-full md:w-3/4 flex gap-4">
+                        <div className="flex-1">
+                            <label className="block text-xs text-[var(--color-text-muted)] mb-1">Stage Items</label>
+                            <input 
+                                type="number" 
+                                value={limits?.stage || 0} 
+                                onChange={(e) => handleUpdateCategoryLimits(cat, 'stage', e.target.value)}
+                                className="w-full px-3 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded text-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] text-[var(--color-text-heading)]"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-xs text-[var(--color-text-muted)] mb-1">Non-Stage Items</label>
+                            <input 
+                                type="number" 
+                                value={limits?.nonStage || 0} 
+                                onChange={(e) => handleUpdateCategoryLimits(cat, 'nonStage', e.target.value)}
+                                className="w-full px-3 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded text-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] text-[var(--color-text-heading)]"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-xs text-[var(--color-text-muted)] mb-1">Total Limit</label>
+                            <input 
+                                type="number" 
+                                value={limits?.total || 0} 
+                                disabled
+                                className="w-full px-3 py-1.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded text-sm opacity-50 cursor-not-allowed text-[var(--color-text-heading)]"
+                            />
+                        </div>
+                    </div>
+                  </div>
+                )
+              })}
+              <div className="flex justify-end pt-4">
+                <Button onClick={handleSaveAllLimits} loading={savingLimits} variant="primary">
+                  Save Limits
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -219,9 +369,9 @@ const SettingsPage = () => {
               </div>
               <button 
                 onClick={handleToggleMaintenance}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none \${settings.maintenanceMode ? 'bg-red-500' : 'bg-[var(--color-border)]'}`}
+                style={{ backgroundColor: settings.maintenanceMode ? '#ef4444' : '#cbd5e1', width: '44px', height: '24px', borderRadius: '9999px', position: 'relative', transition: 'background-color 0.2s', cursor: 'pointer', border: 'none' }}
               >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform \${settings.maintenanceMode ? 'translate-x-6' : 'translate-x-1'}`} />
+                <span style={{ display: 'inline-block', width: '18px', height: '18px', backgroundColor: 'white', borderRadius: '50%', position: 'absolute', top: '3px', left: settings.maintenanceMode ? '23px' : '3px', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
               </button>
             </div>
 

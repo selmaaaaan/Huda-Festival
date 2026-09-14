@@ -56,10 +56,9 @@ const createRegistration = async (req, res) => {
         }
 
         
-        const { CATEGORY_ITEM_LIMITS } = require('../config/bylawRules');
         if (programme.format === 'Individual' && programme.type !== 'Kulliyyah') {
             for (const candidate of candidates) {
-                const limits = CATEGORY_ITEM_LIMITS[candidate.category];
+                const limits = settings?.categoryItemLimits ? settings.categoryItemLimits.get(candidate.category) : undefined;
                 if (limits) {
                     const existingRegs = await Registration.find({
                         candidates: candidate._id,

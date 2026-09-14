@@ -39,6 +39,7 @@ export default function TeamLeaderDashboard() {
   const [loading, setLoading] = useState(true);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
     const [isTopicRegistrationEnabled, setIsTopicRegistrationEnabled] = useState(true);
+    const [categoryTopicStatus, setCategoryTopicStatus] = useState({});
   const [lastUpdated, setLastUpdated] = useState(0);
   const [teamProgress, setTeamProgress] = useState(null);
 
@@ -85,7 +86,10 @@ export default function TeamLeaderDashboard() {
       if (settingsRes.data?.isRegistrationOpen !== undefined)
           setIsRegistrationOpen(settingsRes.data.isRegistrationOpen);
         if (settingsRes.data?.topicRegistrationEnabled !== undefined)
-          setIsTopicRegistrationEnabled(settingsRes.data.topicRegistrationEnabled);
+            setIsTopicRegistrationEnabled(settingsRes.data.topicRegistrationEnabled);
+          if (settingsRes.data?.categoryTopicRegistrationStatus) {
+            setCategoryTopicStatus(settingsRes.data.categoryTopicRegistrationStatus);
+          }
       setTopicEnabledProgrammes(topicProgRes.data);
       setMyTopics(myTopicRes.data);
       if (progressRes?.data?.teamWise) {
@@ -202,8 +206,8 @@ export default function TeamLeaderDashboard() {
   // Categories that actually have eligible programmes
   const topicCategories = useMemo(() => {
     const cats = [...new Set(eligibleTopicProgrammes.map(p => p.category))];
-    return cats.sort();
-  }, [eligibleTopicProgrammes]);
+    return cats.filter(cat => categoryTopicStatus[cat] !== false).sort();
+  }, [eligibleTopicProgrammes, categoryTopicStatus]);
 
   // Programmes within the selected category
   const topicProgrammesInCategory = useMemo(() =>
@@ -218,6 +222,8 @@ export default function TeamLeaderDashboard() {
     e.preventDefault();
     setError(''); setSuccess(false);
     if (!topicForm.programmeId || !topicForm.topic) { setError('Please fill all fields'); return; }
+      const hasCands = myRegistrations.some(r => (r.programme._id || r.programme) === topicForm.programmeId && r.candidates?.length > 0);
+      if (hasCands && !topicForm.candidateId) { setError('Please select a candidate'); return; }
     setSubmitting(true);
     try {
       const { data } = await api.post('/topic-registrations', {
@@ -238,6 +244,7 @@ export default function TeamLeaderDashboard() {
   };
 
   const openTopicForm = () => {
+    if (isTopicRegistrationEnabled === false) return;
     setSuccess(false); setError('');
     setTopicForm({ programmeId: '', candidateId: '', topic: '' });
     setTopicCategory('');
@@ -348,10 +355,10 @@ export default function TeamLeaderDashboard() {
               <span className="text-xs text-[var(--color-text-muted)] font-medium mb-1">
                 Updated {lastUpdated}s ago
               </span>
-              <Button onClick={openNewRegistration} variant="primary" className="shadow-md">
-                <Plus size={15} />
-                {activeTab === 'topics' ? 'Submit Topic' : 'New Registration'}
-              </Button>
+              <Button onClick={activeTab === 'topics' ? openTopicForm : openNewRegistration} variant="primary" className="shadow-md">
+                  <Plus size={15} />
+                  {activeTab === 'topics' ? 'Submit Topic' : 'New Registration'}
+                </Button>
             </div>
           </div>
         </div>
@@ -737,15 +744,35 @@ export default function TeamLeaderDashboard() {
                     />
                   )}
                 </motion.div>
-              )}
+                )}
 
               {/* ── Step 3: Topic entry ───────────────────────────────────────── */}
-              {topicForm.programmeId && (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
-                      3 — Enter Topic
-                    </label>
+              {topicForm.programmeId && (() => {
+                  const reg = myRegistrations.find(r => (r.programme._id || r.programme) === topicForm.programmeId);
+                  const registeredCands = reg?.candidates || [];
+                  return (
+                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                      {registeredCands.length > 0 && (
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                            3 — Select Candidate
+                          </label>
+                          <select
+                            value={topicForm.candidateId || ''}
+                            onChange={e => setTopicForm(f => ({ ...f, candidateId: e.target.value }))}
+                            className="w-full px-3 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
+                          >
+                            <option value="">Select a registered candidate…</option>
+                            {registeredCands.map(c => (
+                              <option key={c._id} value={c._id}>{c.name} ({c.admissionNo})</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                          {registeredCands.length > 0 ? '4' : '3'} — Enter Topic
+                        </label>
                     {selectedTopicProg?.topicMode === 'fixed-list' ? (
                       <select
                         value={topicForm.topic}
@@ -787,7 +814,8 @@ export default function TeamLeaderDashboard() {
                     </div>
                   )}
                 </motion.div>
-              )}
+                  );
+                })()}
 
               <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
                 <Button variant="ghost" type="button" onClick={() => setShowTopicForm(false)}>Cancel</Button>

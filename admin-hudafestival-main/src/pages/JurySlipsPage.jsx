@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Printer, RefreshCw, AlertCircle, Search, Users, FileText, BarChart2, Info } from 'lucide-react';
+import { Printer, RefreshCw, AlertCircle, Search, Users, FileText, BarChart2, Info, Activity, Hash, Layers } from 'lucide-react';
 import api from '../services/api';
 import ProgrammeCodePicker from '../components/ProgrammeCodePicker';
 import Button from '../components/Button';
@@ -11,6 +11,7 @@ const JurySlipsPage = () => {
   const [shuffledList, setShuffledList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showWarning, setShowWarning] = useState(false);
 
   useEffect(() => {
     fetchProgrammes();
@@ -33,10 +34,11 @@ const JurySlipsPage = () => {
     try {
       // Fetch only approved registrations
       const res = await api.get(`/registrations?programme=${selectedProgramme._id}&status=approved&limit=1000`);
-      if (res.data) {
+      if (res.data && (res.data.registrations?.length > 0 || res.data.data?.length > 0)) {
         setRegistrations(res.data.registrations || res.data.data || []);
       } else {
         setRegistrations([]);
+        setShowWarning(true);
       }
     } catch (err) {
       setError('Failed to load registrations');
@@ -58,11 +60,11 @@ const JurySlipsPage = () => {
   const handleGenerate = () => {
     if (registrations.length === 0) return;
     // Shuffle the registrations
-    const shuffled = [...registrations];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
+    const shuffled = [...registrations].sort((a, b) => {
+      const teamA = a.team?.name || '';
+      const teamB = b.team?.name || '';
+      return teamA.localeCompare(teamB);
+    });
 
     // Assign code letters
     const assigned = shuffled.map((reg, index) => ({
@@ -118,10 +120,10 @@ const JurySlipsPage = () => {
             </div>
             <h3 className="text-xl font-bold text-[var(--color-text-heading)]">{registrations.length} Approved Registrations Found</h3>
             <p className="text-[var(--color-text-muted)] max-w-md mx-auto">
-              Click the button below to randomly shuffle these candidates and assign sequential Code Letters (A, B, C...) to hide their true entry order from the jury.
+              Click the button below to generate the participant list grouped by team.
             </p>
             <Button onClick={handleGenerate} variant="primary" className="mx-auto">
-              <RefreshCw size={18} className="mr-2" /> Shuffle & Generate List
+              <RefreshCw size={18} className="mr-2" /> Generate List
             </Button>
           </div>
         )}
@@ -129,7 +131,7 @@ const JurySlipsPage = () => {
         {shuffledList.length > 0 && (
           <div className="flex justify-end gap-3 mt-4">
              <Button onClick={handleGenerate} variant="outline">
-               <RefreshCw size={16} className="mr-2" /> Reshuffle
+               <RefreshCw size={16} className="mr-2" /> Refresh
              </Button>
              <Button onClick={handlePrint} variant="primary">
                <Printer size={16} className="mr-2" /> Print Participant List
@@ -140,7 +142,7 @@ const JurySlipsPage = () => {
 
       {/* Printable Area */}
       {shuffledList.length > 0 && selectedProgramme && (
-        <div className="print:absolute print:inset-0 print:z-[9999] print:block rounded-xl border border-blue-100 overflow-hidden text-slate-800 font-sans shadow-lg mx-auto max-w-[210mm] print:w-[210mm] print:min-h-[297mm] print:m-0 print:p-0 print:bg-white bg-white">
+        <div className="print:absolute print:inset-0 print:z-[9999] print:block rounded-xl border border-blue-100 overflow-hidden text-slate-800 font-sans shadow-lg mx-auto max-w-[210mm] print:w-[210mm] print:min-h-[297mm] print:m-0 print:p-0 print:bg-white bg-white" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}>
           
           {/* Header Area */}
           <div className="relative overflow-hidden bg-gradient-to-b from-blue-50 to-[#eef4fd] px-8 pt-8 pb-10 text-center border-b border-blue-200">
@@ -159,19 +161,37 @@ const JurySlipsPage = () => {
             
             {/* Programme Details Card */}
             <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-4 flex gap-4">
-                 <div className="flex-1 flex flex-col justify-center items-center bg-slate-50 rounded-lg p-3 border border-slate-100">
-                    <div className="text-slate-500 font-semibold mb-1 text-[10px] uppercase tracking-wider">Programme</div>
-                    <div className="font-bold text-[#1e3a8a] text-sm text-center">{selectedProgramme.name}</div>
+                 <div className="flex-1 flex items-center bg-slate-50 rounded-lg p-3 border border-slate-100">
+                    <div className="bg-blue-100 text-blue-600 p-2 rounded-md mr-3 shrink-0">
+                       <Activity size={18} />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <div className="text-slate-500 font-semibold text-[10px] uppercase tracking-wider">Programme</div>
+                      <div className="font-bold text-[#1e3a8a] text-sm">{selectedProgramme.name}</div>
+                    </div>
                  </div>
-                 <div className="flex-1 flex flex-col justify-center items-center bg-slate-50 rounded-lg p-3 border border-slate-100">
-                    <div className="text-slate-500 font-semibold mb-1 text-[10px] uppercase tracking-wider">Programme Code</div>
-                    <div className="font-bold text-[#1e3a8a] text-sm">{selectedProgramme.code}</div>
+                 <div className="flex-1 flex items-center bg-slate-50 rounded-lg p-3 border border-slate-100">
+                    <div className="bg-blue-100 text-blue-600 p-2 rounded-md mr-3 shrink-0">
+                       <Hash size={18} />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <div className="text-slate-500 font-semibold text-[10px] uppercase tracking-wider">Programme Code</div>
+                      <div className="font-bold text-[#1e3a8a] text-sm">{selectedProgramme.code}</div>
+                    </div>
                  </div>
-                 <div className="flex-1 flex flex-col justify-center items-center bg-slate-50 rounded-lg p-3 border border-slate-100">
-                    <div className="text-slate-500 font-semibold mb-1 text-[10px] uppercase tracking-wider">Category</div>
-                    <div className="font-bold text-[#1e3a8a] text-sm uppercase">{selectedProgramme.category}</div>
+                 <div className="flex-1 flex items-center bg-slate-50 rounded-lg p-3 border border-slate-100">
+                    <div className="bg-blue-100 text-blue-600 p-2 rounded-md mr-3 shrink-0">
+                       <Layers size={18} />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                      <div className="text-slate-500 font-semibold text-[10px] uppercase tracking-wider">Category</div>
+                      <div className="font-bold text-[#1e3a8a] text-sm uppercase">{selectedProgramme.category}</div>
+                    </div>
                  </div>
             </div>
+
+            {/* Blank Space Box */}
+            <div className="bg-white rounded-xl shadow-sm border border-blue-100 h-16 w-full"></div>
 
             {/* Participants Table Card */}
             <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden p-4">
@@ -209,8 +229,8 @@ const JurySlipsPage = () => {
                        return (
                          <tr key={reg._id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
                            <td className="py-3 px-2 border border-slate-200 text-center font-semibold text-slate-700">{idx + 1}</td>
-                           <td className="py-3 px-2 border border-slate-200 text-center font-bold text-blue-700 text-base">{reg.codeLetter}</td>
-                           <td className="py-3 px-3 border border-slate-200 text-slate-600 text-xs">{adNos}</td>
+                           <td className="py-3 px-2 border border-slate-200 text-center font-bold text-blue-700 text-base"></td>
+                           <td className="py-3 px-3 border border-slate-200 text-slate-800 text-sm font-bold">{adNos}</td>
                            <td className="py-3 px-4 border border-slate-200 font-medium text-slate-800">{names}</td>
                            <td className="py-3 px-3 border border-slate-200 text-slate-600 font-semibold">{reg.team?.name || '-'}</td>
                            
@@ -245,6 +265,26 @@ const JurySlipsPage = () => {
              </div>
           </div>
           
+        </div>
+      )}
+
+      {/* Warning Popup */}
+      {showWarning && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[99999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-100 w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4 border border-red-100 shadow-sm">
+                <AlertCircle size={32} />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800 mb-2">Registration Incomplete</h3>
+              <p className="text-sm text-slate-500 mb-6">
+                Registration is not complete yet for this programme. No candidates found.
+              </p>
+              <Button onClick={() => setShowWarning(false)} variant="primary" className="w-full bg-slate-800 hover:bg-slate-700">
+                Okay
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

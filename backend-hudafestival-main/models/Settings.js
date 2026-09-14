@@ -28,6 +28,26 @@ const settingsSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    categoryTopicRegistrationStatus: {
+        type: Map,
+        of: Boolean,
+        default: {}
+    },
+    categoryItemLimits: {
+        type: Map,
+        of: new mongoose.Schema({
+            total: { type: Number, default: 9 },
+            stage: { type: Number, default: 4 },
+            nonStage: { type: Number, default: 5 }
+        }, { _id: false }),
+        default: {
+            'BIDĀYAH': { total: 9, stage: 4, nonStage: 5 },
+            'E_ŪLĀ': { total: 9, stage: 4, nonStage: 5 },
+            'THĀNIYAH': { total: 9, stage: 4, nonStage: 5 },
+            'THĀNAWIYYAH': { total: 11, stage: 5, nonStage: 6 },
+            'EĀLIYAH': { total: 9, stage: 4, nonStage: 5 }
+        }
+    },
     maintenanceMode: {
         type: Boolean,
         default: false

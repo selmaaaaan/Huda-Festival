@@ -48,10 +48,10 @@ const getDashboardProgress = async (req, res) => {
 
         programmes.forEach(p => {
             const cat = p.category;
-            const expectedR = (p.maxParticipants || 1) * numTeams;
+            const expectedR = numTeams; // exactly 1 per programme per team
             let expectedT = 0;
             if (p.topicMode && p.topicMode !== 'none') {
-                expectedT = (p.maxParticipants || 1) * numTeams;
+                expectedT = numTeams; // exactly 1 per programme per team
             }
             
             globalExpectedReg += expectedR;
@@ -66,42 +66,36 @@ const getDashboardProgress = async (req, res) => {
             }
         });
 
-                const TEAM_QUOTAS = {
-    'BID\u0100YAH': 9,
-    '\u02BE\u016AL\u0100': 9,
-    'TH\u0100NIYAH': 9,
-    'TH\u0100NAWIYYAH': 11,
-    '\u02BF\u0100LIYAH': 9
-};
+                
 
-        // Override Expected Reg based on hard quotas
-        globalExpectedReg = 0;
-        categories.forEach(cat => {
-            const rawPerTeam = categoryGlobal[cat].expectedReg / numTeams;
-            const quotaPerTeam = TEAM_QUOTAS[cat] || rawPerTeam;
-            categoryGlobal[cat].expectedReg = quotaPerTeam * numTeams;
-            globalExpectedReg += categoryGlobal[cat].expectedReg;
-        });
-
-        // Process Registrations
+        // Process Registrations (Unique team+programme pairs)
+        const uniqueGlobalRegs = new Set();
         allRegistrations.forEach(r => {
             const p = progMap[r.programme?.toString()];
-            if (p && categoryGlobal[p.category]) {
-                const add = 1;
-                categoryGlobal[p.category].regCompleted += add;
+            if (p && r.team && categoryGlobal[p.category]) {
+                const uniqueKey = r.team.toString() + '_' + p._id.toString();
+                if (!uniqueGlobalRegs.has(uniqueKey)) {
+                    uniqueGlobalRegs.add(uniqueKey);
+                    categoryGlobal[p.category].regCompleted += 1;
+                }
             }
         });
 
         // Process Topics
+        const uniqueGlobalTops = new Set();
         allTopics.forEach(t => {
             const p = progMap[t.programme?.toString()];
-            if (p && categoryGlobal[p.category]) {
-                categoryGlobal[p.category].topCompleted += 1;
+            if (p && t.team && categoryGlobal[p.category]) {
+                const uniqueKey = t.team.toString() + '_' + p._id.toString();
+                if (!uniqueGlobalTops.has(uniqueKey)) {
+                    uniqueGlobalTops.add(uniqueKey);
+                    categoryGlobal[p.category].topCompleted += 1;
+                }
             }
         });
 
-        const globalRegCompleted = allRegistrations.length;
-        const globalTopCompleted = allTopics.length;
+        const globalRegCompleted = uniqueGlobalRegs.size;
+        const globalTopCompleted = uniqueGlobalTops.size;
 
         // Compile global response
         const globalCategoryResponse = categories.map(cat => {
@@ -142,8 +136,8 @@ const getDashboardProgress = async (req, res) => {
             const teamRegs = allRegistrations.filter(r => r.team?.toString() === teamIdStr);
             const teamTops = allTopics.filter(r => r.team?.toString() === teamIdStr);
             
-            const teamRegCount = teamRegs.length;
-            const teamTopicCount = teamTops.length;
+            const teamRegCount = new Set(teamRegs.map(r => r.programme?.toString())).size;
+            const teamTopicCount = new Set(teamTops.map(t => t.programme?.toString())).size;
 
             const categoryProgress = categories.map(cat => {
                 const cg = categoryGlobal[cat];
@@ -159,8 +153,8 @@ const getDashboardProgress = async (req, res) => {
                     return p && p.category === cat;
                 });
                 
-                const catTeamRegCount = catTeamRegs.length;
-                const catTeamTopCount = catTeamTops.length;
+                const catTeamRegCount = new Set(catTeamRegs.map(r => r.programme?.toString())).size;
+                const catTeamTopCount = new Set(catTeamTops.map(t => t.programme?.toString())).size;
                 
                 return {
                     category: cat,
@@ -240,7 +234,7 @@ const getSettings = async (req, res) => {
 }
 
 const updateSettings = async (req, res) => {
-    const { gradePoints, isRegistrationOpen, categoryRegistrationStatus, maintenanceMode, maintenanceMessage, topicRegistrationEnabled, venues } = req.body;
+    const { gradePoints, isRegistrationOpen, categoryRegistrationStatus, categoryTopicRegistrationStatus, categoryItemLimits, maintenanceMode, maintenanceMessage, topicRegistrationEnabled, venues } = req.body;
 
     try {
         let settings = await Settings.findOne();
@@ -259,6 +253,12 @@ const updateSettings = async (req, res) => {
         }
         if (typeof topicRegistrationEnabled !== 'undefined') {
             settings.topicRegistrationEnabled = topicRegistrationEnabled;
+        }
+        if (categoryTopicRegistrationStatus) {
+            settings.categoryTopicRegistrationStatus = new Map(Object.entries(categoryTopicRegistrationStatus));
+        }
+        if (categoryItemLimits) {
+            settings.categoryItemLimits = new Map(Object.entries(categoryItemLimits));
         }
         if (typeof maintenanceMode !== 'undefined') {
             settings.maintenanceMode = maintenanceMode;
