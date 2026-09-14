@@ -76,20 +76,20 @@ const createRegistration = async (req, res) => {
                         }
                     }
 
-                    const isStage = programme.stageType.toLowerCase() === 'stage';
-                    const isNonStage = programme.stageType.toLowerCase() === 'non-stage';
+                    const isStage = !programme.isStarred && programme.stageType.toLowerCase() === 'stage';
+                    const isNonStage = !programme.isStarred && programme.stageType.toLowerCase() === 'non-stage';
 
                     const newStageCount = stageCount + (isStage ? 1 : 0);
                     const newNonStageCount = nonStageCount + (isNonStage ? 1 : 0);
                     const newTotalCount = newStageCount + newNonStageCount;
 
-                    if (newStageCount > limits.stage) {
+                    if (isStage && newStageCount > limits.stage) {
                         return res.status(400).json({ message: `This candidate has already reached the maximum of ${limits.stage} stage items for ${candidate.category}` });
                     }
-                    if (newNonStageCount > limits.nonStage) {
+                    if (isNonStage && newNonStageCount > limits.nonStage) {
                         return res.status(400).json({ message: `This candidate has already reached the maximum of ${limits.nonStage} non-stage items for ${candidate.category}` });
                     }
-                    if (newTotalCount > limits.total) {
+                    if ((isStage || isNonStage) && newTotalCount > limits.total) {
                         return res.status(400).json({ message: `This candidate has already reached the maximum of ${limits.total} total items for ${candidate.category}` });
                     }
                 }

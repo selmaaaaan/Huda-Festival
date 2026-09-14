@@ -5,7 +5,7 @@ import api from '../services/api';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 
-const CATEGORIES = ['All', 'BIDAYAH', '?ULA', 'THANIYAH', 'THANAWIYYAH', '?ALIYAH', 'KULLIYYAH'];
+const CATEGORIES = ['All', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
 export default function TopicManagementPage() {
   const [programmes, setProgrammes] = useState([]);
@@ -105,7 +105,11 @@ export default function TopicManagementPage() {
     }
   };
 
-  const filteredProgrammes = programmes.filter(p => selectedCategory === 'All' || p.category === selectedCategory);
+  const filteredProgrammes = programmes.filter(p => {
+    const matchCat = selectedCategory === 'All' || p.category === selectedCategory;
+    const matchTopic = (p.topicMode && p.topicMode !== 'none') || (selectedProgramme && selectedProgramme._id === p._id);
+    return matchCat && matchTopic;
+  });
 
   if (loading) return <div className="p-8">Loading...</div>;
 
@@ -119,7 +123,27 @@ export default function TopicManagementPage() {
         {/* Left Panel - Programmes */}
         <div className="w-1/3 flex flex-col bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm">
           <div className="px-4 py-3 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
-            <h2 className="text-sm font-semibold mb-3">Programmes</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold">Programmes</h2>
+              <select 
+                onChange={(e) => {
+                  const p = programmes.find(x => x._id === e.target.value);
+                  if (p) selectProgramme(p);
+                  e.target.value = "";
+                }}
+                className="text-xs px-2 py-1 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded outline-none w-32 text-[var(--color-text-heading)] focus:border-[var(--color-primary)] truncate"
+                defaultValue=""
+              >
+                <option value="" disabled>+ Add Programme</option>
+                {programmes
+                  .filter(p => !p.topicMode || p.topicMode === 'none')
+                  .sort((a,b) => (a.category + a.name).localeCompare(b.category + b.name))
+                  .map(p => (
+                    <option key={p._id} value={p._id}>{p.category} - {p.name}</option>
+                  ))
+                }
+              </select>
+            </div>
             <div className="flex overflow-x-auto gap-2 pb-1 no-scrollbar">
               {CATEGORIES.map(cat => (
                 <button
@@ -144,13 +168,32 @@ export default function TopicManagementPage() {
               <div 
                 key={prog._id}
                 onClick={() => selectProgramme(prog)}
-                className={`p-3 rounded-lg cursor-pointer border transition-colors ${
+                className={`p-3 rounded-lg cursor-pointer border transition-colors group ${
                   selectedProgramme?._id === prog._id 
                     ? 'bg-[var(--color-primary)]/10 border-[var(--color-primary)]/30 text-[var(--color-primary)]' 
                     : 'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-[var(--color-primary)]/50'
                 }`}
               >
-                <div className="font-medium text-sm text-[var(--color-text-heading)]">{prog.name}</div>
+                <div className="flex justify-between items-start">
+                    <div className="font-medium text-sm text-[var(--color-text-heading)]">{prog.name} <span className="opacity-50 text-xs ml-1">({prog.code})</span></div>
+                    <button 
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm('Remove this programme from topic management?')) {
+                                api.patch(`/programmes/${prog._id}/topic-settings`, { topicMode: 'none', topicList: [] })
+                                   .then(() => {
+                                       fetchProgrammes();
+                                       if (selectedProgramme?._id === prog._id) setSelectedProgramme(null);
+                                   })
+                                   .catch(err => alert(err.response?.data?.message || 'Failed'));
+                            }
+                        }}
+                        className="text-[var(--color-text-muted)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remove from Topic Management"
+                    >
+                        <Trash2 size={14} />
+                    </button>
+                </div>
                 <div className="text-xs text-[var(--color-text-muted)] mt-1 flex justify-between">
                   <span>{prog.category}</span>
                   <span className="font-semibold uppercase">{prog.topicMode || 'none'}</span>
@@ -183,11 +226,12 @@ export default function TopicManagementPage() {
                     >
                       <option value="none">None</option>
                       <option value="free-text">Free Text</option>
-                      <option value="fixed-list">Fixed List</option>
+                      <option value="fixed-list">Fixed List (Team Exclusive)</option>
+                      <option value="fixed-list-global">Fixed List (Global Exclusive)</option>
                     </select>
                   </div>
                   
-                  {topicMode === 'fixed-list' && (
+                  {(topicMode === 'fixed-list' || topicMode === 'fixed-list-global') && (
                     <div className="w-2/3">
                       <label className="block text-sm font-medium mb-2 text-[var(--color-text-muted)]">Allowed Topics (one per line)</label>
                       <textarea
@@ -238,7 +282,14 @@ export default function TopicManagementPage() {
                             </div>
                           ) : (
                             <div className="flex items-center justify-between group">
-                              <span className="text-sm font-medium text-[var(--color-primary)]">{topic.topic}</span>
+                              <div className="flex flex-col">
+        <span className="text-sm font-medium text-[var(--color-primary)]">{topic.topic}</span>
+        {topic.attachment && (
+            <a href={topic.attachment} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 hover:underline mt-1 truncate max-w-xs">
+                {topic.attachment}
+            </a>
+        )}
+    </div>
                               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button 
                                   onClick={() => startEditTopic(topic)}

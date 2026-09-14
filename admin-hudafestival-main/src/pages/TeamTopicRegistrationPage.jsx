@@ -169,11 +169,13 @@ export default function TeamTopicRegistrationPage() {
   }, [eligibleTopicProgrammes]);
 
   // Programmes within the selected category
-  const topicProgrammesInCategory = useMemo(() =>
-    topicCategory
-      ? eligibleTopicProgrammes.filter(p => p.category === topicCategory)
-      : [],
-    [eligibleTopicProgrammes, topicCategory]);
+  const topicProgrammesInCategory = useMemo(() => {
+    if (!topicCategory) return [];
+    const registeredProgrammeIds = myRegistrations.filter(r => r.status !== 'rejected').map(r => r.programme._id || r.programme);
+    return eligibleTopicProgrammes.filter(p => 
+      (p.category === topicCategory || p.category === 'KULLIYYAH') && registeredProgrammeIds.includes(p._id)
+    );
+  }, [eligibleTopicProgrammes, topicCategory, myRegistrations]);
 
   const selectedTopicProg = topicEnabledProgrammes.find(p => p._id === topicForm.programmeId);
 
@@ -181,16 +183,20 @@ export default function TeamTopicRegistrationPage() {
     e.preventDefault();
     setError(''); setSuccess(false);
     if (!topicForm.programmeId || !topicForm.topic) { setError('Please fill all fields'); return; }
-    setSubmitting(true);
+      const hasCands = myRegistrations.some(r => (r.programme._id || r.programme) === topicForm.programmeId && r.candidates?.length > 0);
+      const isGroup = selectedTopicProg?.format === 'Group';
+      if (hasCands && !isGroup && !topicForm.candidateId && !editTopicId) { setError('Please select a candidate'); return; }
+      setSubmitting(true);
     try {
       if (editTopicId) {
-        const { data } = await api.patch('/topic-registrations/' + editTopicId, { topic: topicForm.topic });
+        const { data } = await api.patch('/topic-registrations/' + editTopicId, { topic: topicForm.topic, attachment: topicForm.attachment });
         setMyTopics(prev => prev.map(t => t._id === editTopicId ? data : t));
       } else {
         const { data } = await api.post('/topic-registrations', {
           programmeId: topicForm.programmeId, teamId,
           candidateId: topicForm.candidateId || undefined,
           topic: topicForm.topic,
+            attachment: topicForm.attachment,
         });
         setMyTopics(prev => [data, ...prev]);
       }
@@ -716,11 +722,45 @@ export default function TeamTopicRegistrationPage() {
               )}
 
               {/* ── Step 3: Topic entry ───────────────────────────────────────── */}
-              {topicForm.programmeId && (
+              {topicForm.programmeId && (() => {
+                  const regs = myRegistrations.filter(r => (r.programme._id || r.programme) === topicForm.programmeId);
+                  const registeredCands = regs.flatMap(r => r.candidates || []);
+                  
+                  const uniqueCandsMap = new Map();
+                  registeredCands.forEach(c => {
+                      if (c && c._id) uniqueCandsMap.set(c._id, c);
+                  });
+                  const uniqueCands = Array.from(uniqueCandsMap.values());
+
+                  const isGroup = selectedTopicProg?.format === 'Group';
+                  
+                  return (
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                  {uniqueCands.length > 0 && !isGroup && !editTopicId && (
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                        3 — Select Candidate
+                      </label>
+                      <select
+                        value={topicForm.candidateId || ''}
+                        onChange={e => setTopicForm(f => ({ ...f, candidateId: e.target.value }))}
+                        className="w-full px-3 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
+                      >
+                        <option value="">Select a registered candidate…</option>
+                        {uniqueCands.map(c => {
+                            const alreadySubmitted = otherTopics[topicForm.programmeId]?.some(t => t.candidate?._id === c._id && t.team?._id === teamId);
+                            return (
+                                <option key={c._id} value={c._id} disabled={alreadySubmitted}>
+                                    {c.name} ({c.admissionNo}) {alreadySubmitted ? '(Topic Submitted)' : ''}
+                                </option>
+                            );
+                        })}
+                      </select>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
-                      3 — Enter Topic
+                      {uniqueCands.length > 0 && !isGroup && !editTopicId ? '4' : '3'} — Enter Topic
                     </label>
                     {selectedTopicProg?.topicMode === 'fixed-list' ? (
                       <select
@@ -763,9 +803,24 @@ export default function TeamTopicRegistrationPage() {
                     </div>
                   )}
                 </motion.div>
-              )}
+                );
+              })()}
 
               <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
+                {selectedTopicProg?.topicMode === 'free-text' && (
+                      <div className="mt-4">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                          Attachment (YouTube Link / Image URL)
+                        </label>
+                        <input
+                          type="text"
+                          value={topicForm.attachment || ''}
+                          onChange={e => setTopicForm(f => ({ ...f, attachment: e.target.value }))}
+                          placeholder="Optional: https://youtube.com/..."
+                          className="w-full px-3 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
+                        />
+                      </div>
+                    )}
                 <Button variant="ghost" type="button" onClick={() => setShowTopicForm(false)}>Cancel</Button>
                 <Button variant="primary" type="submit" loading={submitting}>Submit Topic</Button>
               </div>

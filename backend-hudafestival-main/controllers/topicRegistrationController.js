@@ -12,7 +12,16 @@ const submitTopic = async (req, res) => {
         }
         
         // Global check moved below programme lookup
-        const { programmeId, teamId, candidateId, topic } = req.body;
+        const { programmeId, teamId, candidateId, topic, attachment } = req.body;
+        
+        const programme = await Programme.findById(programmeId);
+        
+        if (programme.topicMode === 'fixed-list-global') {
+            const globallyTaken = await TopicRegistration.findOne({ programme: programmeId, topic: topic });
+            if (globallyTaken) {
+                return res.status(400).json({ message: 'This topic has already been registered globally by another candidate.' });
+            }
+        }
         
         const existingCandidateTopic = await TopicRegistration.findOne({ programme: programmeId, candidate: candidateId });
         if (existingCandidateTopic) {
@@ -30,11 +39,42 @@ const submitTopic = async (req, res) => {
             team: teamId,
             candidate: candidateId,
             topic,
+            attachment,
             submittedBy: req.user._id,
             status: 'pending'
         });
 
         const saved = await registration.save();
+        
+        // --- AUTO-ASSIGN LOGIC ---
+        // If this is a fixed-list (Team Exclusive) and exactly 1 candidate is left without a topic, and exactly 1 topic is left, auto-assign it.
+        if (programme.topicMode === 'fixed-list') {
+            const Registration = require('../models/Registration');
+            const teamReg = await Registration.findOne({ programme: programmeId, team: teamId });
+            if (teamReg && teamReg.candidates && teamReg.candidates.length > 1) {
+                const teamTopics = await TopicRegistration.find({ programme: programmeId, team: teamId });
+                const submittedCandIds = teamTopics.map(t => t.candidate?.toString());
+                const unassignedCands = teamReg.candidates.filter(c => !submittedCandIds.includes(c.toString()));
+                
+                const submittedTopicStrings = teamTopics.map(t => t.topic);
+                const remainingTopics = programme.topicList.filter(t => !submittedTopicStrings.includes(t));
+                
+                // If remaining counts match, auto-assign
+                if (unassignedCands.length > 0 && unassignedCands.length === remainingTopics.length) {
+                    for (let i = 0; i < unassignedCands.length; i++) {
+                        await TopicRegistration.create({
+                            programme: programmeId,
+                            team: teamId,
+                            candidate: unassignedCands[i],
+                            topic: remainingTopics[i],
+                            submittedBy: req.user._id,
+                            status: 'approved'
+                        });
+                    }
+                }
+            }
+        }
+        
         res.status(201).json(saved);
     } catch (error) {
         res.status(500).json({ message: 'Failed to submit topic', error: error.message });
@@ -55,8 +95,8 @@ const getTopicsForProgramme = async (req, res) => {
 
 const getMyTopicSubmissions = async (req, res) => {
     try {
-        // Assuming team leader's team is linked or they query by their ID
-        const topics = await TopicRegistration.find({ submittedBy: req.user._id })
+        const query = req.user.role === 'team_leader' ? { team: req.user.team } : { submittedBy: req.user._id };
+        const topics = await TopicRegistration.find(query)
             .populate('programme', 'name code')
             .populate('team', 'name')
             .populate('candidate', 'name admissionNo');
@@ -139,10 +179,10 @@ const updateTopic = async (req, res) => {
         const settings = await Settings.findOne();
         // Global check moved below programme lookup
 
-        const { topic } = req.body;
+        const { topic, attachment } = req.body;
         const topicId = req.params.id;
         
-        const registration = await TopicRegistration.findById(topicId);
+        const registration = await TopicRegistration.findById(topicId).populate('programme');
         if (!registration) {
             return res.status(404).json({ message: 'Topic registration not found' });
         }
@@ -155,10 +195,25 @@ const updateTopic = async (req, res) => {
             return res.status(400).json({ message: 'Cannot update approved topic' });
         }
         
+        if (attachment !== undefined) {
+            registration.attachment = attachment;
+        }
+
         if (topic && topic !== registration.topic) {
+            if (registration.programme && registration.programme.topicMode === 'fixed-list-global') {
+                const globallyTaken = await TopicRegistration.findOne({ 
+                    programme: registration.programme._id, 
+                    topic: topic,
+                    _id: { $ne: registration._id }
+                });
+                if (globallyTaken) {
+                    return res.status(400).json({ message: 'This topic has already been registered globally by another candidate.' });
+                }
+            }
+
             // Check if the team already picked this new topic for someone else
             const existingTeamTopic = await TopicRegistration.findOne({ 
-                programme: registration.programme, 
+                programme: registration.programme._id, 
                 team: registration.team, 
                 topic: topic,
                 _id: { $ne: registration._id }

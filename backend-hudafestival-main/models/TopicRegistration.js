@@ -5,6 +5,7 @@ const topicRegistrationSchema = new mongoose.Schema({
   team: { type: mongoose.Schema.Types.ObjectId, ref: 'Team', required: true },
   candidate: { type: mongoose.Schema.Types.ObjectId, ref: 'Candidate' },
   topic: { type: String, required: true },
+  attachment: { type: String },
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
   submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

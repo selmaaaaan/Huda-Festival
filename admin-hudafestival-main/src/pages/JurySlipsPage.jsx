@@ -3,6 +3,7 @@ import { Printer, RefreshCw, AlertCircle, Search, Users, FileText, BarChart2, In
 import api from '../services/api';
 import ProgrammeCodePicker from '../components/ProgrammeCodePicker';
 import Button from '../components/Button';
+import * as XLSX from 'xlsx';
 
 const JurySlipsPage = () => {
   const [programmes, setProgrammes] = useState([]);
@@ -55,6 +56,85 @@ const JurySlipsPage = () => {
       temp = Math.floor(temp / 26) - 1;
     }
     return letter;
+  };
+
+    const handleExportCurrent = () => {
+    if (shuffledList.length === 0 && registrations.length === 0) return;
+    const listToExport = shuffledList.length > 0 ? shuffledList : registrations;
+
+    const data = listToExport.map((reg, idx) => ({
+      'SL.No': idx + 1,
+      'Code Letter': reg.codeLetter || '',
+      'Ad No': reg.candidates?.map(c => c.admissionNo).join(', ') || '-',
+      'Name': reg.candidates?.map(c => c.name).join(', ') || '-',
+      'Team': reg.team?.name || '-'
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Participants");
+    XLSX.writeFile(wb, `${selectedProgramme?.name || 'Programme'}_Participants.xlsx`);
+  };
+
+  const handleExportAll = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/registrations?status=approved&limit=100000`);
+      const allRegs = res.data.registrations || res.data.data || [];
+      if (allRegs.length === 0) { alert('No approved registrations found.'); return; }
+
+      const wb = XLSX.utils.book_new();
+      const grouped = {};
+      allRegs.forEach(reg => {
+        if (!reg.programme) return;
+        const progName = reg.programme.name;
+        if (!grouped[progName]) grouped[progName] = [];
+        grouped[progName].push(reg);
+      });
+
+      Object.keys(grouped).forEach(progName => {
+        let progRegs = grouped[progName];
+        progRegs.sort((a, b) => {
+          const teamA = a.team?.name || '';
+          const teamB = b.team?.name || '';
+          return teamA.localeCompare(teamB);
+        });
+
+        progRegs = progRegs.map((reg, index) => {
+           let letter = '';
+           let temp = index;
+           while (temp >= 0) {
+             letter = String.fromCharCode(65 + (temp % 26)) + letter;
+             temp = Math.floor(temp / 26) - 1;
+           }
+           return { ...reg, codeLetter: letter };
+        });
+
+        const data = progRegs.map((reg, idx) => ({
+          'SL.No': idx + 1,
+          'Code Letter': reg.codeLetter || '',
+          'Ad No': reg.candidates?.map(c => c.admissionNo).join(', ') || '-',
+          'Name': reg.candidates?.map(c => c.name).join(', ') || '-',
+          'Team': reg.team?.name || '-'
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(data);
+        let safeSheetName = progName.substring(0, 31).replace(/[\\/?*\[\]]/g, '');
+        let uniqueName = safeSheetName;
+        let counter = 1;
+        while(wb.SheetNames.includes(uniqueName)) {
+            uniqueName = safeSheetName.substring(0, 28) + '(' + counter + ')';
+            counter++;
+        }
+        XLSX.utils.book_append_sheet(wb, ws, uniqueName);
+      });
+      XLSX.writeFile(wb, "All_Programmes_Participants.xlsx");
+    } catch (err) {
+      console.error(err);
+      alert('Failed to export all programmes');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGenerate = () => {
@@ -229,7 +309,7 @@ const JurySlipsPage = () => {
                        return (
                          <tr key={reg._id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
                            <td className="py-3 px-2 border border-slate-200 text-center font-semibold text-slate-700">{idx + 1}</td>
-                           <td className="py-3 px-2 border border-slate-200 text-center font-bold text-blue-700 text-base"></td>
+                           <td className="py-3 px-2 border border-slate-200 text-center font-bold text-blue-700 text-base">{reg.codeLetter || ''}</td>
                            <td className="py-3 px-3 border border-slate-200 text-slate-800 text-sm font-bold">{adNos}</td>
                            <td className="py-3 px-4 border border-slate-200 font-medium text-slate-800">{names}</td>
                            <td className="py-3 px-3 border border-slate-200 text-slate-600 font-semibold">{reg.team?.name || '-'}</td>

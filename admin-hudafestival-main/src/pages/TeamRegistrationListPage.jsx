@@ -381,9 +381,13 @@ export default function TeamRegistrationListPage() {
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3 border-r border-[var(--color-border)] bg-[var(--color-surface)] sticky left-[21rem] z-20">
-                                                <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold ${isCompliant ? 'bg-green-500/10 text-green-600' : 'bg-orange-500/10 text-orange-600'}`}>
-                                                    {isCompliant ? <CheckCircle size={10} /> : <AlertTriangle size={10} />}
-                                                    {isCompliant ? 'Compliant' : 'Pending'}
+                                                                                                <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold ${
+                                                    cand.bylawStatus?.status === 'compliant' ? 'bg-green-500/10 text-green-600' :
+                                                    cand.bylawStatus?.status === 'violated' ? 'bg-red-500/10 text-red-600' :
+                                                    'bg-orange-500/10 text-orange-600'
+                                                }`}>
+                                                    {cand.bylawStatus?.status === 'compliant' ? <CheckCircle size={10} /> : <AlertTriangle size={10} />}
+                                                    {cand.bylawStatus?.status === 'compliant' ? 'Compliant' : cand.bylawStatus?.status === 'violated' ? 'Violated' : 'Pending'}
                                                 </div>
                                                 <div className="text-[9px] text-[var(--color-text-muted)] mt-1 ml-1 text-nowrap">
                                                     S: {cand.bylawStatus?.stageCount} | N: {cand.bylawStatus?.nonStageCount}

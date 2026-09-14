@@ -82,7 +82,7 @@ const programmeSchema = new mongoose.Schema({
     },
     topicMode: { 
         type: String, 
-        enum: ['none', 'free-text', 'fixed-list'], 
+        enum: ['none', 'free-text', 'fixed-list', 'fixed-list-global'], 
         default: 'none' 
     },
     topicList: [String],

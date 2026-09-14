@@ -56,7 +56,7 @@ export default function TeamLeaderDashboard() {
   const [regSearchQuery, setRegSearchQuery] = useState('');
 
   // ── Topic Form (cascade state) ──────────────────────────────────────────────
-  const [topicForm, setTopicForm] = useState({ programmeId: '', candidateId: '', topic: '' });
+  const [topicForm, setTopicForm] = useState({ programmeId: '', candidateId: '', topic: '', attachment: '' });
   const [topicCategory, setTopicCategory] = useState('');
 
   // ── Table Filters ───────────────────────────────────────────────────────────
@@ -210,11 +210,14 @@ export default function TeamLeaderDashboard() {
   }, [eligibleTopicProgrammes, categoryTopicStatus]);
 
   // Programmes within the selected category
-  const topicProgrammesInCategory = useMemo(() =>
-    topicCategory
-      ? eligibleTopicProgrammes.filter(p => p.category === topicCategory || p.category === 'KULLIYYAH')
-      : [],
-    [eligibleTopicProgrammes, topicCategory]);
+  const topicProgrammesInCategory = useMemo(() => {
+    if (!topicCategory) return [];
+    // Only allow selecting programmes the team has actually registered for
+    const registeredProgrammeIds = myRegistrations.filter(r => r.status !== 'rejected').map(r => r.programme._id || r.programme);
+    return eligibleTopicProgrammes.filter(p => 
+      (p.category === topicCategory || p.category === 'KULLIYYAH') && registeredProgrammeIds.includes(p._id)
+    );
+  }, [eligibleTopicProgrammes, topicCategory, myRegistrations]);
 
   const selectedTopicProg = topicEnabledProgrammes.find(p => p._id === topicForm.programmeId);
 
@@ -223,7 +226,8 @@ export default function TeamLeaderDashboard() {
     setError(''); setSuccess(false);
     if (!topicForm.programmeId || !topicForm.topic) { setError('Please fill all fields'); return; }
       const hasCands = myRegistrations.some(r => (r.programme._id || r.programme) === topicForm.programmeId && r.candidates?.length > 0);
-      if (hasCands && !topicForm.candidateId) { setError('Please select a candidate'); return; }
+      const isGroup = selectedTopicProg?.format === 'Group';
+      if (hasCands && !isGroup && !topicForm.candidateId) { setError('Please select a candidate'); return; }
     setSubmitting(true);
     try {
       const { data } = await api.post('/topic-registrations', {
@@ -235,7 +239,7 @@ export default function TeamLeaderDashboard() {
       setSuccess(true);
       setTimeout(() => {
         setShowTopicForm(false);
-        setTopicForm({ programmeId: '', candidateId: '', topic: '' });
+        setTopicForm({ programmeId: '', candidateId: '', topic: '', attachment: '' });
         setTopicCategory('');
         setSuccess(false);
       }, 1500);
@@ -246,7 +250,7 @@ export default function TeamLeaderDashboard() {
   const openTopicForm = () => {
     if (isTopicRegistrationEnabled === false) return;
     setSuccess(false); setError('');
-    setTopicForm({ programmeId: '', candidateId: '', topic: '' });
+    setTopicForm({ programmeId: '', candidateId: '', topic: '', attachment: '' });
     setTopicCategory('');
     setShowTopicForm(true);
   };
@@ -708,7 +712,7 @@ export default function TeamLeaderDashboard() {
                       type="button"
                       onClick={() => {
                         setTopicCategory(cat);
-                        setTopicForm(f => ({ ...f, programmeId: '', topic: '', candidateId: '' }));
+                        setTopicForm(f => ({ ...f, programmeId: '', topic: '', candidateId: '', attachment: '' }));
                       }}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                         topicCategory === cat
@@ -737,7 +741,7 @@ export default function TeamLeaderDashboard() {
                       value={topicForm.programmeId}
                       onSelect={(prog) => {
                         const val = prog?._id || '';
-                        setTopicForm(f => ({ ...f, programmeId: val, topic: '', candidateId: '' }));
+                        setTopicForm(f => ({ ...f, programmeId: val, topic: '', candidateId: '', attachment: '' }));
                         if (val) loadOtherTopics(val);
                       }}
                       compact
@@ -748,11 +752,20 @@ export default function TeamLeaderDashboard() {
 
               {/* ── Step 3: Topic entry ───────────────────────────────────────── */}
               {topicForm.programmeId && (() => {
-                  const reg = myRegistrations.find(r => (r.programme._id || r.programme) === topicForm.programmeId);
-                  const registeredCands = reg?.candidates || [];
+                  const regs = myRegistrations.filter(r => (r.programme._id || r.programme) === topicForm.programmeId);
+                  const registeredCands = regs.flatMap(r => r.candidates || []);
+                  
+                  const uniqueCandsMap = new Map();
+                  registeredCands.forEach(c => {
+                      if (c && c._id) uniqueCandsMap.set(c._id, c);
+                  });
+                  const uniqueCands = Array.from(uniqueCandsMap.values());
+
+                  const isGroup = selectedTopicProg?.format === 'Group';
+                  
                   return (
                     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                      {registeredCands.length > 0 && (
+                      {uniqueCands.length > 0 && !isGroup && (
                         <div>
                           <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
                             3 — Select Candidate
@@ -763,15 +776,20 @@ export default function TeamLeaderDashboard() {
                             className="w-full px-3 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
                           >
                             <option value="">Select a registered candidate…</option>
-                            {registeredCands.map(c => (
-                              <option key={c._id} value={c._id}>{c.name} ({c.admissionNo})</option>
-                            ))}
+                            {uniqueCands.map(c => {
+                                const alreadySubmitted = otherTopics[topicForm.programmeId]?.some(t => t.candidate?._id === c._id && t.team?._id === teamId);
+                                return (
+                                    <option key={c._id} value={c._id} disabled={alreadySubmitted}>
+                                        {c.name} ({c.admissionNo}) {alreadySubmitted ? '(Topic Submitted)' : ''}
+                                    </option>
+                                );
+                            })}
                           </select>
                         </div>
                       )}
                       <div>
                         <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
-                          {registeredCands.length > 0 ? '4' : '3'} — Enter Topic
+                          {uniqueCands.length > 0 && !isGroup ? '4' : '3'} — Enter Topic
                         </label>
                     {selectedTopicProg?.topicMode === 'fixed-list' ? (
                       <select

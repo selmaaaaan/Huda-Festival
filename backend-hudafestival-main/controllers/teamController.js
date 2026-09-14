@@ -1,4 +1,5 @@
 const Team = require('../models/Team');
+const Settings = require('../models/Settings');
 const Candidate = require('../models/Candidate');
 const Registration = require('../models/Registration');
 const Programme = require('../models/Programme');
@@ -158,7 +159,8 @@ const getRegistrationGrid = async (req, res) => {
         const programmes = await Programme.find(progQuery).lean();
         
         // 3. Fetch ALL Registrations for this team (to calculate compliance and grid)
-        const registrations = await Registration.find({ team: teamId }).populate('programme', 'type maxParticipants groupSize').lean();
+        const registrations = await Registration.find({ team: teamId }).populate('programme', 'type maxParticipants groupSize isStarred').lean();
+        const settings = await Settings.findOne();
 
         // 4. Calculate Compliance per candidate
         // Min 1 Stage + 1 Non-Stage
