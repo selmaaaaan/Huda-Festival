@@ -12,8 +12,11 @@ import PointAdjustmentPage from './pages/PointAdjustmentPage';
 import Sidebar from './components/Sidebar';
 import Breadcrumbs from './components/Breadcrumbs';
 import SettingsPage from './pages/SettingsPage';
+import UsersPage from './pages/UsersPage';
 import SchedulePage from './pages/SchedulePage';
+import JurySlipsPage from './pages/JurySlipsPage';
 import VolunteerPortal from './pages/VolunteerPortal';
+import ConfirmDialog from './components/ConfirmDialog';
 import { Search, Bell, AlertTriangle, LogOut, Sun, Moon } from 'lucide-react';
 import api from './services/api';
 
@@ -70,6 +73,7 @@ function App() {
   const [activePage, setActivePage] = useState(getInitialPage(initialInfo));
   const [appSettings, setAppSettings] = useState({ maintenanceMode: false, maintenanceMessage: '' });
   const [isDark, setIsDark] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('huda-admin-primary-theme');
@@ -209,6 +213,9 @@ function App() {
       case 'notifications':
         pageContent = <NotificationsPage />;
         break;
+      case 'users':
+        pageContent = <UsersPage />;
+        break;
       case 'settings':
         pageContent = <SettingsPage />;
         break;
@@ -238,6 +245,9 @@ function App() {
         break;
       case 'topic_management':
         pageContent = <TopicManagementPage />;
+        break;
+      case 'jury_slips':
+        pageContent = <JurySlipsPage />;
         break;
       case 'schedule':
         pageContent = <SchedulePage />;
@@ -272,6 +282,8 @@ function App() {
       <>
         <AnimatePresence>{showPreloader && <Preloader />}</AnimatePresence>
         <LoginPage onLoginSuccess={handleLoginSuccess} />
+
+        
       </>
     );
   }
@@ -321,7 +333,7 @@ function App() {
               </button>
 
               <button 
-                onClick={handleLogout} 
+                onClick={() => setShowLogoutConfirm(true)} 
                 className="flex items-center gap-2 bg-red-500/10 text-red-600 hover:bg-red-500 hover:text-white px-5 py-2 rounded-full transition-all font-semibold text-sm border border-red-500/20 hover:border-red-500 cursor-pointer"
               >
                 <LogOut size={16} />
@@ -335,6 +347,17 @@ function App() {
           </main>
         </div>
       </div>
+      <ConfirmDialog 
+        open={showLogoutConfirm} 
+        title="Confirm Logout" 
+        message="Are you sure you want to log out?" 
+        confirmLabel="Log Out" 
+        onConfirm={() => {
+          setShowLogoutConfirm(false);
+          handleLogout();
+        }} 
+        onCancel={() => setShowLogoutConfirm(false)} 
+      />
     </>
   );
 }

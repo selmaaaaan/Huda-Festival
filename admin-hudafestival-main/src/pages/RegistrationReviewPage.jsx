@@ -35,6 +35,7 @@ export default function RegistrationReviewPage() {
   // Dialogs & Modals
   const [rejectDialog, setRejectDialog] = useState({ open: false, id: null });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, id: null });
+  const [bulkDialog, setBulkDialog] = useState({ open: false, action: null, reason: '' });
   const [rejectReason, setRejectReason] = useState('');
   const [actionLoading, setActionLoading] = useState(null);
 
@@ -46,6 +47,45 @@ export default function RegistrationReviewPage() {
   const [teamCandidates, setTeamCandidates] = useState([]);
 
   // Fetch Core Data
+    const [selectedIds, setSelectedIds] = useState([]);
+
+  const handleSelectAll = (e, currentFiltered) => {
+    if (e.target.checked) {
+      setSelectedIds(currentFiltered.map(r => r._id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const executeBulkApprove = async () => {
+    try {
+      await Promise.allSettled(selectedIds.map(id => api.patch(`/registrations/${id}/approve`)));
+      setRegistrations(prev => prev.map(r => selectedIds.includes(r._id) ? { ...r, status: 'approved' } : r));
+      setSelectedIds([]);
+    } catch(e) {
+      alert('Error in bulk approval');
+    } finally {
+      setBulkDialog({ open: false, action: null, reason: '' });
+    }
+  };
+
+  const executeBulkReject = async () => {
+    const reason = bulkDialog.reason;
+    try {
+      await Promise.allSettled(selectedIds.map(id => api.patch(`/registrations/${id}/reject`, { rejectionReason: reason })));
+      setRegistrations(prev => prev.map(r => selectedIds.includes(r._id) ? { ...r, status: 'rejected', rejectionReason: reason } : r));
+      setSelectedIds([]);
+    } catch(e) {
+      alert('Error in bulk rejection');
+    } finally {
+      setBulkDialog({ open: false, action: null, reason: '' });
+    }
+  };
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -332,6 +372,16 @@ export default function RegistrationReviewPage() {
           </div>
 
           {/* Table */}
+          {/* Bulk Actions */}
+          {selectedIds.length > 0 && (
+            <div className="bg-[var(--color-surface-elevated)] p-4 rounded-xl border border-[var(--color-border)] flex items-center gap-4">
+              <span className="text-sm font-semibold text-[var(--color-text-heading)]">{selectedIds.length} selected</span>
+              <Button onClick={() => setBulkDialog({ open: true, action: 'approve', reason: '' })} variant="primary" className="bg-green-600 hover:bg-green-700 text-white">Approve Selected</Button>
+              <Button onClick={() => setBulkDialog({ open: true, action: 'reject', reason: '' })} variant="danger">Reject Selected</Button>
+              <button onClick={() => setSelectedIds([])} className="text-sm text-[var(--color-text-muted)] hover:underline ml-auto">Clear Selection</button>
+            </div>
+          )}
+
           <div className="bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-2xl overflow-hidden shadow-sm">
             {filteredRegistrations.length === 0 ? (
               <div className="py-20 flex flex-col items-center justify-center text-center px-4">
@@ -348,6 +398,7 @@ export default function RegistrationReviewPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-[var(--color-surface)] border-b border-[var(--color-border)] text-xs uppercase tracking-wider text-[var(--color-text-muted)] font-semibold">
+                      <th className="px-6 py-4 w-12"><input type="checkbox" onChange={(e) => handleSelectAll(e, filteredRegistrations)} checked={filteredRegistrations.length > 0 && selectedIds.length === filteredRegistrations.length} className="w-4 h-4 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]" /></th>
                       <th className="px-6 py-4">Programme</th>
                       <th className="px-6 py-4">Team</th>
                       <th className="px-6 py-4">Candidates</th>
@@ -359,6 +410,7 @@ export default function RegistrationReviewPage() {
                     {filteredRegistrations.map(reg => (
                       <motion.tr key={reg._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                         className="hover:bg-[var(--color-surface)] transition-colors">
+                        <td className="px-6 py-4"><input type="checkbox" checked={selectedIds.includes(reg._id)} onChange={() => handleSelectOne(reg._id)} className="w-4 h-4 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]" /></td>
                         <td className="px-6 py-4">
                           <div className="font-semibold text-[var(--color-text-heading)]">{reg.programme?.name || '—'}</div>
                           <div className="text-xs text-[var(--color-text-muted)] mt-0.5">{reg.programme?.code || ''}</div>
@@ -423,6 +475,34 @@ export default function RegistrationReviewPage() {
       </motion.div>
 
       {/* Delete Dialog */}
+      <ConfirmDialog
+        open={bulkDialog.open}
+        title={bulkDialog.action === 'approve' ? "Approve Registrations" : "Reject Registrations"}
+        message={bulkDialog.action === 'approve' 
+          ? `Are you sure you want to approve ${selectedIds.length} registrations?` 
+          : `You are about to reject ${selectedIds.length} registrations. Please provide a reason:`}
+        confirmLabel={bulkDialog.action === 'approve' ? "Approve" : "Reject"}
+        variant={bulkDialog.action === 'approve' ? "primary" : "danger"}
+        onConfirm={() => {
+          if (bulkDialog.action === 'approve') {
+            executeBulkApprove();
+          } else {
+            executeBulkReject();
+          }
+        }}
+        onCancel={() => setBulkDialog({ open: false, action: null, reason: '' })}
+      >
+        {bulkDialog.action === 'reject' && (
+          <input 
+            type="text" 
+            placeholder="Rejection reason..." 
+            value={bulkDialog.reason}
+            onChange={(e) => setBulkDialog(prev => ({ ...prev, reason: e.target.value }))}
+            className="w-full px-3 py-2 mt-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md text-[var(--color-text-heading)] focus:outline-none focus:border-red-500"
+          />
+        )}
+      </ConfirmDialog>
+
       <ConfirmDialog
         open={deleteDialog.open}
         title="Delete Registration"

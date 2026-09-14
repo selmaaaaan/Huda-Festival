@@ -5,6 +5,12 @@ const submitTopic = async (req, res) => {
     try {
         const Settings = require('../models/Settings');
         const settings = await Settings.findOne();
+        const Team = require('../models/Team');
+        const teamDoc = await Team.findById(req.user.role === 'team_leader' ? req.user.team : req.body.teamId);
+        if (teamDoc && teamDoc.isTopicRegistrationOpen === false && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Topic Registration is closed for your team' });
+        }
+        
         if (settings && settings.topicRegistrationEnabled === false && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Topic Registration is closed by Fest Admins' });
         }

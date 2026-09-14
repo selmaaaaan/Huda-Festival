@@ -5,6 +5,7 @@ import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/Modal';
 import ProgrammeCodePicker from '../components/ProgrammeCodePicker';
+import GettingStartedCard from '../components/GettingStartedCard';
 import {
   ClipboardList, Users, Plus, Search, CheckCircle, AlertTriangle,
   MessageSquare, BookOpen, ChevronRight, X, Filter, Edit3, Trash2
@@ -37,7 +38,9 @@ export default function TeamLeaderDashboard() {
   const [otherTopics, setOtherTopics] = useState({});
   const [loading, setLoading] = useState(true);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
+    const [isTopicRegistrationEnabled, setIsTopicRegistrationEnabled] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(0);
+  const [teamProgress, setTeamProgress] = useState(null);
 
   // ── Modal State ─────────────────────────────────────────────────────────────
   const [showForm, setShowForm] = useState(false);
@@ -67,21 +70,28 @@ export default function TeamLeaderDashboard() {
   const loadData = async (isPoll = false) => {
     try {
       if (!isPoll) setLoading(true);
-      const [progRes, candRes, regRes, settingsRes, topicProgRes, myTopicRes] = await Promise.all([
+      const [progRes, candRes, regRes, settingsRes, topicProgRes, myTopicRes, progressRes] = await Promise.all([
         api.get('/programmes'),
         api.get('/candidates'),
         api.get('/registrations'),
         api.get('/settings').catch(() => ({ data: {} })),
         api.get('/topic-registrations/enabled-programmes'),
         api.get('/topic-registrations/my-submissions'),
+        api.get('/settings/dashboard-progress').catch(() => ({ data: {} })),
       ]);
       setProgrammes(progRes.data);
       if (!isPoll) setCandidates(candRes.data);
       setMyRegistrations(regRes.data?.registrations || regRes.data || []);
       if (settingsRes.data?.isRegistrationOpen !== undefined)
-        setIsRegistrationOpen(settingsRes.data.isRegistrationOpen);
+          setIsRegistrationOpen(settingsRes.data.isRegistrationOpen);
+        if (settingsRes.data?.topicRegistrationEnabled !== undefined)
+          setIsTopicRegistrationEnabled(settingsRes.data.topicRegistrationEnabled);
       setTopicEnabledProgrammes(topicProgRes.data);
       setMyTopics(myTopicRes.data);
+      if (progressRes?.data?.teamWise) {
+        const myProg = progressRes.data.teamWise.find(t => t.teamId === teamId);
+        if (myProg) setTeamProgress(myProg);
+      }
       setLastUpdated(0);
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
@@ -227,6 +237,13 @@ export default function TeamLeaderDashboard() {
     finally { setSubmitting(false); }
   };
 
+  const openTopicForm = () => {
+    setSuccess(false); setError('');
+    setTopicForm({ programmeId: '', candidateId: '', topic: '' });
+    setTopicCategory('');
+    setShowTopicForm(true);
+  };
+
   const openNewRegistration = () => {
     if (isRegistrationOpen === false) return;
     setSuccess(false); setError('');
@@ -348,6 +365,12 @@ export default function TeamLeaderDashboard() {
             <StatCard label="Approved"        value={approvedCount}                accent="#22c55e" />
             <StatCard label="Pending Review"  value={pendingCount}                 accent="#f59e0b" />
           </div>
+
+          {teamProgress && (
+            <div className="w-full">
+               <GettingStartedCard progressData={teamProgress} title="Our Team's Festival Progress" />
+            </div>
+          )}
 
           {/* ── Hidden Tabs ─────────────────────────────────────────────────────────── */}
           <div className="hidden border-b border-[var(--color-border)] gap-6">

@@ -128,6 +128,17 @@ const DashboardPage = () => {
               </div>
             </div>
           </div>
+          
+          {progressData?.teamWise && progressData.teamWise.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-xl font-bold text-[var(--color-text-heading)] mb-6">Team Wise Progress</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {progressData.teamWise.map((teamData) => (
+                  <GettingStartedCard key={teamData.teamId} progressData={teamData} title={teamData.teamName} />
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

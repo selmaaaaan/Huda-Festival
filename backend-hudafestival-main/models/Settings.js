@@ -12,6 +12,18 @@ const settingsSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    categoryRegistrationStatus: {
+        type: Map,
+        of: Boolean,
+        default: {
+            'BIDĀYAH': true,
+            'ʾŪLĀ': true,
+            'THĀNIYAH': true,
+            'THĀNAWIYYAH': true,
+            'ʿĀLIYAH': true,
+            'KULLIYYAH': true
+        }
+    },
     topicRegistrationEnabled: {
         type: Boolean,
         default: true

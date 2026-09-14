@@ -33,6 +33,7 @@ export default function TeamRegistrationListPage() {
     const [groupModal, setGroupModal] = useState({ isOpen: false, prog: null, candidate: null, selectedIds: [] });
     const [groupSaving, setGroupSaving] = useState(false);
     const [saveError, setSaveError] = useState('');
+    const [saveErrorsList, setSaveErrorsList] = useState([]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -154,30 +155,45 @@ export default function TeamRegistrationListPage() {
     const handleSave = async () => {
         setSaving(true);
         setSaveError('');
+        setSaveErrorsList([]);
         try {
-            const adds = [];
-            const removes = [];
+            const promises = [];
 
             Object.entries(pendingChanges).forEach(([cellId, isAdding]) => {
                 const [candId, progId] = cellId.split('-');
                 if (isAdding) {
-                    adds.push({ programmeId: progId, teamId: selectedTeam, candidateIds: [candId] });
+                    const cand = candidates.find(c => c._id === candId);
+                    const prog = programmes.find(p => p._id === progId);
+                    promises.push(
+                        api.post('/registrations', { programmeId: progId, teamId: selectedTeam, candidateIds: [candId] })
+                        .catch(err => {
+                            throw { message: err.response?.data?.message || 'Addition failed', detail: `${cand?.name || 'Unknown Candidate'} - ${prog?.name || 'Unknown Programme'}` };
+                        })
+                    );
                 } else {
                     const reg = registrations.find(r => r.programme?._id === progId && r.candidates?.includes(candId));
-                    if (reg) removes.push(reg._id);
+                    if (reg) {
+                        promises.push(
+                            api.delete(`/registrations/${reg._id}`)
+                            .catch(err => {
+                                throw { message: err.response?.data?.message || 'Deletion failed', detail: 'Removing a registration' };
+                            })
+                        );
+                    }
                 }
             });
 
-            const removePromises = removes.map(regId => api.delete(`/registrations/${regId}`));
-            const addPromises = adds.map(add => api.post('/registrations', add));
+            const results = await Promise.allSettled(promises);
+            const errors = results.filter(r => r.status === 'rejected').map(r => r.reason);
             
-            await Promise.all([...removePromises, ...addPromises]);
+            if (errors.length > 0) {
+                setSaveErrorsList(errors);
+            }
             
             setPendingChanges({});
             await fetchGrid();
         } catch (err) {
-            setSaveError(err.response?.data?.message || 'Failed to save some changes.');
-            setTimeout(() => setSaveError(''), 5000);
+            setSaveError('An unexpected error occurred.');
             fetchGrid();
         } finally {
             setSaving(false);
@@ -444,6 +460,27 @@ export default function TeamRegistrationListPage() {
                     </div>
                 )}
             </div>
+
+            <Modal
+                isOpen={saveErrorsList.length > 0}
+                onClose={() => setSaveErrorsList([])}
+                title="Save Completed with Errors"
+            >
+                <div className="space-y-4">
+                    <p className="text-sm text-[var(--color-text-muted)]">
+                        Some changes could not be saved because they violate constraints:
+                    </p>
+                    <ul className="space-y-3">
+                        {saveErrorsList.map((err, idx) => (
+                            <li key={idx} className="bg-red-50 text-red-700 p-3 rounded-lg border border-red-200">
+                                <div className="font-bold text-sm">{err.detail}</div>
+                                <div className="text-xs opacity-90">{err.message}</div>
+                            </li>
+                        ))}
+                    </ul>
+                    <Button onClick={() => setSaveErrorsList([])} className="w-full justify-center">Acknowledge</Button>
+                </div>
+            </Modal>
 
             <Modal 
                 isOpen={groupModal.isOpen} 

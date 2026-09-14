@@ -17,6 +17,10 @@ const teamSchema = new mongoose.Schema({
     motto: {
         type: String,
         required: false,
+    },
+    isTopicRegistrationOpen: {
+        type: Boolean,
+        default: true,
     }
 }, { timestamps: true })
 

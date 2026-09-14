@@ -8,7 +8,7 @@ const Programme = require('../models/Programme');
 // @access Private/Admin
 
 const createTeam = async (req, res) => {
-    const { name, color, motto } = req.body;
+    const { name, color, motto, isTopicRegistrationOpen } = req.body;
 
     if(!name) {
         return res.status(400).json({ message: 'Team name is required' });
@@ -77,6 +77,7 @@ const updateTeamById = async (req, res) => {
         }
         team.name = name || team.name;
         if (color !== undefined) team.color = color;
+        if (isTopicRegistrationOpen !== undefined) team.isTopicRegistrationOpen = isTopicRegistrationOpen;
         if (motto !== undefined) team.motto = motto;
         const updatedTeam = await team.save()
         res.status(200).json(updatedTeam)

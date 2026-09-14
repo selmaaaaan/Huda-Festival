@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight, Settings, Sun, Moon, Image as ImageIcon, Bell, ClipboardList, CalendarClock, Radio, FileSpreadsheet, BookOpen, Table2 } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight, Settings, Sun, Moon, Image as ImageIcon, Bell, ClipboardList, FileText, CalendarClock, Radio, FileSpreadsheet, BookOpen, Table2 } from 'lucide-react';
 import Logo from './Logo';
 
 const navItems = [
@@ -17,7 +17,9 @@ const navItems = [
   { key: 'notifications', label: 'Notifications', icon: Bell },
   { key: 'topic_management', label: 'Topic Mgmt', icon: ClipboardList },
   { key: 'schedule', label: 'Schedule', icon: CalendarClock },
-  { key: 'settings', label: 'Settings', icon: Settings },
+  { key: 'jury_slips', label: 'Participant List', icon: FileText },
+  { key: 'users', label: 'Users & Teams', icon: UserPlus },
+    { key: 'settings', label: 'Settings', icon: Settings },
 ];
 
 import api from '../services/api';
