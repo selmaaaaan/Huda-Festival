@@ -108,7 +108,7 @@ const JudgePanel = () => {
       setCandidates([]);
       setAlreadyJudged(false);
       setOverrideWarning(false);
-      fetchSubmissions();
+      fetchData();
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit results');
     } finally {

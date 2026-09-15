@@ -121,7 +121,7 @@ const CodeLetterSection = ({ programmes }) => {
       // Pre-fill existing letters
       const existing = {};
       (existingRes.data || []).forEach(cl => {
-        existing[cl.candidate._id || cl.candidate] = cl.letter;
+        existing[cl.candidate?._id || cl.candidate] = cl.letter;
       });
 
       // Auto-suggest sequential letters for those without one
