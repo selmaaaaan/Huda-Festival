@@ -67,10 +67,13 @@ const JurySlipsPage = () => {
 
     const data = listToExport.map((reg, idx) => ({
       'SL.No': idx + 1,
-      'Code Letter': reg.codeLetter || '',
-      'Ad No': reg.candidates?.map(c => c.admissionNo).join(', ') || '-',
-      'Name': reg.candidates?.map(c => c.name).join(', ') || '-',
-      'Team': reg.team?.name || '-'
+      'Code Letter': '',
+      'Ad No': reg.candidates?.map(c => c.admissionNo).join('\n') || '-',
+      'Name': reg.candidates?.map(c => c.name).join('\n') || '-',
+      'Team': reg.team?.name || '-',
+        'Position': '',
+        'Grade': '',
+        'Remarks': ''
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);
@@ -115,10 +118,13 @@ const JurySlipsPage = () => {
 
         const data = progRegs.map((reg, idx) => ({
           'SL.No': idx + 1,
-          'Code Letter': reg.codeLetter || '',
-          'Ad No': reg.candidates?.map(c => c.admissionNo).join(', ') || '-',
-          'Name': reg.candidates?.map(c => c.name).join(', ') || '-',
-          'Team': reg.team?.name || '-'
+          'Code Letter': '',
+          'Ad No': reg.candidates?.map(c => c.admissionNo).join('\n') || '-',
+          'Name': reg.candidates?.map(c => c.name).join('\n') || '-',
+          'Team': reg.team?.name || '-',
+        'Position': '',
+        'Grade': '',
+        'Remarks': ''
         }));
 
         const ws = XLSX.utils.json_to_sheet(data);
@@ -300,24 +306,32 @@ const JurySlipsPage = () => {
                        <th className="py-3 px-2 border border-blue-400/30 w-24">CODE<br/>LETTER</th>
                        <th className="py-3 px-3 border border-blue-400/30 w-32">AD NO</th>
                        <th className="py-3 px-4 border border-blue-400/30 text-left">NAME</th>
-                       <th className="py-3 px-3 border border-blue-400/30 w-48">TEAM</th>
+                       <th className="py-3 px-2 border border-blue-400/30 w-24">TEAM</th>
+                       <th className="py-3 px-1 border border-blue-400/30 w-16">POSITION</th>
+                       <th className="py-3 px-1 border border-blue-400/30 w-12">GRADE</th>
+                       <th className="py-3 px-2 border border-blue-400/30 w-24">REMARKS</th>
                      </tr>
                    </thead>
                    <tbody>
                      {shuffledList.map((reg, idx) => {
                        // Format candidates for display
-                       const adNos = reg.candidates?.map(c => c.admissionNo).join(', ') || '-';
-                       const names = reg.candidates?.map(c => c.name).join(', ') || '-';
+                       
                        
                        return (
                          <tr key={reg._id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                           <td className="py-3 px-2 border border-slate-200 text-center font-semibold text-slate-700">{idx + 1}</td>
-                           <td className="py-3 px-2 border border-slate-200 text-center font-bold text-blue-700 text-base">{reg.codeLetter || ''}</td>
-                           <td className="py-3 px-3 border border-slate-200 text-slate-800 text-sm font-bold">{adNos}</td>
-                           <td className="py-3 px-4 border border-slate-200 font-medium text-slate-800">{names}</td>
-                           <td className="py-3 px-3 border border-slate-200 text-slate-600 font-semibold">{reg.team?.name || '-'}</td>
-                           
-                           </tr>
+                           <td className="py-2 px-2 border border-slate-200 text-center font-semibold text-slate-700 align-top">{idx + 1}</td>
+                           <td className="py-2 px-1 border border-slate-200 text-center font-bold text-blue-700 text-base align-top"></td>
+                           <td className="py-2 px-2 border border-slate-200 text-slate-800 text-[11px] font-bold align-top">
+                               {reg.candidates?.length ? reg.candidates.map((c, i) => <div key={c._id} className={i !== 0 ? "mt-1" : ""}>{c.admissionNo}</div>) : '-'}
+                             </td>
+                             <td className="py-2 px-3 border border-slate-200 font-medium text-slate-800 text-[11px] align-top leading-tight">
+                               {reg.candidates?.length ? reg.candidates.map((c, i) => <div key={c._id} className={i !== 0 ? "mt-1" : ""}>{c.name}</div>) : '-'}
+                             </td>
+                           <td className="py-3 px-2 border border-slate-200 text-slate-600 font-semibold text-[11px] align-top">{reg.team?.name || '-'}</td>
+                           <td className="py-3 px-1 border border-slate-200 align-top"></td>
+                           <td className="py-3 px-1 border border-slate-200 align-top"></td>
+                           <td className="py-3 px-2 border border-slate-200 align-top"></td>
+                         </tr>
                        );
                      })}
                      
@@ -325,6 +339,9 @@ const JurySlipsPage = () => {
                      {Array.from({ length: Math.max(0, 8 - shuffledList.length) }).map((_, i) => (
                        <tr key={`empty-${i}`} className={(shuffledList.length + i) % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
                          <td className="py-4 px-2 border border-slate-200 text-center font-semibold text-slate-400">{shuffledList.length + i + 1}</td>
+                         <td className="border border-slate-200"></td>
+                         <td className="border border-slate-200"></td>
+                         <td className="border border-slate-200"></td>
                          <td className="border border-slate-200"></td>
                          <td className="border border-slate-200"></td>
                          <td className="border border-slate-200"></td>

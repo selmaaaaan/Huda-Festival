@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 
 const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName, teams = [], categories = [], initialData = null }) => {
@@ -8,6 +8,15 @@ const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName, te
     selectedTeam: initialData?.team?._id || initialData?.team || teamId || '',
     selectedCategory: initialData?.category || categoryName || ''
   });
+
+  useEffect(() => {
+    setFormData({
+      admissionNo: initialData?.admissionNo || '', 
+      name: initialData?.name || '',
+      selectedTeam: initialData?.team?._id || initialData?.team || teamId || '',
+      selectedCategory: initialData?.category || categoryName || ''
+    });
+  }, [initialData, teamId, categoryName]);
   const [imageFile, setImageFile] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -78,19 +87,19 @@ const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName, te
 
       <div className="space-y-1.5">
         <label className="block text-sm font-medium text-[var(--color-text-heading)]">Admission Number</label>
-        <input type="text" name="admissionNo" required onChange={handleChange}
+        <input type="text" name="admissionNo" value={formData.admissionNo} required onChange={handleChange}
           className="w-full px-4 py-2.5 border border-[var(--color-border)] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition" />
       </div>
 
       <div className="space-y-1.5">
         <label className="block text-sm font-medium text-[var(--color-text-heading)]">Candidate Name</label>
-        <input type="text" name="name" required onChange={handleChange}
+        <input type="text" name="name" value={formData.name} required onChange={handleChange}
           className="w-full px-4 py-2.5 border border-[var(--color-border)] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition" />
       </div>
 
       <div className="space-y-1.5">
         <label className="block text-sm font-medium text-[var(--color-text-heading)]">Candidate Image</label>
-        <input type="file" name="image" required onChange={handleFileChange}
+        <input type="file" name="image" required={!initialData} onChange={handleFileChange}
           className="w-full text-sm text-[var(--color-text-body)] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-[var(--color-primary)] hover:file:bg-red-100 transition" />
       </div>
 
