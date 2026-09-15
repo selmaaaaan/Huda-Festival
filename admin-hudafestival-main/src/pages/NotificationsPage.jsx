@@ -66,7 +66,8 @@ const NotificationsPage = ({ inline = false }) => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this notification?')) return;
+    const confirmed = await confirmAction('Confirm', 'Delete this notification?');
+    if (!confirmed) return;
     try {
       await api.delete(`/notifications/${id}`);
       fetchNotifications();

@@ -94,7 +94,8 @@ const GalleryPage = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this image?')) return;
+    const confirmed = await confirmAction('Confirm', 'Are you sure you want to delete this image?');
+    if (!confirmed) return;
     
     try {
       await api.delete(`/gallery/${id}`);

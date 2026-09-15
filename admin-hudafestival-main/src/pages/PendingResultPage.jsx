@@ -51,7 +51,8 @@ const PendingResultsPage = () => {
   useEffect(() => { fetchPendingData(); }, []);
 
   const handleApproveBatch = async (batch) => {
-    if (window.confirm('Approve and publish all results in this batch?')) {
+    const confirmed = await confirmAction('Confirm', 'Approve and publish all results in this batch?');
+    if (confirmed) {
       try { 
         await api.post('/results/batch-publish', { batchId: batch.batchId });
         alertAction('Batch published successfully!'); 

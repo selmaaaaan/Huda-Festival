@@ -34,7 +34,8 @@ const SchedulePage = () => {
   };
 
   const handleDeleteVenue = async (venueToDelete) => {
-    if(!window.confirm(`Delete venue "${venueToDelete}"?`)) return;
+    const confirmed = await confirmAction('Confirm', `Delete venue "${venueToDelete}"?`);
+    if (!confirmed) return;
     try {
         const newVenues = (venuesList || []).filter(v => v !== venueToDelete);
         await api.patch('/settings', { venues: newVenues });
@@ -106,7 +107,8 @@ const SchedulePage = () => {
   };
 
   const handleRemoveSchedule = async (progId) => {
-    if (!window.confirm('Clear schedule for this programme?')) return;
+    const confirmed = await confirmAction('Confirm', 'Clear schedule for this programme?');
+    if (!confirmed) return;
     try {
       await api.patch(`/programmes/${progId}/schedule`, {
         date: null,

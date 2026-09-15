@@ -1,5 +1,6 @@
 import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect, useMemo } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, Save, CheckCircle, XCircle, Edit2, X, Trash2 } from 'lucide-react';
 import api from '../services/api';
@@ -9,6 +10,7 @@ import StatusBadge from '../components/StatusBadge';
 const CATEGORIES = ['All', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
 export default function TopicManagementPage() {
+  const confirmAction = useConfirm();
   const alertAction = useAlert();
 
   const [programmes, setProgrammes] = useState([]);
@@ -25,8 +27,6 @@ export default function TopicManagementPage() {
   const [editTopicText, setEditTopicText] = useState('');
 
   const fetchProgrammes = async () => {
-  const confirmAction = useConfirm();
-
     try {
       const { data } = await api.get('/programmes');
       setProgrammes(data);
@@ -101,7 +101,8 @@ export default function TopicManagementPage() {
   };
 
   const handleDeleteTopic = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this topic registration?')) return;
+    const confirmed = await confirmAction("Confirm", 'Are you sure you want to delete this topic registration?');
+      if (!confirmed) return;
     try {
       await api.delete(`/topic-registrations/${id}`);
       if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id);
@@ -182,9 +183,10 @@ export default function TopicManagementPage() {
                 <div className="flex justify-between items-start">
                     <div className="font-medium text-sm text-[var(--color-text-heading)]">{prog.name} <span className="opacity-50 text-xs ml-1">({prog.code})</span></div>
                     <button 
-                        onClick={(e) => {
+                        onClick={async (e) => {
                             e.stopPropagation();
-                            if (window.confirm('Remove this programme from topic management?')) {
+                            const confirmed = await confirmAction('Confirm', 'Remove this programme from topic management?');
+                            if (confirmed) {
                                 api.patch(`/programmes/${prog._id}/topic-settings`, { topicMode: 'none', topicList: [] })
                                    .then(() => {
                                        fetchProgrammes();

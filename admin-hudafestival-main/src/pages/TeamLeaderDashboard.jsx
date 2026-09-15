@@ -1,5 +1,6 @@
 import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect, useMemo } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import Button from '../components/Button';
@@ -24,6 +25,7 @@ const StatCard = ({ label, value, accent }) => (
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function TeamLeaderDashboard() {
+  const confirmAction = useConfirm();
   const alertAction = useAlert();
 
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
@@ -72,8 +74,6 @@ export default function TeamLeaderDashboard() {
 
   // ── Data Loading ─────────────────────────────────────────────────────────────
   const loadData = async (isPoll = false) => {
-  const confirmAction = useConfirm();
-
     try {
       if (!isPoll) setLoading(true);
       const [progRes, candRes, regRes, settingsRes, topicProgRes, myTopicRes, progressRes] = await Promise.all([
@@ -278,7 +278,8 @@ export default function TeamLeaderDashboard() {
   };
 
   const handleDeleteRegistration = async (regId) => {
-    if (!window.confirm('Are you sure you want to delete this registration?')) return;
+    const confirmed = await confirmAction("Confirm", 'Are you sure you want to delete this registration?');
+      if (!confirmed) return;
     setSubmitting(true);
     try {
       await api.delete(`/registrations/${regId}`);
