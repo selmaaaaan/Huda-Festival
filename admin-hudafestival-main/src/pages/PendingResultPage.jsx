@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import api from '../services/api';
 import EmptyState from '../components/EmptyState';
 import Button from '../components/Button';
 import { Clock } from 'lucide-react';
 
 const PendingResultsPage = () => {
+  const confirmAction = useConfirm();
+
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -56,13 +59,13 @@ const PendingResultsPage = () => {
   };
 
   const handleDenyBatch = async (batch) => {
-    if (window.confirm('Delete all pending results in this batch?')) {
+    confirmAction('Delete all pending results in this batch?', async () => {
         try {
             await api.delete(`/results/batch/${batch.batchId}`);
             alert('Batch deleted.');
             fetchPendingData();
         } catch (err) { alert(err.response?.data?.message || 'Error deleting batch.'); }
-    }
+    });
   };
 
   if (loading) return <p className="p-8 text-[var(--color-text-body)]">Loading...</p>;

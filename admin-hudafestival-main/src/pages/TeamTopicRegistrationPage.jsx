@@ -66,6 +66,8 @@ export default function TeamTopicRegistrationPage() {
 
   // ── Data Loading ─────────────────────────────────────────────────────────────
   const loadData = async (isPoll = false) => {
+  const confirmAction = useConfirm();
+
     try {
       if (!isPoll) setLoading(true);
       const [progRes, candRes, regRes, settingsRes, topicProgRes, myTopicRes] = await Promise.all([

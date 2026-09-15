@@ -4,6 +4,7 @@ import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import AddCandidateForm from '../components/AddCandidate';
 import Button from '../components/Button';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { ChevronRight, Users } from 'lucide-react';
 
 const CandidatesPage = () => {
@@ -13,6 +14,7 @@ const CandidatesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState(null);
   
@@ -53,9 +55,18 @@ const CandidatesPage = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this candidate?')) {
-      try { await api.delete(`/candidates/${id}`); api.get('/candidates').then(res => setCandidates(res.data)); } catch (err) { setError(err.response?.data?.message || 'Failed to delete candidate.'); }
+    setConfirmDeleteId(id);
+  };
+  
+  const executeDelete = async () => {
+    if (!confirmDeleteId) return;
+    try { 
+        await api.delete(`/candidates/${confirmDeleteId}`); 
+        api.get('/candidates').then(res => setCandidates(res.data)); 
+    } catch (err) { 
+        setError(err.response?.data?.message || 'Failed to delete candidate.'); 
     }
+    setConfirmDeleteId(null);
   };
 
   // If team_leader, filter locally just in case backend doesn't filter perfectly, though backend should.
@@ -159,6 +170,15 @@ const CandidatesPage = () => {
            <AddCandidateForm onFormSubmit={handleFormSubmit} onFormCancel={() => { setIsModalOpen(false); setEditingCandidate(null); }} teamId={selectedTeam?._id} categoryName={selectedCategory} teams={teams} categories={categories} initialData={editingCandidate} />
         </div>
       </Modal>
+      <ConfirmDialog 
+        open={!!confirmDeleteId} 
+        title="Delete Candidate" 
+        message="Are you sure you want to delete this candidate? This action cannot be undone." 
+        confirmLabel="Delete" 
+        variant="danger"
+        onConfirm={executeDelete} 
+        onCancel={() => setConfirmDeleteId(null)} 
+      />
     </div>
   );
 };

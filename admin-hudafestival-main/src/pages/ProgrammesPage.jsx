@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import api from '../services/api';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
@@ -8,6 +9,8 @@ import StatusBadge from '../components/StatusBadge';
 import { ChevronLeft, BarChart2 } from 'lucide-react';
 
 const ProgrammesPage = () => {
+  const confirmAction = useConfirm();
+
   const [programmes, setProgrammes] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [stageFilter, setStageFilter] = useState('ALL');
@@ -27,9 +30,9 @@ const ProgrammesPage = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this programme?')) {
+    confirmAction('Are you sure you want to delete this programme?', async () => {
       try { await api.delete(`/programmes/${id}`); fetchProgrammes(); } catch (err) { setError(err.response?.data?.message || 'Failed to delete programme.'); }
-    }
+    });
   };
 
   const filteredProgrammes = selectedCategory ? programmes.filter(p => p.category === selectedCategory && (stageFilter === 'ALL' || p.stageType === stageFilter.toLowerCase())) : [];

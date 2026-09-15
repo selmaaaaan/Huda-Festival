@@ -22,6 +22,8 @@ export default function TopicManagementPage() {
   const [editTopicText, setEditTopicText] = useState('');
 
   const fetchProgrammes = async () => {
+  const confirmAction = useConfirm();
+
     try {
       const { data } = await api.get('/programmes');
       setProgrammes(data);

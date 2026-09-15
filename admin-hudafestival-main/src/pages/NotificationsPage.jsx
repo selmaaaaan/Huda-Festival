@@ -5,6 +5,8 @@ import Button from '../components/Button';
 import EmptyState from '../components/EmptyState';
 
 const NotificationsPage = ({ inline = false }) => {
+  const confirmAction = useConfirm();
+
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

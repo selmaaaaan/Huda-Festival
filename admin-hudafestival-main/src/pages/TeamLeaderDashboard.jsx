@@ -69,6 +69,8 @@ export default function TeamLeaderDashboard() {
 
   // ── Data Loading ─────────────────────────────────────────────────────────────
   const loadData = async (isPoll = false) => {
+  const confirmAction = useConfirm();
+
     try {
       if (!isPoll) setLoading(true);
       const [progRes, candRes, regRes, settingsRes, topicProgRes, myTopicRes, progressRes] = await Promise.all([

@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import { Calendar, Clock, MapPin, Save, Trash2 } from 'lucide-react';
 import api from '../services/api';
 import ProgrammeCodePicker from '../components/ProgrammeCodePicker';
 import Button from '../components/Button';
 
 const SchedulePage = () => {
+  const confirmAction = useConfirm();
+
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedProgramme, setSelectedProgramme] = useState(null);
   const [venue, setVenue] = useState('');

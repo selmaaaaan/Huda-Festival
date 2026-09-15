@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import api from '../services/api';
 import { Plus, Trash2, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
 
 const PointAdjustmentPage = () => {
+  const confirmAction = useConfirm();
+
     const [adjustments, setAdjustments] = useState([]);
     const [teams, setTeams] = useState([]);
     const [candidates, setCandidates] = useState([]);
@@ -69,13 +72,14 @@ const PointAdjustmentPage = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Delete this adjustment? This will revert the points.')) return;
-        try {
-            await api.delete(`/point-adjustments/${id}`);
-            fetchData();
-        } catch (err) {
-            alert(err.response?.data?.message || 'Failed to delete adjustment');
-        }
+        confirmAction('Delete this adjustment? This will revert the points.', async () => {
+            try {
+                await api.delete(`/point-adjustments/${id}`);
+                fetchData();
+            } catch (err) {
+                alert(err.response?.data?.message || 'Failed to delete adjustment');
+            }
+        });
     };
 
     return (

@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import api from '../services/api';
 import { Upload, X, Trash2, Image as ImageIcon } from 'lucide-react';
 import Button from '../components/Button';
 import EmptyState from '../components/EmptyState';
 
 const GalleryPage = () => {
+  const confirmAction = useConfirm();
+
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
