@@ -6,7 +6,7 @@ import Button from '../components/Button';
 import Modal from '../components/Modal';
 
 
-const CATEGORIES = ['All', 'BIDĀYAH', 'E_ŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'EĀLIYAH', 'KULLIYYAH'];
+const CATEGORIES = ['All', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 const STAGES = ['All Stages', 'Stage', 'Non-Stage'];
 
 export default function TeamRegistrationListPage() {
