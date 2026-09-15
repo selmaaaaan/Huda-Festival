@@ -112,8 +112,8 @@ export default function TeamTopicRegistrationPage() {
   };
 
   // ── Derived Stats ─────────────────────────────────────────────────────────────
-  const approvedCount = useMemo(() => myRegistrations.filter(r => r.status === 'approved').length, [myRegistrations]);
-  const pendingCount  = useMemo(() => myRegistrations.filter(r => r.status === 'pending').length, [myRegistrations]);
+  const approvedCount = useMemo(() => myTopics.filter(r => r.status === 'approved').length, [myTopics]);
+  const pendingCount  = useMemo(() => myTopics.filter(r => r.status === 'pending').length, [myTopics]);
   const memberCount   = candidates.length;
 
   // ── Registration Form Logic ───────────────────────────────────────────────────
@@ -349,7 +349,7 @@ export default function TeamTopicRegistrationPage() {
           {/* ── Stats Strip ─────────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <StatCard label="Team Members"    value={memberCount}                  accent={teamColor} />
-            <StatCard label="Total Submitted" value={myRegistrations.length}       />
+            <StatCard label="Total Submitted" value={myTopics.length}       />
             <StatCard label="Approved"        value={approvedCount}                accent="#22c55e" />
             <StatCard label="Pending Review"  value={pendingCount}                 accent="#f59e0b" />
           </div>
