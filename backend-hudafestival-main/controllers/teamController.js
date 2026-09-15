@@ -159,11 +159,12 @@ const getRegistrationGrid = async (req, res) => {
         const programmes = await Programme.find(progQuery).lean();
         
         // 3. Fetch ALL Registrations for this team (to calculate compliance and grid)
-        const registrations = await Registration.find({ team: teamId }).populate('programme', 'type maxParticipants groupSize isStarred').lean();
+        const registrations = await Registration.find({ team: teamId }).populate('programme', 'type maxParticipants groupSize isStarred stageType category').lean();
         const settings = await Settings.findOne();
 
         // 4. Calculate Compliance per candidate
         // Min 1 Stage + 1 Non-Stage
+        
         candidates.forEach(cand => {
             let stageCount = 0;
             let nonStageCount = 0;
@@ -175,12 +176,22 @@ const getRegistrationGrid = async (req, res) => {
                 }
             });
             
+            let status = 'pending'; // Yellow (no program selected in either Stage or Non-Stage)
+            if (stageCount === 1 && nonStageCount === 1) {
+                status = 'compliant'; // Green
+            } else if (stageCount > 1 || nonStageCount > 1) {
+                status = 'violated'; // Red
+            }
+            
             cand.bylawStatus = {
-                isCompliant: stageCount >= 1 && nonStageCount >= 1,
+                isCompliant: status === 'compliant',
+                status,
                 stageCount,
-                nonStageCount
+                nonStageCount,
+                limits: { stage: 1, nonStage: 1 }
             };
         });
+
 
         // 5. Calculate Quota info per programme
         const gridData = {};

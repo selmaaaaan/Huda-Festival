@@ -226,12 +226,12 @@ export default function TopicManagementPage() {
                     >
                       <option value="none">None</option>
                       <option value="free-text">Free Text</option>
-                      <option value="fixed-list">Fixed List (Team Exclusive)</option>
-                      <option value="fixed-list-global">Fixed List (Global Exclusive)</option>
+                      <option value="fixed">Fixed / Shared</option>
+                      <option value="exclusive">Exclusive</option>
                     </select>
                   </div>
                   
-                  {(topicMode === 'fixed-list' || topicMode === 'fixed-list-global') && (
+                  {(topicMode === 'fixed' || topicMode === 'exclusive') && (
                     <div className="w-2/3">
                       <label className="block text-sm font-medium mb-2 text-[var(--color-text-muted)]">Allowed Topics (one per line)</label>
                       <textarea

@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middlewares/authMiddleware');
 const {
-  createRegistration, getRegistrations, approveRegistration,
+  protect, authorize } = require('../middlewares/authMiddleware');
+const {
+  getParticipantReport, createRegistration, getRegistrations, approveRegistration,
   rejectRegistration, updateRegistration, deleteRegistration
 } = require('../controllers/registrationController');
+
+router.get('/report/participant-list', protect, authorize('admin'), getParticipantReport);
 
 router.route('/')
   .post(protect, createRegistration)

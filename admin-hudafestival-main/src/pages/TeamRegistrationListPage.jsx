@@ -103,7 +103,7 @@ export default function TeamRegistrationListPage() {
                 const draftAddIndiv = Object.keys(pendingChanges).filter(k => k.startsWith(`${cand._id}-`) && pendingChanges[k] === true && programmes.find(p => p._id === k.split('-')[1])?.stageType === prog.stageType && programmes.find(p => p._id === k.split('-')[1])?.format !== 'Group').length;
                 const draftRemoveIndiv = Object.keys(pendingChanges).filter(k => k.startsWith(`${cand._id}-`) && pendingChanges[k] === false && programmes.find(p => p._id === k.split('-')[1])?.stageType === prog.stageType && programmes.find(p => p._id === k.split('-')[1])?.format !== 'Group').length;
                 
-                const baseCount = prog.stageType === 'stage' ? cand.bylawStatus?.individualStageCount : cand.bylawStatus?.individualNonStageCount;
+                const baseCount = prog.stageType === 'stage' ? (cand.bylawStatus?.stageCount) : (cand.bylawStatus?.nonStageCount);
                 const limit = prog.stageType === 'stage' ? cand.bylawStatus?.limits?.stage : cand.bylawStatus?.limits?.nonStage;
                 
                 if (limit && (baseCount + draftAddIndiv - draftRemoveIndiv) >= limit) {
@@ -352,11 +352,11 @@ export default function TeamRegistrationListPage() {
                                     
                                     const draftAddStage = Object.keys(pendingChanges).filter(k => k.startsWith(`${cand._id}-`) && pendingChanges[k] === true && programmes.find(p => p._id === k.split('-')[1])?.stageType === 'stage' && programmes.find(p => p._id === k.split('-')[1])?.format !== 'Group').length;
                                     const draftRemoveStage = Object.keys(pendingChanges).filter(k => k.startsWith(`${cand._id}-`) && pendingChanges[k] === false && programmes.find(p => p._id === k.split('-')[1])?.stageType === 'stage' && programmes.find(p => p._id === k.split('-')[1])?.format !== 'Group').length;
-                                    const currentStage = (cand.bylawStatus?.individualStageCount || 0) + draftAddStage - draftRemoveStage;
+                                    const currentStage = ((cand.bylawStatus?.stageCount) || 0) + draftAddStage - draftRemoveStage;
 
                                     const draftAddNonStage = Object.keys(pendingChanges).filter(k => k.startsWith(`${cand._id}-`) && pendingChanges[k] === true && programmes.find(p => p._id === k.split('-')[1])?.stageType === 'non-stage' && programmes.find(p => p._id === k.split('-')[1])?.format !== 'Group').length;
                                     const draftRemoveNonStage = Object.keys(pendingChanges).filter(k => k.startsWith(`${cand._id}-`) && pendingChanges[k] === false && programmes.find(p => p._id === k.split('-')[1])?.stageType === 'non-stage' && programmes.find(p => p._id === k.split('-')[1])?.format !== 'Group').length;
-                                    const currentNonStage = (cand.bylawStatus?.individualNonStageCount || 0) + draftAddNonStage - draftRemoveNonStage;
+                                    const currentNonStage = ((cand.bylawStatus?.nonStageCount) || 0) + draftAddNonStage - draftRemoveNonStage;
 
                                     
                                     return (
@@ -369,11 +369,11 @@ export default function TeamRegistrationListPage() {
                                                     <div className="text-[10px] text-[var(--color-text-muted)]">{cand.classLevel || '-'}</div>
                                                     {cand.bylawStatus?.limits && (
                                                         <div className="flex gap-1.5 text-[9px] font-semibold tracking-wide">
-                                                            <span className={currentStage > cand.bylawStatus.limits.stage ? "text-red-500" : (currentStage === cand.bylawStatus.limits.stage ? "text-yellow-500" : "text-[var(--color-primary)]")}>
+                                                            <span className={currentStage > cand.bylawStatus.limits.stage ? "text-red-500" : (currentStage === cand.bylawStatus.limits.stage ? "text-green-500" : "text-[var(--color-text-muted)]")}>
                                                                 {currentStage}/{cand.bylawStatus.limits.stage} STG
                                                             </span>
                                                             <span className="text-[var(--color-border)]">•</span>
-                                                            <span className={currentNonStage > cand.bylawStatus.limits.nonStage ? "text-red-500" : (currentNonStage === cand.bylawStatus.limits.nonStage ? "text-yellow-500" : "text-[var(--color-primary)]")}>
+                                                            <span className={currentNonStage > cand.bylawStatus.limits.nonStage ? "text-red-500" : (currentNonStage === cand.bylawStatus.limits.nonStage ? "text-green-500" : "text-[var(--color-text-muted)]")}>
                                                                 {currentNonStage}/{cand.bylawStatus.limits.nonStage} NSTG
                                                             </span>
                                                         </div>

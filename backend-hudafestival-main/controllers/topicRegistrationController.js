@@ -16,7 +16,7 @@ const submitTopic = async (req, res) => {
         
         const programme = await Programme.findById(programmeId);
         
-        if (programme.topicMode === 'fixed-list-global') {
+        if (programme.topicMode === 'exclusive') {
             const globallyTaken = await TopicRegistration.findOne({ programme: programmeId, topic: topic });
             if (globallyTaken) {
                 return res.status(400).json({ message: 'This topic has already been registered globally by another candidate.' });
@@ -48,7 +48,7 @@ const submitTopic = async (req, res) => {
         
         // --- AUTO-ASSIGN LOGIC ---
         // If this is a fixed-list (Team Exclusive) and exactly 1 candidate is left without a topic, and exactly 1 topic is left, auto-assign it.
-        if (programme.topicMode === 'fixed-list') {
+        if (programme.topicMode === 'fixed') {
             const Registration = require('../models/Registration');
             const teamReg = await Registration.findOne({ programme: programmeId, team: teamId });
             if (teamReg && teamReg.candidates && teamReg.candidates.length > 1) {
@@ -200,7 +200,7 @@ const updateTopic = async (req, res) => {
         }
 
         if (topic && topic !== registration.topic) {
-            if (registration.programme && registration.programme.topicMode === 'fixed-list-global') {
+            if (registration.programme && registration.programme.topicMode === 'exclusive') {
                 const globallyTaken = await TopicRegistration.findOne({ 
                     programme: registration.programme._id, 
                     topic: topic,

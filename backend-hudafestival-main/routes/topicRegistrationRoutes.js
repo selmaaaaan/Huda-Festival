@@ -19,9 +19,12 @@ router.get('/pending', protect, authorize('admin'), getPendingTopics);
 router.get('/programme/:programmeId', protect, getTopicsForProgramme);
 router.get('/', protect, authorize('admin'), getAllTopics);
 
+const attachmentUpload = require('../config/attachmentCloudinary');
+router.post('/upload', protect, attachmentUpload.single('file'), (req, res) => { if(!req.file) return res.status(400).json({message: 'No file'}); res.json({url: req.file.path}); });
 router.post('/', protect, submitTopic);
 router.patch('/:id/review', protect, authorize('admin'), reviewTopic);
 router.patch('/:id', protect, authorize('admin', 'judge', 'team_leader'), updateTopic);
 router.delete('/:id', protect, authorize('admin', 'team_leader'), deleteTopic);
 
 module.exports = router;
+

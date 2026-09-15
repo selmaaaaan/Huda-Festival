@@ -237,7 +237,7 @@ function App() {
       case 'adjustments':
         pageContent = <PointAdjustmentPage />;
         break;
-      case 'judgment_feedback':
+            case 'judgment_feedback':
         pageContent = <JudgmentFeedbackPage />;
         break;
       case 'logs':
