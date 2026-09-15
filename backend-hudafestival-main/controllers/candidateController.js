@@ -134,7 +134,7 @@ const deleteCandidate = async (req, res) => {
         }
 
         if (req.user.role === 'team_leader' && candidate.team.toString() !== req.user.team.toString()) {
-            return res.status(403).json({ message: 'You can only delete your own team\'s candidates' });
+            return res.status(403).json({ message: "You can only delete your own team's candidates" });
         }
 
         const approvedResults = await Result.find({ candidate: candidate._id, status: 'approved' });
@@ -149,12 +149,32 @@ const deleteCandidate = async (req, res) => {
         
         await Result.deleteMany({ candidate: candidate._id });
 
-        await cloudinary.uploader.destroy(candidate.image.public_id);
+        const Registration = require('../models/Registration');
+        const regs = await Registration.find({ candidates: candidate._id });
+        for (let reg of regs) {
+            reg.candidates = reg.candidates.filter(cId => cId.toString() !== candidate._id.toString());
+            if (reg.candidates.length === 0) {
+                await reg.deleteOne();
+            } else {
+                await reg.save();
+            }
+        }
+
+        const PointAdjustment = require('../models/PointAdjustment');
+        await PointAdjustment.deleteMany({ appliesTo: 'candidate', candidate: candidate._id });
+
+        if (candidate.image && candidate.image.public_id) {
+            try {
+                await cloudinary.uploader.destroy(candidate.image.public_id);
+            } catch (err) {
+                console.error('Cloudinary delete error:', err);
+            }
+        }
+
         await candidate.deleteOne();
         await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'CANDIDATE_DELETED', entityType: 'Candidate', entityId: candidate._id, details: { name: candidate.name }, req });
-
-        res.status(200).json({ message: 'Candidate deleted successfully'});
-
+        
+        return res.status(200).json({ message: 'Candidate deleted successfully' });
     }
     catch(error) {
         console.error('Error deleting candidate: ', error);
