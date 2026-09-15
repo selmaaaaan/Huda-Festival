@@ -65,16 +65,20 @@ const JurySlipsPage = () => {
     if (shuffledList.length === 0 && registrations.length === 0) return;
     const listToExport = shuffledList.length > 0 ? shuffledList : registrations;
 
-    const data = listToExport.map((reg, idx) => ({
-      'SL.No': idx + 1,
-      'Code Letter': '',
-      'Ad No': reg.candidates?.map(c => c.admissionNo).join('\n') || '-',
-      'Name': reg.candidates?.map(c => c.name).join('\n') || '-',
-      'Team': reg.team?.name || '-',
+    // Flatten: one row per candidate
+    let slNo = 0;
+    const data = listToExport.flatMap((reg) =>
+      (reg.candidates?.length ? reg.candidates : [{}]).map((c) => ({
+        'SL.No': ++slNo,
+        'Code Letter': reg.codeLetter || '',
+        'Ad No': c.admissionNo || '-',
+        'Name': c.name || '-',
+        'Team': reg.team?.name || '-',
         'Position': '',
         'Grade': '',
         'Remarks': ''
-    }));
+      }))
+    );
 
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
@@ -116,16 +120,19 @@ const JurySlipsPage = () => {
            return { ...reg, codeLetter: letter };
         });
 
-        const data = progRegs.map((reg, idx) => ({
-          'SL.No': idx + 1,
-          'Code Letter': '',
-          'Ad No': reg.candidates?.map(c => c.admissionNo).join('\n') || '-',
-          'Name': reg.candidates?.map(c => c.name).join('\n') || '-',
-          'Team': reg.team?.name || '-',
-        'Position': '',
-        'Grade': '',
-        'Remarks': ''
-        }));
+        let slNoAll = 0;
+        const data = progRegs.flatMap((reg) =>
+          (reg.candidates?.length ? reg.candidates : [{}]).map((c) => ({
+            'SL.No': ++slNoAll,
+            'Code Letter': reg.codeLetter || '',
+            'Ad No': c.admissionNo || '-',
+            'Name': c.name || '-',
+            'Team': reg.team?.name || '-',
+            'Position': '',
+            'Grade': '',
+            'Remarks': ''
+          }))
+        );
 
         const ws = XLSX.utils.json_to_sheet(data);
         let safeSheetName = progName.substring(0, 31).replace(/[\\/?*\[\]]/g, '');
@@ -293,7 +300,7 @@ const JurySlipsPage = () => {
                    <div className="bg-blue-100 text-blue-600 p-2 rounded-md"><Users size={20}/></div>
                    <div>
                      <div className="text-xs font-semibold text-blue-600 uppercase">Total Participants</div>
-                     <div className="font-bold text-xl text-[#1e3a8a] leading-none mt-1">{shuffledList.length}</div>
+                     <div className="font-bold text-xl text-[#1e3a8a] leading-none mt-1">{shuffledList.reduce((s, r) => s + (r.candidates?.length || 0), 0)}</div>
                    </div>
                  </div>
                </div>
@@ -313,42 +320,44 @@ const JurySlipsPage = () => {
                      </tr>
                    </thead>
                    <tbody>
-                     {shuffledList.map((reg, idx) => {
-                       // Format candidates for display
-                       
-                       
-                       return (
-                         <tr key={reg._id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                           <td className="py-3 px-2 border border-slate-200 text-center font-semibold text-slate-700 align-middle">{idx + 1}</td>
-                           <td className="py-3 px-1 border border-slate-200 text-center font-bold text-blue-700 text-base align-middle"></td>
-                           <td className="py-3 px-3 border border-slate-200 text-slate-800 text-[12px] font-bold align-middle text-left">
-                               {reg.candidates?.length ? reg.candidates.map((c, i) => <div key={c._id} className={i !== 0 ? "mt-1" : ""}>{c.admissionNo}</div>) : '-'}
-                             </td>
-                             <td className="py-3 px-3 border border-slate-200 font-bold text-slate-800 text-[12px] align-middle leading-tight">
-                               {reg.candidates?.length ? reg.candidates.map((c, i) => <div key={c._id} className={i !== 0 ? "mt-1" : ""}>{c.name}</div>) : '-'}
-                             </td>
-                           <td className="py-3 px-2 border border-slate-200 text-slate-700 font-bold text-[12px] align-middle">{reg.team?.name || '-'}</td>
-                           <td className="py-3 px-1 border border-slate-200 align-middle"></td>
-                           <td className="py-3 px-1 border border-slate-200 align-middle"></td>
-                           <td className="py-3 px-2 border border-slate-200 align-middle"></td>
-                         </tr>
-                       );
-                     })}
-                     
-                     {/* Add a few empty rows at the bottom for extra space/aesthetics */}
-                     {Array.from({ length: Math.max(0, 8 - shuffledList.length) }).map((_, i) => (
-                       <tr key={`empty-${i}`} className={(shuffledList.length + i) % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                         <td className="py-4 px-2 border border-slate-200 text-center font-semibold text-slate-400">{shuffledList.length + i + 1}</td>
-                         <td className="border border-slate-200"></td>
-                         <td className="border border-slate-200"></td>
-                         <td className="border border-slate-200"></td>
-                         <td className="border border-slate-200"></td>
-                         <td className="border border-slate-200"></td>
-                         <td className="border border-slate-200"></td>
-                         <td className="border border-slate-200"></td>
-                       </tr>
-                     ))}
-                   </tbody>
+                      {(() => {
+                        // Flatten: one row per candidate
+                        const rows = [];
+                        shuffledList.forEach((reg) => {
+                          const cands = reg.candidates?.length ? reg.candidates : [{}];
+                          cands.forEach((c) => rows.push({ c, reg }));
+                        });
+                        return rows.map(({ c, reg }, idx) => (
+                          <tr key={(c._id || reg._id) + '-' + idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                            <td className="py-3 px-2 border border-slate-200 text-center font-semibold text-slate-700 align-middle">{idx + 1}</td>
+                            <td className="py-3 px-1 border border-slate-200 text-center font-bold text-blue-700 text-base align-middle">{reg.codeLetter || ''}</td>
+                            <td className="py-3 px-3 border border-slate-200 text-slate-800 text-[12px] font-bold align-middle text-left">{c.admissionNo || '-'}</td>
+                            <td className="py-3 px-3 border border-slate-200 font-bold text-slate-800 text-[12px] align-middle leading-tight">{c.name || '-'}</td>
+                            <td className="py-3 px-2 border border-slate-200 text-slate-700 font-bold text-[12px] align-middle">{reg.team?.name || '-'}</td>
+                            <td className="py-3 px-1 border border-slate-200 align-middle"></td>
+                            <td className="py-3 px-1 border border-slate-200 align-middle"></td>
+                            <td className="py-3 px-2 border border-slate-200 align-middle"></td>
+                          </tr>
+                        ));
+                      })()}
+
+                      {/* Filler rows based on total candidate count */}
+                      {(() => {
+                        const totalCands = shuffledList.reduce((s, r) => s + (r.candidates?.length || 0), 0);
+                        return Array.from({ length: Math.max(0, 8 - totalCands) }).map((_, i) => (
+                          <tr key={`empty-${i}`} className={(totalCands + i) % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                            <td className="py-4 px-2 border border-slate-200 text-center font-semibold text-slate-400">{totalCands + i + 1}</td>
+                            <td className="border border-slate-200"></td>
+                            <td className="border border-slate-200"></td>
+                            <td className="border border-slate-200"></td>
+                            <td className="border border-slate-200"></td>
+                            <td className="border border-slate-200"></td>
+                            <td className="border border-slate-200"></td>
+                            <td className="border border-slate-200"></td>
+                          </tr>
+                        ));
+                      })()}
+                    </tbody>
                  </table>
                </div>
             </div>
