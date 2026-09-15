@@ -303,13 +303,13 @@ const JurySlipsPage = () => {
                    <thead>
                      <tr className="bg-[#2563eb] text-white text-center font-bold">
                        <th className="py-3 px-2 border border-blue-400/30 w-12">SL.No</th>
-                       <th className="py-3 px-2 border border-blue-400/30 w-24">CODE<br/>LETTER</th>
-                       <th className="py-3 px-3 border border-blue-400/30 w-32">AD NO</th>
+                       <th className="py-3 px-2 border border-blue-400/30 w-16 text-center">CODE<br/>LETTER</th>
+                       <th className="py-3 px-3 border border-blue-400/30 w-16 text-left">AD NO</th>
                        <th className="py-3 px-4 border border-blue-400/30 text-left">NAME</th>
-                       <th className="py-3 px-2 border border-blue-400/30 w-24">TEAM</th>
+                       <th className="py-3 px-2 border border-blue-400/30 w-24 text-left">TEAM</th>
                        <th className="py-3 px-1 border border-blue-400/30 w-16">POSITION</th>
                        <th className="py-3 px-1 border border-blue-400/30 w-12">GRADE</th>
-                       <th className="py-3 px-2 border border-blue-400/30 w-24">REMARKS</th>
+                       <th className="py-3 px-2 border border-blue-400/30 w-48">REMARKS</th>
                      </tr>
                    </thead>
                    <tbody>
@@ -319,18 +319,18 @@ const JurySlipsPage = () => {
                        
                        return (
                          <tr key={reg._id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                           <td className="py-2 px-2 border border-slate-200 text-center font-semibold text-slate-700 align-top">{idx + 1}</td>
-                           <td className="py-2 px-1 border border-slate-200 text-center font-bold text-blue-700 text-base align-top"></td>
-                           <td className="py-2 px-2 border border-slate-200 text-slate-800 text-[11px] font-bold align-top">
+                           <td className="py-3 px-2 border border-slate-200 text-center font-semibold text-slate-700 align-middle">{idx + 1}</td>
+                           <td className="py-3 px-1 border border-slate-200 text-center font-bold text-blue-700 text-base align-middle"></td>
+                           <td className="py-3 px-3 border border-slate-200 text-slate-800 text-[12px] font-bold align-middle text-left">
                                {reg.candidates?.length ? reg.candidates.map((c, i) => <div key={c._id} className={i !== 0 ? "mt-1" : ""}>{c.admissionNo}</div>) : '-'}
                              </td>
-                             <td className="py-2 px-3 border border-slate-200 font-medium text-slate-800 text-[11px] align-top leading-tight">
+                             <td className="py-3 px-3 border border-slate-200 font-bold text-slate-800 text-[12px] align-middle leading-tight">
                                {reg.candidates?.length ? reg.candidates.map((c, i) => <div key={c._id} className={i !== 0 ? "mt-1" : ""}>{c.name}</div>) : '-'}
                              </td>
-                           <td className="py-3 px-2 border border-slate-200 text-slate-600 font-semibold text-[11px] align-top">{reg.team?.name || '-'}</td>
-                           <td className="py-3 px-1 border border-slate-200 align-top"></td>
-                           <td className="py-3 px-1 border border-slate-200 align-top"></td>
-                           <td className="py-3 px-2 border border-slate-200 align-top"></td>
+                           <td className="py-3 px-2 border border-slate-200 text-slate-700 font-bold text-[12px] align-middle">{reg.team?.name || '-'}</td>
+                           <td className="py-3 px-1 border border-slate-200 align-middle"></td>
+                           <td className="py-3 px-1 border border-slate-200 align-middle"></td>
+                           <td className="py-3 px-2 border border-slate-200 align-middle"></td>
                          </tr>
                        );
                      })}

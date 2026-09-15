@@ -315,6 +315,7 @@ export default function TopicManagementPage() {
                             <div className="text-sm font-semibold text-[var(--color-text-heading)]">{topic.team?.name || 'Unknown Team'}</div>
                             {topic.candidate && <div className="text-xs text-[var(--color-text-muted)] mt-0.5">Candidate: {topic.candidate.name}</div>}
                             {topic.createdAt && <div className="text-xs text-[var(--color-text-muted)] mt-0.5">Submitted: {new Date(topic.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}</div>}
+                            {topic.updatedAt && new Date(topic.updatedAt).getTime() - new Date(topic.createdAt).getTime() > 2000 && <div className="text-xs text-[var(--color-primary)] mt-0.5">Edited: {new Date(topic.updatedAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}</div>}
                           </div>
                           <StatusBadge status={topic.status} />
                         </div>
