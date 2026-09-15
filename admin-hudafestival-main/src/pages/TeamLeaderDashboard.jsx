@@ -365,7 +365,7 @@ export default function TeamLeaderDashboard() {
               <span className="text-xs text-[var(--color-text-muted)] font-medium mb-1">
                 Updated {lastUpdated}s ago
               </span>
-              <Button onClick={activeTab === 'topics' ? openTopicForm : openNewRegistration} variant="primary" className="shadow-md">
+              <Button onClick={activeTab === 'topics' ? openTopicForm : openNewRegistration} variant="primary" className="shadow-md" disabled={isRegistrationOpen === false && userInfo?.role === 'team_leader'} title={(isRegistrationOpen === false && userInfo?.role === 'team_leader') ? 'Registration is closed' : ''}>
                   <Plus size={15} />
                   {activeTab === 'topics' ? 'Submit Topic' : 'New Registration'}
                 </Button>
@@ -478,13 +478,13 @@ export default function TeamLeaderDashboard() {
                           <td className="px-6 py-4"><StatusBadge status={reg.status} /></td>
                           <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] max-w-xs truncate">{reg.rejectionReason || '—'}</td>
                           <td className="px-6 py-4 text-right flex justify-end gap-2">
-                            {isRegistrationOpen !== false && reg.status !== 'approved' && (
-                              <button onClick={() => openEditRegistration(reg)} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1" title="Edit Registration">
+                            {reg.status !== 'approved' && (
+                              <button onClick={() => openEditRegistration(reg)} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed" disabled={isRegistrationOpen === false && userInfo?.role === 'team_leader'} title={(isRegistrationOpen === false && userInfo?.role === 'team_leader') ? 'Registration is closed' : 'Edit Registration'}>
                                 <Edit3 size={16} />
                               </button>
                             )}
-                            {isRegistrationOpen !== false && (
-                              <button onClick={() => handleDeleteRegistration(reg._id)} className="text-[var(--color-text-muted)] hover:text-red-500 transition-colors p-1" title="Delete Registration">
+                            {true && (
+                              <button onClick={() => handleDeleteRegistration(reg._id)} className="text-[var(--color-text-muted)] hover:text-red-500 transition-colors p-1 disabled:opacity-50 disabled:cursor-not-allowed" disabled={isRegistrationOpen === false && userInfo?.role === 'team_leader'} title={(isRegistrationOpen === false && userInfo?.role === 'team_leader') ? 'Registration is closed' : 'Delete Registration'}>
                                 <Trash2 size={16} />
                               </button>
                             )}
