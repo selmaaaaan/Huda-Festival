@@ -238,8 +238,9 @@ export default function TeamRegistrationListPage() {
         const total = candidates.length;
         const compliant = candidates.filter(c => c.bylawStatus?.isCompliant).length;
         const pending = total - compliant;
-        return { total, compliant, pending };
-    }, [candidates]);
+        const openQuotas = programmes.filter(p => p.quotaInfo?.status === 'OPEN').length;
+        return { total, compliant, pending, openQuotas };
+    }, [candidates, programmes]);
 
     return (
         <div className="p-8 h-full flex flex-col w-full bg-[var(--color-background)]">
@@ -291,6 +292,10 @@ export default function TeamRegistrationListPage() {
                     <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 w-40">
                         <div className="text-[11px] font-bold text-orange-500 uppercase mb-1">Pending</div>
                         <div className="text-2xl font-bold text-[var(--color-text-heading)]">{stats.pending}</div>
+                    </div>
+                    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 w-40">
+                        <div className="text-[11px] font-bold text-blue-500 uppercase mb-1">Open Quotas</div>
+                        <div className="text-2xl font-bold text-[var(--color-text-heading)]">{stats.openQuotas}</div>
                     </div>
                 </div>
 
