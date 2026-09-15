@@ -169,7 +169,7 @@ export default function TeamTopicRegistrationPage() {
 
   // Categories that actually have eligible programmes
   const topicCategories = useMemo(() => {
-    const registeredProgrammeIds = myRegistrations.filter(r => r.status !== 'rejected').map(r => r.programme._id || r.programme);
+    const registeredProgrammeIds = myRegistrations.filter(r => r.status !== 'rejected' && r.programme).map(r => r.programme?._id || r.programme);
     const validProgrammes = eligibleTopicProgrammes.filter(p => registeredProgrammeIds.includes(p._id));
     const cats = [...new Set(validProgrammes.map(p => p.category))];
     return cats.sort();
@@ -178,7 +178,7 @@ export default function TeamTopicRegistrationPage() {
   // Programmes within the selected category
   const topicProgrammesInCategory = useMemo(() => {
     if (!topicCategory) return [];
-    const registeredProgrammeIds = myRegistrations.filter(r => r.status !== 'rejected').map(r => r.programme._id || r.programme);
+    const registeredProgrammeIds = myRegistrations.filter(r => r.status !== 'rejected' && r.programme).map(r => r.programme?._id || r.programme);
     return eligibleTopicProgrammes.filter(p => 
       (p.category === topicCategory || p.category === 'KULLIYYAH') && registeredProgrammeIds.includes(p._id)
     );
@@ -190,7 +190,7 @@ export default function TeamTopicRegistrationPage() {
     e.preventDefault();
     setError(''); setSuccess(false);
     if (!topicForm.programmeId || !topicForm.topic) { setError('Please fill all fields'); return; }
-      const hasCands = myRegistrations.some(r => (r.programme._id || r.programme) === topicForm.programmeId && r.candidates?.length > 0);
+      const hasCands = myRegistrations.some(r => (r.programme?._id || r.programme) === topicForm.programmeId && r.candidates?.length > 0);
       const isGroup = selectedTopicProg?.format === 'Group';
       if (hasCands && !isGroup && !topicForm.candidateId && !editTopicId) { setError('Please select a candidate'); return; }
       setSubmitting(true);
@@ -751,7 +751,7 @@ export default function TeamTopicRegistrationPage() {
 
               {/* ── Step 3: Topic entry ───────────────────────────────────────── */}
                                           {topicForm.programmeId && (() => {
-                  const regs = myRegistrations.filter(r => (r.programme._id || r.programme) === topicForm.programmeId && r.status !== 'rejected');
+                  const regs = myRegistrations.filter(r => (r.programme?._id || r.programme) === topicForm.programmeId && r.status !== 'rejected');
                   const registeredCands = regs.flatMap(r => r.candidates || []);
                   
                   const uniqueCandsMap = new Map();
