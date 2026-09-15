@@ -22,7 +22,15 @@ export default function ConflictCheckerPage() {
         api.get('/programmes')
             .then(res => {
                 setProgrammes(res.data);
-                const cats = [...new Set(res.data.map(p => p.category))].filter(Boolean).sort();
+                const CATEGORY_ORDER = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
+                const cats = [...new Set(res.data.map(p => p.category))].filter(Boolean).sort((a, b) => {
+                    const idxA = CATEGORY_ORDER.indexOf(a);
+                    const idxB = CATEGORY_ORDER.indexOf(b);
+                    if (idxA === -1 && idxB === -1) return a.localeCompare(b);
+                    if (idxA === -1) return 1;
+                    if (idxB === -1) return -1;
+                    return idxA - idxB;
+                });
                 setCategories(cats);
                 if (cats.length > 0) setSelectedCategory(cats[0]);
             })
@@ -127,6 +135,7 @@ export default function ConflictCheckerPage() {
                                 setSelectedCategory(e.target.value);
                                 setProg1Code('');
                                 setProg2Code('');
+                                setResults(null);
                             }}
                             className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)]"
                         >
@@ -143,6 +152,7 @@ export default function ConflictCheckerPage() {
                                 setSelectedStageType(e.target.value);
                                 setProg1Code('');
                                 setProg2Code('');
+                                setResults(null);
                             }}
                             className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)]"
                         >
@@ -159,7 +169,7 @@ export default function ConflictCheckerPage() {
                             <input
                                 type="text"
                                 value={prog1Code}
-                                onChange={e => setProg1Code(e.target.value.toUpperCase())}
+                                onChange={e => { setProg1Code(e.target.value.toUpperCase()); setResults(null); }}
                                 placeholder="e.g. BS1"
                                 list="prog1-list"
                                 className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)]"
@@ -171,7 +181,7 @@ export default function ConflictCheckerPage() {
                             </datalist>
                         </div>
                         {prog1Code && programmes.find(p => p.code.toLowerCase() === prog1Code.toLowerCase()) && (
-                            <p className="text-xs text-emerald-500 mt-2 font-medium">✓ {programmes.find(p => p.code.toLowerCase() === prog1Code.toLowerCase()).name}</p>
+                            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-bold uppercase tracking-wide">✓ {programmes.find(p => p.code.toLowerCase() === prog1Code.toLowerCase()).name}</div>
                         )}
                     </div>
                     <div>
@@ -180,7 +190,7 @@ export default function ConflictCheckerPage() {
                             <input
                                 type="text"
                                 value={prog2Code}
-                                onChange={e => setProg2Code(e.target.value.toUpperCase())}
+                                onChange={e => { setProg2Code(e.target.value.toUpperCase()); setResults(null); }}
                                 placeholder="e.g. BS2"
                                 list="prog2-list"
                                 className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)]"
@@ -192,12 +202,12 @@ export default function ConflictCheckerPage() {
                             </datalist>
                         </div>
                         {prog2Code && programmes.find(p => p.code.toLowerCase() === prog2Code.toLowerCase()) && (
-                            <p className="text-xs text-emerald-500 mt-2 font-medium">✓ {programmes.find(p => p.code.toLowerCase() === prog2Code.toLowerCase()).name}</p>
+                            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-bold uppercase tracking-wide">✓ {programmes.find(p => p.code.toLowerCase() === prog2Code.toLowerCase()).name}</div>
                         )}
                     </div>
                 </div>
                 <div className="mt-6 flex justify-end">
-                    <Button onClick={handleCheck} loading={loading} disabled={!prog1Code || !prog2Code} variant="primary" className="px-8">
+                    <Button onClick={handleCheck} loading={loading} disabled={false} variant="primary" className="px-8">
                         Check Conflicts
                     </Button>
                 </div>
