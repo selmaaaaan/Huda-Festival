@@ -213,6 +213,15 @@ export default function TeamTopicRegistrationPage() {
             if (!candData || !candData.topic) allFilled = false;
         });
         if (!allFilled) { setError('Please fill all fields'); return; }
+        
+        if (selectedTopicProg?.topicMode === 'exclusive') {
+            const topicValues = uniqueCands.map(cand => topicForm.candidates[cand._id]?.topic?.trim().toLowerCase()).filter(Boolean);
+            const uniqueTopics = new Set(topicValues);
+            if (topicValues.length !== uniqueTopics.size) {
+                setError('You cannot assign the same exclusive topic to multiple candidates.');
+                return;
+            }
+        }
     }
 
     setSubmitting(true);
@@ -236,17 +245,17 @@ export default function TeamTopicRegistrationPage() {
         } else {
             const existingForProg = myTopics.filter(topic => (topic.programme?._id || topic.programme) === topicForm.programmeId);
             
-            const promises = Object.keys(topicForm.candidates).map(async (candId) => {
+            const updates = [];
+            for (const candId of Object.keys(topicForm.candidates)) {
                 const candData = topicForm.candidates[candId];
-                if (!candData || !candData.topic) return null;
+                if (!candData || !candData.topic) continue;
                 
                 const et = existingForProg.find(topic => topic.candidate?._id === candId);
                 if (et) {
                     if (et.topic !== candData.topic || et.attachment !== candData.attachment) {
                         const { data } = await api.patch('/topic-registrations/' + et._id, { topic: candData.topic, attachment: candData.attachment });
-                        return { action: 'update', data };
+                        updates.push({ action: 'update', data });
                     }
-                    return null;
                 } else {
                     const { data } = await api.post('/topic-registrations', {
                         programmeId: topicForm.programmeId, 
@@ -255,12 +264,9 @@ export default function TeamTopicRegistrationPage() {
                         topic: candData.topic,
                         attachment: candData.attachment,
                     });
-                    return { action: 'create', data };
+                    updates.push({ action: 'create', data });
                 }
-            });
-            
-            const responses = await Promise.all(promises);
-            const updates = responses.filter(Boolean);
+            }
             
             setMyTopics(prev => {
                 let next = [...prev];
@@ -579,7 +585,7 @@ export default function TeamTopicRegistrationPage() {
                   <table className="w-full text-sm">
                     <thead className="bg-[var(--color-surface)]">
                       <tr>
-                        {['Programme', 'Candidate', 'Topic', 'Status', 'Review Note', ''].map(h => (
+                        {['Programme', 'Candidate', 'Topic', 'Submitted At', 'Status', 'Review Note', ''].map(h => (
                           <th key={h} className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider border-b border-[var(--color-border)]">{h}</th>
                         ))}
                       </tr>
@@ -594,6 +600,7 @@ export default function TeamTopicRegistrationPage() {
                           </td>
                           <td className="px-6 py-4 text-[var(--color-text-muted)]">{t.candidate?.name || '—'}</td>
                           <td className="px-6 py-4 font-medium" style={{ color: teamColor }}>{t.topic}</td>
+                          <td className="px-6 py-4 text-xs text-[var(--color-text-muted)]">{t.createdAt ? new Date(t.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '—'}</td>
                           <td className="px-6 py-4"><StatusBadge status={t.status} /></td>
                           <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] max-w-xs truncate">{t.reviewNote || '—'}</td>
                           <td className="px-6 py-4 text-right flex justify-end gap-2">
@@ -837,7 +844,7 @@ export default function TeamTopicRegistrationPage() {
                       {isGroup ? (
                         <div className="p-3 border rounded-lg bg-[var(--color-surface-elevated)] space-y-3">
                            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
-                             3 ?" Enter Group Topic
+                             3 - Enter Group Topic
                            </label>
                            {selectedTopicProg?.topicMode === 'fixed' || selectedTopicProg?.topicMode === 'exclusive' ? (
                               <select
@@ -845,7 +852,7 @@ export default function TeamTopicRegistrationPage() {
                                 onChange={e => setTopicForm(f => ({ ...f, groupTopic: e.target.value }))}
                                 className="w-full px-3 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
                               >
-                                <option value="">Select a topic?</option>
+                                <option value="">Select a topic...</option>
                                 {selectedTopicProg?.topicList?.map(t => (
                                   <option key={t} value={t} disabled={globallyTakenTopics.includes(t) && topicForm.groupTopic !== t}>{t}</option>
                                 ))}
@@ -856,7 +863,7 @@ export default function TeamTopicRegistrationPage() {
                                   type="text"
                                   value={topicForm.groupTopic || ''}
                                   onChange={e => setTopicForm(f => ({ ...f, groupTopic: e.target.value }))}
-                                  placeholder="Enter group topic?"
+                                  placeholder="Enter group topic..."
                                   className="w-full px-3 py-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-sm text-[var(--color-text-heading)] focus:outline-none focus:border-[var(--color-primary)]"
                                 />
                                 
@@ -864,9 +871,19 @@ export default function TeamTopicRegistrationPage() {
                                    <div className="pt-2 border-t border-[var(--color-border)]">
                                      <label className="block text-xs font-bold uppercase text-[var(--color-text-muted)] mb-2">Attachment</label>
                                      <div className="flex gap-2 mb-2">
+                                       <button type="button" onClick={() => setTopicForm(f => ({ ...f, groupAttachmentType: 'text', groupAttachment: '' }))} className={`px-2 py-1 text-xs font-medium rounded border ${(!topicForm.groupAttachmentType || topicForm.groupAttachmentType === 'text') ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-transparent text-[var(--color-text-muted)]'}`}>Text Box</button>
                                        <button type="button" onClick={() => setTopicForm(f => ({ ...f, groupAttachmentType: 'youtube', groupAttachment: '' }))} className={`px-2 py-1 text-xs font-medium rounded border ${topicForm.groupAttachmentType === 'youtube' ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-transparent text-[var(--color-text-muted)]'}`}>YouTube Link</button>
-                                       <button type="button" onClick={() => setTopicForm(f => ({ ...f, groupAttachmentType: 'image', groupAttachment: '' }))} className={`px-2 py-1 text-xs font-medium rounded border ${topicForm.groupAttachmentType === 'image' ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-transparent text-[var(--color-text-muted)]'}`}>Image Upload</button>
+                                       <button type="button" onClick={() => setTopicForm(f => ({ ...f, groupAttachmentType: 'image', groupAttachment: '' }))} className={`px-2 py-1 text-xs font-medium rounded border ${topicForm.groupAttachmentType === 'image' ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-transparent text-[var(--color-text-muted)]'}`}>Image Option</button>
                                      </div>
+                                     {(!topicForm.groupAttachmentType || topicForm.groupAttachmentType === 'text') && (
+                                       <textarea
+                                         value={topicForm.groupAttachment || ''}
+                                         onChange={e => setTopicForm(f => ({ ...f, groupAttachment: e.target.value }))}
+                                         placeholder="Enter attachment text (optional)…"
+                                         rows="3"
+                                         className="w-full px-3 py-2.5 border border-[var(--color-border)] bg-[var(--color-surface)] rounded-md text-sm focus:outline-none focus:border-[var(--color-primary)] resize-none"
+                                       />
+                                     )}
                                      {topicForm.groupAttachmentType === 'youtube' && (
                                        <input type="text" placeholder="https://youtube.com/..." value={topicForm.groupAttachment || ''} onChange={e => setTopicForm(f => ({ ...f, groupAttachment: e.target.value }))} className="w-full px-3 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] rounded-md text-sm focus:outline-none focus:border-[var(--color-primary)]" />
                                      )}
@@ -894,7 +911,7 @@ export default function TeamTopicRegistrationPage() {
                       ) : (
                         <div className="space-y-4">
                           <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
-                            3 ?" Assign Topics to Candidates
+                            3 - Assign Topics to Candidates
                           </label>
                           {uniqueCands.length === 0 && <p className="text-sm text-red-500">No candidates registered for this programme yet.</p>}
                           {uniqueCands.map(c => {
@@ -910,7 +927,7 @@ export default function TeamTopicRegistrationPage() {
                                       onChange={e => setTopicForm(f => ({ ...f, candidates: { ...f.candidates, [c._id]: { ...candData, topic: e.target.value } } }))}
                                       className="w-full px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md text-sm focus:outline-none focus:border-[var(--color-primary)]"
                                     >
-                                      <option value="">Select a topic?</option>
+                                      <option value="">Select a topic...</option>
                                       {selectedTopicProg?.topicList?.map(t => {
                                          let isDisabled = false;
                                          if (selectedTopicProg.topicMode === 'exclusive') {
@@ -928,17 +945,27 @@ export default function TeamTopicRegistrationPage() {
                                         type="text"
                                         value={candData.topic || ''}
                                         onChange={e => setTopicForm(f => ({ ...f, candidates: { ...f.candidates, [c._id]: { ...candData, topic: e.target.value } } }))}
-                                        placeholder="Enter topic?"
+                                        placeholder="Enter topic text..."
                                         className="w-full px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md text-sm focus:outline-none focus:border-[var(--color-primary)]"
                                       />
                                       {selectedTopicProg?.topicMode === 'free-text' && (
                                          <div className="pt-2 border-t border-[var(--color-border)]">
                                            <label className="block text-xs font-bold uppercase text-[var(--color-text-muted)] mb-2">Attachment</label>
                                            <div className="flex gap-2 mb-2">
-                                             <button type="button" onClick={() => setTopicForm(f => ({ ...f, candidates: { ...f.candidates, [c._id]: { ...candData, attachmentType: 'youtube', attachment: '' } } }))} className={`px-2 py-1 text-xs font-medium rounded border ${candData.attachmentType === 'youtube' ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-transparent text-[var(--color-text-muted)]'}`}>YouTube Link</button>
-                                             <button type="button" onClick={() => setTopicForm(f => ({ ...f, candidates: { ...f.candidates, [c._id]: { ...candData, attachmentType: 'image', attachment: '' } } }))} className={`px-2 py-1 text-xs font-medium rounded border ${candData.attachmentType === 'image' ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-transparent text-[var(--color-text-muted)]'}`}>Image Upload</button>
+                                             <button type="button" onClick={() => setTopicForm(f => ({ ...f, candidates: { ...f.candidates, [c._id]: { ...candData, attachmentType: 'text', attachment: '' } } }))} className={`px-2 py-1 text-xs font-medium rounded border ${(!candData.attachmentType || candData.attachmentType === 'text') ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-transparent text-[var(--color-text-muted)]'}`}>Text Box</button>
+                                               <button type="button" onClick={() => setTopicForm(f => ({ ...f, candidates: { ...f.candidates, [c._id]: { ...candData, attachmentType: 'youtube', attachment: '' } } }))} className={`px-2 py-1 text-xs font-medium rounded border ${candData.attachmentType === 'youtube' ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-transparent text-[var(--color-text-muted)]'}`}>YouTube Link</button>
+                                               <button type="button" onClick={() => setTopicForm(f => ({ ...f, candidates: { ...f.candidates, [c._id]: { ...candData, attachmentType: 'image', attachment: '' } } }))} className={`px-2 py-1 text-xs font-medium rounded border ${candData.attachmentType === 'image' ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]' : 'bg-transparent text-[var(--color-text-muted)]'}`}>Image Option</button>
                                            </div>
-                                           {candData.attachmentType === 'youtube' && (
+                                           {(!candData.attachmentType || candData.attachmentType === 'text') && (
+                                               <textarea
+                                                 value={candData.attachment || ''}
+                                                 onChange={e => setTopicForm(f => ({ ...f, candidates: { ...f.candidates, [c._id]: { ...candData, attachment: e.target.value } } }))}
+                                                 placeholder="Enter attachment text (optional)…"
+                                                 rows="3"
+                                                 className="w-full px-3 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] rounded-md text-sm focus:outline-none focus:border-[var(--color-primary)] resize-none"
+                                               />
+                                             )}
+                                             {candData.attachmentType === 'youtube' && (
                                              <input type="text" placeholder="https://youtube.com/..." value={candData.attachment || ''} onChange={e => setTopicForm(f => ({ ...f, candidates: { ...f.candidates, [c._id]: { ...candData, attachment: e.target.value } } }))} className="w-full px-3 py-2 border border-[var(--color-border)] bg-[var(--color-surface)] rounded-md text-sm focus:outline-none focus:border-[var(--color-primary)]" />
                                            )}
                                            {candData.attachmentType === 'image' && (

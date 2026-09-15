@@ -8,7 +8,7 @@ const createRegistration = async (req, res) => {
     const { programmeId, teamId, candidateIds } = req.body;
     try {
         const settings = await Settings.findOne();
-        if (settings && settings.isRegistrationOpen === false) {
+        if (settings && settings.isRegistrationOpen === false && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
             return res.status(403).json({ message: 'Registration is closed by Fest Admins' });
         }
 

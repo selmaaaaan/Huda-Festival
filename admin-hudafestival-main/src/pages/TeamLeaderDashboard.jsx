@@ -558,7 +558,7 @@ export default function TeamLeaderDashboard() {
                   <table className="w-full text-sm">
                     <thead className="bg-[var(--color-surface)]">
                       <tr>
-                        {['Programme', 'Candidate', 'Topic', 'Status', 'Review Note'].map(h => (
+                        {['Programme', 'Candidate', 'Topic', 'Submitted At', 'Status', 'Review Note'].map(h => (
                           <th key={h} className="px-6 py-3 text-left text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider border-b border-[var(--color-border)]">{h}</th>
                         ))}
                       </tr>
@@ -573,6 +573,7 @@ export default function TeamLeaderDashboard() {
                           </td>
                           <td className="px-6 py-4 text-[var(--color-text-muted)]">{t.candidate?.name || '—'}</td>
                           <td className="px-6 py-4 font-medium" style={{ color: teamColor }}>{t.topic}</td>
+                          <td className="px-6 py-4 text-xs text-[var(--color-text-muted)]">{t.createdAt ? new Date(t.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : '—'}</td>
                           <td className="px-6 py-4"><StatusBadge status={t.status} /></td>
                           <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] max-w-xs truncate">{t.reviewNote || '—'}</td>
                         </motion.tr>

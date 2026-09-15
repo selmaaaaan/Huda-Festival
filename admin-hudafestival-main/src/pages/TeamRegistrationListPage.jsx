@@ -34,7 +34,7 @@ export default function TeamRegistrationListPage() {
     const [cellError, setCellError] = useState({ cellId: null, message: '' });
     const [pendingChanges, setPendingChanges] = useState({});
     const [saving, setSaving] = useState(false);
-    const [groupModal, setGroupModal] = useState({ isOpen: false, prog: null, candidate: null, selectedIds: [] });
+    const [groupModal, setGroupModal] = useState({ isOpen: false, prog: null, candidate: null, selectedIds: [], editRegId: null });
     const [confirmDeleteModal, setConfirmDeleteModal] = useState({ isOpen: false, regId: null, progName: '' });
     const [groupSaving, setGroupSaving] = useState(false);
     const [saveError, setSaveError] = useState('');
@@ -170,7 +170,7 @@ export default function TeamRegistrationListPage() {
                 candidateIds: selectedIds
             });
             await fetchGrid();
-            setGroupModal({ isOpen: false, prog: null, candidate: null, selectedIds: [] });
+            setGroupModal({ isOpen: false, prog: null, candidate: null, selectedIds: [], editRegId: null });
         } catch (err) {
             console.error('Failed to create group registration', err);
             alertAction(err.response?.data?.message || 'Failed to create group registration');
@@ -556,7 +556,7 @@ export default function TeamRegistrationListPage() {
 
             <Modal 
                 isOpen={groupModal.isOpen} 
-                onClose={() => setGroupModal({ isOpen: false, prog: null, candidate: null, selectedIds: [] })} 
+                onClose={() => setGroupModal({ isOpen: false, prog: null, candidate: null, selectedIds: [], editRegId: null })} 
                 title="Group Registration"
             >
                 {groupModal.prog && (
@@ -596,7 +596,7 @@ export default function TeamRegistrationListPage() {
                         </div>
 
                         <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
-                            <Button type="button" variant="ghost" onClick={() => setGroupModal({ isOpen: false, prog: null, candidate: null, selectedIds: [] })}>
+                            <Button type="button" variant="ghost" onClick={() => setGroupModal({ isOpen: false, prog: null, candidate: null, selectedIds: [], editRegId: null })}>
                                 Cancel
                             </Button>
                             <Button type="submit" variant="primary" loading={groupSaving} disabled={groupModal.selectedIds.length !== groupModal.prog.groupSize}>
