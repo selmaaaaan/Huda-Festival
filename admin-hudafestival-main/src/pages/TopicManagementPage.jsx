@@ -6,6 +6,7 @@ import { Settings, Save, CheckCircle, XCircle, Edit2, X, Trash2 } from 'lucide-r
 import api from '../services/api';
 import Button from '../components/Button';
 import StatusBadge from '../components/StatusBadge';
+import Modal from '../components/Modal';
 
 const CATEGORIES = ['All', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
@@ -62,7 +63,7 @@ export default function TopicManagementPage() {
       const payload = {
         programmeId: selectedProgramme._id,
         teamId: newTopicForm.teamId,
-        topic: newTopicForm.topic,
+        topic: newTopicForm.topic || (topicMode === 'free-text' ? 'Attachment Provided' : ''),
         attachment: newTopicForm.attachment
       };
       if (selectedProgramme.format !== 'Group') {

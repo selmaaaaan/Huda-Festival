@@ -23,15 +23,18 @@ const submitTopic = async (req, res) => {
             }
         }
         
-        if (candidateId) {
-            const existingCandidateTopic = await TopicRegistration.findOne({ programme: programmeId, candidate: candidateId });
-            if (existingCandidateTopic) {
-                return res.status(400).json({ message: 'This candidate already has a topic submitted for this programme' });
-            }
-        } else {
+        if (programme.format === 'Group') {
             const existingGroupTopic = await TopicRegistration.findOne({ programme: programmeId, team: teamId });
             if (existingGroupTopic) {
                 return res.status(400).json({ message: 'Your team already has a topic submitted for this programme' });
+            }
+        } else {
+            if (!candidateId) {
+                return res.status(400).json({ message: 'Candidate is required for Individual programmes' });
+            }
+            const existingCandidateTopic = await TopicRegistration.findOne({ programme: programmeId, candidate: candidateId });
+            if (existingCandidateTopic) {
+                return res.status(400).json({ message: 'This candidate already has a topic submitted for this programme' });
             }
         }
         
