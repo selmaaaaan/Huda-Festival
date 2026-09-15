@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema({
         enum: ['admin', 'judge', 'volunteer', 'team_leader'],
         default: 'admin'
     },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
     team: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Team',

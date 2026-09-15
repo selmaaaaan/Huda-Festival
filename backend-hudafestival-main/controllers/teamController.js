@@ -119,6 +119,7 @@ const deleteTeamById = async (req, res) => {
 // @access Private
 const getUnregisteredProgrammes = async (req, res) => {
     try {
+        if (req.user.role === 'team_leader' && req.user.team.toString() !== req.params.id) { return res.status(403).json({ message: 'Access denied: You can only view your own team.' }); }
         const teamId = req.params.id;
         
         // Find all programmes the team has registered for
@@ -137,6 +138,7 @@ const getUnregisteredProgrammes = async (req, res) => {
 
 const getRegistrationGrid = async (req, res) => {
     try {
+        if (req.user.role === 'team_leader' && req.user.team.toString() !== req.params.id) { return res.status(403).json({ message: 'Access denied: You can only view your own team.' }); }
         const teamId = req.params.id;
         const { category, stageType } = req.query;
 

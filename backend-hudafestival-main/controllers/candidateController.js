@@ -8,6 +8,12 @@ const Result = require('../models/Result');
 // @route POST /api/candidates
 // @access Public/Admin
 const createCandidate = async (req, res) => {
+    const Settings = require('../models/Settings');
+    const settings = await Settings.findOne();
+    if (settings && settings.isRegistrationOpen === false && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+        return res.status(403).json({ message: 'Registration is currently closed by Fest Admins.' });
+    }
+
     if (!req.body || Object.keys(req.body).length === 0) {
         return res.status(400).json({ message: 'Request body is missing' });
     }
@@ -91,6 +97,12 @@ const getCandidateById = async (req, res) => {
 //  @route PUT /api/candidate/:id
 // @access Private/Admin
 const updateCandidate = async (req, res) => {
+    const Settings = require('../models/Settings');
+    const settings = await Settings.findOne();
+    if (settings && settings.isRegistrationOpen === false && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+        return res.status(403).json({ message: 'Registration is currently closed by Fest Admins.' });
+    }
+
     const { admissionNo, name, team, category, isResultPublished} = req.body;
     try {
         const candidate = await Candidate.findById(req.params.id);
@@ -127,6 +139,12 @@ const updateCandidate = async (req, res) => {
 // @access Private/Admin
 
 const deleteCandidate = async (req, res) => {
+    const Settings = require('../models/Settings');
+    const settings = await Settings.findOne();
+    if (settings && settings.isRegistrationOpen === false && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+        return res.status(403).json({ message: 'Registration is currently closed by Fest Admins.' });
+    }
+
     try {
         const candidate = await Candidate.findById(req.params.id);
         if(!candidate) {

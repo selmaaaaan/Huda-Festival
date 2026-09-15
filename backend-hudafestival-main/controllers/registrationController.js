@@ -197,9 +197,17 @@ const rejectRegistration = async (req, res) => {
 
 const updateRegistration = async (req, res) => {
     try {
+        const Settings = require('../models/Settings');
+        const settings = await Settings.findOne();
+        if (settings && settings.isRegistrationOpen === false && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+            return res.status(403).json({ message: 'Registration is currently closed by Fest Admins.' });
+        }
+
         const { candidateIds } = req.body;
         const registration = await Registration.findById(req.params.id).populate('programme');
         if (!registration) return res.status(404).json({ message: 'Registration not found' });
+
+        if (req.user.role === 'team_leader' && req.user.team.toString() !== registration.team.toString()) { return res.status(403).json({ message: 'Access denied: You can only modify your own team registrations.' }); }
 
         if (candidateIds && Array.isArray(candidateIds)) {
             if (registration.programme.format === 'Group' && candidateIds.length !== registration.programme.groupSize) {
@@ -233,8 +241,18 @@ const updateRegistration = async (req, res) => {
 
 const deleteRegistration = async (req, res) => {
     try {
-        const registration = await Registration.findByIdAndDelete(req.params.id);
+        const Settings = require('../models/Settings');
+        const settings = await Settings.findOne();
+        if (settings && settings.isRegistrationOpen === false && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+            return res.status(403).json({ message: 'Registration is currently closed by Fest Admins.' });
+        }
+
+        const registration = await Registration.findById(req.params.id);
         if (!registration) return res.status(404).json({ message: 'Registration not found' });
+
+        if (req.user.role === 'team_leader' && req.user.team.toString() !== registration.team.toString()) { return res.status(403).json({ message: 'Access denied: You can only modify your own team registrations.' }); }
+
+        await Registration.findByIdAndDelete(req.params.id);
         res.status(200).json({ message: 'Registration deleted' });
     } catch (error) {
         console.error('Error deleting registration:', error);
