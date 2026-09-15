@@ -23,15 +23,24 @@ const submitTopic = async (req, res) => {
             }
         }
         
-        const existingCandidateTopic = await TopicRegistration.findOne({ programme: programmeId, candidate: candidateId });
-        if (existingCandidateTopic) {
-            return res.status(400).json({ message: 'This candidate already has a topic submitted for this programme' });
+        if (candidateId) {
+            const existingCandidateTopic = await TopicRegistration.findOne({ programme: programmeId, candidate: candidateId });
+            if (existingCandidateTopic) {
+                return res.status(400).json({ message: 'This candidate already has a topic submitted for this programme' });
+            }
+        } else {
+            const existingGroupTopic = await TopicRegistration.findOne({ programme: programmeId, team: teamId });
+            if (existingGroupTopic) {
+                return res.status(400).json({ message: 'Your team already has a topic submitted for this programme' });
+            }
         }
         
-        // Ensure the team doesn't select the same topic for two different candidates
-        const existingTeamTopic = await TopicRegistration.findOne({ programme: programmeId, team: teamId, topic: topic });
-        if (existingTeamTopic) {
-            return res.status(400).json({ message: 'Your team has already selected this topic for another candidate in this programme' });
+        // Ensure the team doesn't select the same topic for two different candidates (except free-text where topics can naturally overlap)
+        if (programme.topicMode !== 'free-text') {
+            const existingTeamTopic = await TopicRegistration.findOne({ programme: programmeId, team: teamId, topic: topic });
+            if (existingTeamTopic) {
+                return res.status(400).json({ message: 'Your team has already selected this topic for another candidate in this programme' });
+            }
         }
 
         const registration = new TopicRegistration({
@@ -212,14 +221,16 @@ const updateTopic = async (req, res) => {
             }
 
             // Check if the team already picked this new topic for someone else
-            const existingTeamTopic = await TopicRegistration.findOne({ 
-                programme: registration.programme._id, 
-                team: registration.team, 
-                topic: topic,
-                _id: { $ne: registration._id }
-            });
-            if (existingTeamTopic) {
-                return res.status(400).json({ message: 'Your team has already selected this topic for another candidate in this programme' });
+            if (registration.programme.topicMode !== 'free-text') {
+                const existingTeamTopic = await TopicRegistration.findOne({ 
+                    programme: registration.programme._id, 
+                    team: registration.team, 
+                    topic: topic,
+                    _id: { $ne: registration._id }
+                });
+                if (existingTeamTopic) {
+                    return res.status(400).json({ message: 'Your team has already selected this topic for another candidate in this programme' });
+                }
             }
             registration.topic = topic;
             registration.status = 'pending'; // Reset to pending if edited

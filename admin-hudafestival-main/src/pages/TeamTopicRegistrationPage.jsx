@@ -195,7 +195,8 @@ export default function TeamTopicRegistrationPage() {
     
     // Validation
     if (isGroup) {
-        if (!topicForm.groupTopic) { setError('Please fill all fields'); return; }
+        if (!topicForm.groupTopic && selectedTopicProg?.topicMode !== 'free-text') { setError('Please fill all fields'); return; }
+        if (!topicForm.groupTopic && selectedTopicProg?.topicMode === 'free-text' && !topicForm.groupAttachment) { setError('Please provide a topic or upload an attachment'); return; }
     } else {
         const regs = myRegistrations.filter(r => (r.programme?._id || r.programme) === topicForm.programmeId && r.status !== 'rejected');
         const registeredCands = regs.flatMap(r => r.candidates || []);
@@ -210,9 +211,9 @@ export default function TeamTopicRegistrationPage() {
         let allFilled = true;
         uniqueCands.forEach(cand => {
             const candData = topicForm.candidates[cand._id];
-            if (!candData || !candData.topic) allFilled = false;
+            if (!candData || (!candData.topic && !(selectedTopicProg?.topicMode === 'free-text' && candData.attachment))) allFilled = false;
         });
-        if (!allFilled) { setError('Please fill all fields'); return; }
+        if (!allFilled) { setError('Please fill all fields or upload an attachment'); return; }
         
         if (selectedTopicProg?.topicMode === 'exclusive') {
             const topicValues = uniqueCands.map(cand => topicForm.candidates[cand._id]?.topic?.trim().toLowerCase()).filter(Boolean);
@@ -231,13 +232,13 @@ export default function TeamTopicRegistrationPage() {
             const groupEt = existingForProg.length > 0 ? existingForProg[0] : null;
             
             if (groupEt) {
-                const { data } = await api.patch('/topic-registrations/' + groupEt._id, { topic: topicForm.groupTopic, attachment: topicForm.groupAttachment });
+                const { data } = await api.patch('/topic-registrations/' + groupEt._id, { topic: topicForm.groupTopic || (selectedTopicProg?.topicMode === 'free-text' ? 'Attachment Provided' : ''), attachment: topicForm.groupAttachment });
                 setMyTopics(prev => prev.map(t => t._id === groupEt._id ? data : t));
             } else {
                 const { data } = await api.post('/topic-registrations', {
                     programmeId: topicForm.programmeId, 
                     teamId,
-                    topic: topicForm.groupTopic,
+                    topic: topicForm.groupTopic || (selectedTopicProg?.topicMode === 'free-text' ? 'Attachment Provided' : ''),
                     attachment: topicForm.groupAttachment,
                 });
                 setMyTopics(prev => [data, ...prev]);
@@ -248,12 +249,12 @@ export default function TeamTopicRegistrationPage() {
             const updates = [];
             for (const candId of Object.keys(topicForm.candidates)) {
                 const candData = topicForm.candidates[candId];
-                if (!candData || !candData.topic) continue;
+                if (!candData || (!candData.topic && !(selectedTopicProg?.topicMode === 'free-text' && candData.attachment))) continue;
                 
                 const et = existingForProg.find(topic => topic.candidate?._id === candId);
                 if (et) {
                     if (et.topic !== candData.topic || et.attachment !== candData.attachment) {
-                        const { data } = await api.patch('/topic-registrations/' + et._id, { topic: candData.topic, attachment: candData.attachment });
+                        const { data } = await api.patch('/topic-registrations/' + et._id, { topic: candData.topic || (selectedTopicProg?.topicMode === 'free-text' ? 'Attachment Provided' : ''), attachment: candData.attachment });
                         updates.push({ action: 'update', data });
                     }
                 } else {
@@ -261,7 +262,7 @@ export default function TeamTopicRegistrationPage() {
                         programmeId: topicForm.programmeId, 
                         teamId,
                         candidateId: candId,
-                        topic: candData.topic,
+                        topic: candData.topic || (selectedTopicProg?.topicMode === 'free-text' ? 'Attachment Provided' : ''),
                         attachment: candData.attachment,
                     });
                     updates.push({ action: 'create', data });

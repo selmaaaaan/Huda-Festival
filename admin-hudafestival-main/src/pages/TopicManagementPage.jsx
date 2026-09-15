@@ -395,13 +395,7 @@ export default function TopicManagementPage() {
           )}
         </div>
       </div>
-      {isRegisterModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[99]">
-          <div className="bg-[var(--color-surface)] p-6 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">Register Topic for {selectedProgramme?.name}</h3>
-              <button onClick={() => setIsRegisterModalOpen(false)}><X size={20}/></button>
-            </div>
+      <Modal isOpen={isRegisterModalOpen} onClose={() => setIsRegisterModalOpen(false)} title={`Register Topic for ${selectedProgramme?.name || ''}`}>
             
             <div className="space-y-4">
               {selectedProgramme?.format === 'Group' ? (
@@ -451,11 +445,9 @@ export default function TopicManagementPage() {
                 </div>
               )}
 
-              <Button onClick={handleRegisterTopic} className="w-full justify-center">Submit Topic</Button>
+              <Button variant="primary" onClick={handleRegisterTopic} className="w-full justify-center">Submit Topic</Button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }
