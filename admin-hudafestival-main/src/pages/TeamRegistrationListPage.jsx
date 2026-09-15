@@ -21,6 +21,7 @@ export default function TeamRegistrationListPage() {
     const [selectedStage, setSelectedStage] = useState('All Stages');
     const [searchQuery, setSearchQuery] = useState('');
     const [showOnlyPending, setShowOnlyPending] = useState(false);
+    const [showOpenQuotasOnly, setShowOpenQuotasOnly] = useState(false);
 
     // Data state
     const [teams, setTeams] = useState([]);
@@ -234,6 +235,17 @@ export default function TeamRegistrationListPage() {
         });
     }, [candidates, searchQuery, showOnlyPending]);
 
+    
+    const filteredProgrammes = useMemo(() => {
+        return programmes.filter(p => {
+            if (showOpenQuotasOnly) {
+                return p.quotaInfo?.status === 'OPEN';
+            }
+            return true;
+        });
+    }, [programmes, showOpenQuotasOnly]);
+
+
     const stats = useMemo(() => {
         const total = candidates.length;
         const compliant = candidates.filter(c => c.bylawStatus?.isCompliant).length;
@@ -335,6 +347,10 @@ export default function TeamRegistrationListPage() {
                         </div>
                         <div className="h-6 w-px bg-[var(--color-border)]"></div>
                         <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+                            <input type="checkbox" checked={showOpenQuotasOnly} onChange={e => setShowOpenQuotasOnly(e.target.checked)} className="accent-[var(--color-primary)]" />
+                            Show Open Quotas Only
+                        </label>
+                        <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
                             <input type="checkbox" checked={showOnlyPending} onChange={e => setShowOnlyPending(e.target.checked)} className="accent-[var(--color-primary)]" />
                             Show Pending Only
                         </label>
@@ -368,7 +384,7 @@ export default function TeamRegistrationListPage() {
                                     <th className="px-4 py-3 border-b border-r border-[var(--color-border)] font-bold text-xs text-[var(--color-text-muted)] uppercase bg-[var(--color-surface-elevated)] sticky left-36 z-40 w-48">Student Name</th>
                                     <th className="px-4 py-3 border-b border-r border-[var(--color-border)] font-bold text-xs text-[var(--color-text-muted)] uppercase bg-[var(--color-surface-elevated)] sticky left-[21rem] z-40 w-32">Bylaw Status</th>
                                     
-                                    {programmes.map(prog => (
+                                    {filteredProgrammes.map(prog => (
                                         <th key={prog._id} className="px-3 py-3 border-b border-r border-[var(--color-border)] text-center min-w-[120px] max-w-[150px]">
                                             <div className="text-[10px] font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-1.5 py-0.5 rounded inline-block mb-1">{prog.code || '—'}</div>
                                             <div className="text-xs font-semibold text-[var(--color-text-heading)] truncate" title={prog.name}>{prog.name}</div>
@@ -425,7 +441,7 @@ export default function TeamRegistrationListPage() {
                                                 </div>
                                             </td>
                                             
-                                            {programmes.map(prog => {
+                                            {filteredProgrammes.map(prog => {
                                                 const isSaved = registrations.some(r => r.programme?._id === prog._id && r.candidates?.includes(cand._id));
                                                 const cellId = `${cand._id}-${prog._id}`;
                                                 const hasError = cellError.cellId === cellId;
@@ -474,7 +490,7 @@ export default function TeamRegistrationListPage() {
                                     <td colSpan={4} className="px-6 py-4 border-r border-[var(--color-border)] font-bold text-right text-[var(--color-text-heading)] bg-[var(--color-surface-elevated)] sticky left-0 z-40">
                                         QUOTA SUMMARY
                                     </td>
-                                    {programmes.map(prog => {
+                                    {filteredProgrammes.map(prog => {
                                         const { registeredCount, maxAllowed, status } = prog.quotaInfo || {};
                                         const isFull = status === 'FULL';
                                         
