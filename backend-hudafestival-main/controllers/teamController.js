@@ -176,11 +176,23 @@ const getRegistrationGrid = async (req, res) => {
                 }
             });
             
-            let status = 'pending'; // Yellow (no program selected in either Stage or Non-Stage)
-            if (stageCount === 1 && nonStageCount === 1) {
-                status = 'compliant'; // Green
-            } else if (stageCount > 1 || nonStageCount > 1) {
-                status = 'violated'; // Red
+            let limitObj = { stage: 4, nonStage: 5 };
+            if (settings && settings.categoryItemLimits) {
+                let catKey = cand.category;
+                if (catKey.includes('ŪLĀ')) catKey = 'E_ŪLĀ';
+                if (catKey.includes('ĀLIYAH')) catKey = 'EĀLIYAH';
+                
+                let sLimits = settings.categoryItemLimits.get(catKey) || settings.categoryItemLimits.get(cand.category);
+                if (sLimits) {
+                    limitObj = { stage: sLimits.stage, nonStage: sLimits.nonStage };
+                }
+            }
+
+            let status = 'pending';
+            if (stageCount > limitObj.stage || nonStageCount > limitObj.nonStage) {
+                status = 'violated';
+            } else if (stageCount >= 1 && nonStageCount >= 1) {
+                status = 'compliant';
             }
             
             cand.bylawStatus = {
@@ -188,9 +200,9 @@ const getRegistrationGrid = async (req, res) => {
                 status,
                 stageCount,
                 nonStageCount,
-                limits: { stage: 1, nonStage: 1 }
+                limits: limitObj
             };
-        });
+});
 
 
         // 5. Calculate Quota info per programme
