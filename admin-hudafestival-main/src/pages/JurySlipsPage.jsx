@@ -70,7 +70,7 @@ const JurySlipsPage = () => {
     const data = listToExport.flatMap((reg) =>
       (reg.candidates?.length ? reg.candidates : [{}]).map((c) => ({
         'SL.No': ++slNo,
-        'Code Letter': reg.codeLetter || '',
+        'Code Letter': '',
         'Ad No': c.admissionNo || '-',
         'Name': c.name || '-',
         'Team': reg.team?.name || '-',
@@ -124,7 +124,7 @@ const JurySlipsPage = () => {
         const data = progRegs.flatMap((reg) =>
           (reg.candidates?.length ? reg.candidates : [{}]).map((c) => ({
             'SL.No': ++slNoAll,
-            'Code Letter': reg.codeLetter || '',
+            'Code Letter': '',
             'Ad No': c.admissionNo || '-',
             'Name': c.name || '-',
             'Team': reg.team?.name || '-',
@@ -214,7 +214,7 @@ const JurySlipsPage = () => {
             <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 text-blue-600 rounded-full mb-2">
               <Users size={24} />
             </div>
-            <h3 className="text-xl font-bold text-[var(--color-text-heading)]">{registrations.length} Approved Registrations Found</h3>
+            <h3 className="text-xl font-bold text-[var(--color-text-heading)]">{registrations.reduce((s, r) => s + (r.candidates?.length || 1), 0)} Candidates Found ({registrations.length} registrations)</h3>
             <p className="text-[var(--color-text-muted)] max-w-md mx-auto">
               Click the button below to generate the participant list grouped by team.
             </p>
@@ -330,7 +330,7 @@ const JurySlipsPage = () => {
                         return rows.map(({ c, reg }, idx) => (
                           <tr key={(c._id || reg._id) + '-' + idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
                             <td className="py-3 px-2 border border-slate-200 text-center font-semibold text-slate-700 align-middle">{idx + 1}</td>
-                            <td className="py-3 px-1 border border-slate-200 text-center font-bold text-blue-700 text-base align-middle">{reg.codeLetter || ''}</td>
+                            <td className="py-3 px-1 border border-slate-200 align-middle"></td>
                             <td className="py-3 px-3 border border-slate-200 text-slate-800 text-[12px] font-bold align-middle text-left">{c.admissionNo || '-'}</td>
                             <td className="py-3 px-3 border border-slate-200 font-bold text-slate-800 text-[12px] align-middle leading-tight">{c.name || '-'}</td>
                             <td className="py-3 px-2 border border-slate-200 text-slate-700 font-bold text-[12px] align-middle">{reg.team?.name || '-'}</td>
