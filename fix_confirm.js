@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+const fs = require('fs');
+const c = `import React, { createContext, useContext, useState, useCallback } from 'react';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 const ConfirmContext = createContext();
@@ -62,3 +63,6 @@ export const ConfirmProvider = ({ children }) => {
         </ConfirmContext.Provider>
     );
 };
+`;
+fs.writeFileSync('admin-hudafestival-main/src/context/ConfirmContext.jsx', c, 'utf8');
+console.log("Fixed ConfirmContext.jsx");
