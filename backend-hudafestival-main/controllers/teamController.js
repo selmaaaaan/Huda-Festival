@@ -146,7 +146,7 @@ const getRegistrationGrid = async (req, res) => {
 
         // 1. Fetch Candidates for this team & category (or all if KULLIYYAH)
         let candQuery = { team: teamId };
-        if (category !== 'KULLIYYAH' && category !== 'All') {
+        if (category !== 'KULLIYYAH' && category !== 'All' ) {
             candQuery.category = category;
         }
         const candidates = await Candidate.find(candQuery).lean();
