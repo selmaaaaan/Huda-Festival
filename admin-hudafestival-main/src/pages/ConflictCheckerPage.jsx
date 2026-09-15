@@ -5,6 +5,8 @@ import Button from '../components/Button';
 
 export default function ConflictCheckerPage() {
     const [programmes, setProgrammes] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('');
     const [prog1, setProg1] = useState('');
     const [prog2, setProg2] = useState('');
     const [search, setSearch] = useState('');
@@ -14,7 +16,12 @@ export default function ConflictCheckerPage() {
 
     useEffect(() => {
         api.get('/programmes')
-            .then(res => setProgrammes(res.data))
+            .then(res => {
+                setProgrammes(res.data);
+                const cats = [...new Set(res.data.map(p => p.category))].filter(Boolean).sort();
+                setCategories(cats);
+                if (cats.length > 0) setSelectedCategory(cats[0]);
+            })
             .catch(err => console.error('Failed to load programmes', err));
     }, []);
 
@@ -104,7 +111,23 @@ export default function ConflictCheckerPage() {
                 </div>
             </div>
 
-            <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
+                        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
+                <div className="mb-6 border-b border-[var(--color-border)] pb-6">
+                    <label className="block text-sm font-bold text-[var(--color-text-heading)] mb-2">Select Category</label>
+                    <select
+                        value={selectedCategory}
+                        onChange={e => {
+                            setSelectedCategory(e.target.value);
+                            setProg1('');
+                            setProg2('');
+                        }}
+                        className="w-full md:w-1/3 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)]"
+                    >
+                        {categories.map(c => (
+                            <option key={c} value={c}>{c}</option>
+                        ))}
+                    </select>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label className="block text-sm font-bold text-[var(--color-text-heading)] mb-2">Programme 1</label>
@@ -114,8 +137,8 @@ export default function ConflictCheckerPage() {
                             className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)]"
                         >
                             <option value="">-- Select First Programme --</option>
-                            {programmes.map(p => (
-                                <option key={p._id} value={p._id}>{p.name} ({p.category})</option>
+                            {programmes.filter(p => p.category === selectedCategory).map(p => (
+                                <option key={p._id} value={p._id}>[{p.code}] {p.name}</option>
                             ))}
                         </select>
                     </div>
@@ -127,8 +150,8 @@ export default function ConflictCheckerPage() {
                             className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)]"
                         >
                             <option value="">-- Select Second Programme --</option>
-                            {programmes.map(p => (
-                                <option key={p._id} value={p._id}>{p.name} ({p.category})</option>
+                            {programmes.filter(p => p.category === selectedCategory).map(p => (
+                                <option key={p._id} value={p._id}>[{p.code}] {p.name}</option>
                             ))}
                         </select>
                     </div>
