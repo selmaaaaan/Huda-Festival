@@ -1,5 +1,6 @@
 import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmContext';
 import api from '../services/api';
 import { Bell, Plus, Power, Clock, XCircle } from 'lucide-react';
 import Button from '../components/Button';
