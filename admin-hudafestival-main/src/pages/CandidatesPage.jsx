@@ -17,6 +17,7 @@ const CandidatesPage = () => {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState(null);
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(true);
   
   const categories = ['ALL', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
@@ -127,7 +128,14 @@ const CandidatesPage = () => {
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">{isTeamLeader ? 'My Team Candidates' : 'Candidates'}</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-[var(--color-text-heading)]">{isTeamLeader ? 'My Team Candidates' : 'Candidates'}</h1>
+          {!isTeamLeader && (
+            <span className={'px-2 py-0.5 text-xs font-semibold rounded-full border ' + (isRegistrationOpen ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200')}>
+              Registration: {isRegistrationOpen ? 'Open' : 'Closed'}
+            </span>
+          )}
+        </div>
         {!isTeamLeader && <Button onClick={() => setIsModalOpen(true)}>+ Add Candidate</Button>}
       </div>
 
