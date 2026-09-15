@@ -6,7 +6,7 @@ import Button from '../components/Button';
 import Modal from '../components/Modal';
 
 
-const CATEGORIES = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
+const CATEGORIES = ['All', 'BIDĀYAH', 'E_ŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'EĀLIYAH', 'KULLIYYAH'];
 const STAGES = ['All Stages', 'Stage', 'Non-Stage'];
 
 export default function TeamRegistrationListPage() {
@@ -17,7 +17,7 @@ export default function TeamRegistrationListPage() {
 
     // Filters
     const [selectedTeam, setSelectedTeam] = useState(isAdmin ? '' : userInfo.team);
-    const [selectedCategory, setSelectedCategory] = useState('BIDĀYAH');
+    const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedStage, setSelectedStage] = useState('All Stages');
     const [searchQuery, setSearchQuery] = useState('');
     const [showOnlyPending, setShowOnlyPending] = useState(false);

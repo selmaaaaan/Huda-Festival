@@ -146,13 +146,16 @@ const getRegistrationGrid = async (req, res) => {
 
         // 1. Fetch Candidates for this team & category (or all if KULLIYYAH)
         let candQuery = { team: teamId };
-        if (category !== 'KULLIYYAH') {
+        if (category !== 'KULLIYYAH' && category !== 'All') {
             candQuery.category = category;
         }
         const candidates = await Candidate.find(candQuery).lean();
         
         // 2. Fetch Programmes for exactly this category
-        const progQuery = { category: category };
+        const progQuery = {};
+        if (category !== 'All') {
+            progQuery.category = category;
+        }
         if (stageType && stageType !== 'All Stages') {
             progQuery.stageType = stageType.toLowerCase();
         }
