@@ -7,6 +7,7 @@ export default function ConflictCheckerPage() {
     const [programmes, setProgrammes] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedStageType, setSelectedStageType] = useState('All');
     const [prog1Code, setProg1Code] = useState('');
     const [prog2Code, setProg2Code] = useState('');
     const [search, setSearch] = useState('');
@@ -114,21 +115,39 @@ export default function ConflictCheckerPage() {
             </div>
 
                         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 shadow-sm">
-                <div className="mb-6 border-b border-[var(--color-border)] pb-6">
-                    <label className="block text-sm font-bold text-[var(--color-text-heading)] mb-2">Select Category</label>
-                    <select
-                        value={selectedCategory}
-                        onChange={e => {
-                            setSelectedCategory(e.target.value);
-                            setProg1Code('');
-                            setProg2Code('');
-                        }}
-                        className="w-full md:w-1/3 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)]"
-                    >
-                        {categories.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                        ))}
-                    </select>
+                <div className="mb-6 border-b border-[var(--color-border)] pb-6 flex flex-col md:flex-row gap-6">
+                    <div className="w-full md:w-1/3">
+                        <label className="block text-sm font-bold text-[var(--color-text-heading)] mb-2">Select Category</label>
+                        <select
+                            value={selectedCategory}
+                            onChange={e => {
+                                setSelectedCategory(e.target.value);
+                                setProg1Code('');
+                                setProg2Code('');
+                            }}
+                            className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)]"
+                        >
+                            {categories.map(c => (
+                                <option key={c} value={c}>{c}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="w-full md:w-1/3">
+                        <label className="block text-sm font-bold text-[var(--color-text-heading)] mb-2">Stage / Non-Stage</label>
+                        <select
+                            value={selectedStageType}
+                            onChange={e => {
+                                setSelectedStageType(e.target.value);
+                                setProg1Code('');
+                                setProg2Code('');
+                            }}
+                            className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)]"
+                        >
+                            <option value="All">All Stages</option>
+                            <option value="stage">Stage</option>
+                            <option value="non-stage">Non-Stage</option>
+                        </select>
+                    </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -143,7 +162,7 @@ export default function ConflictCheckerPage() {
                                 className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)]"
                             />
                             <datalist id="prog1-list">
-                                {programmes.filter(p => !selectedCategory || p.category === selectedCategory).map(p => (
+                                {programmes.filter(p => (!selectedCategory || p.category === selectedCategory) && (selectedStageType === 'All' || p.stageType === selectedStageType)).map(p => (
                                     <option key={p._id} value={p.code}>{p.name}</option>
                                 ))}
                             </datalist>
@@ -164,7 +183,7 @@ export default function ConflictCheckerPage() {
                                 className="w-full bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-xl px-4 py-3 text-[var(--color-text-body)] outline-none focus:border-[var(--color-primary)]"
                             />
                             <datalist id="prog2-list">
-                                {programmes.filter(p => !selectedCategory || p.category === selectedCategory).map(p => (
+                                {programmes.filter(p => (!selectedCategory || p.category === selectedCategory) && (selectedStageType === 'All' || p.stageType === selectedStageType)).map(p => (
                                     <option key={p._id} value={p.code}>{p.name}</option>
                                 ))}
                             </datalist>
