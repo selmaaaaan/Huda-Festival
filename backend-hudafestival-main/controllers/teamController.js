@@ -212,7 +212,7 @@ const getRegistrationGrid = async (req, res) => {
         
         const responseProgrammes = programmes.map(prog => {
             const progRegs = registrations.filter(r => r.programme && r.programme._id.toString() === prog._id.toString());
-            const registeredCount = progRegs.length;
+            const registeredCount = progRegs.reduce((sum, r) => sum + (r.candidates ? r.candidates.length : 0), 0);
             const maxAllowed = prog.maxParticipants || Infinity;
             
             return {
