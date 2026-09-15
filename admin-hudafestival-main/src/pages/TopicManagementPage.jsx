@@ -1,3 +1,4 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Settings, Save, CheckCircle, XCircle, Edit2, X, Trash2 } from 'lucide-react';
@@ -8,6 +9,8 @@ import StatusBadge from '../components/StatusBadge';
 const CATEGORIES = ['All', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
 export default function TopicManagementPage() {
+  const alertAction = useAlert();
+
   const [programmes, setProgrammes] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -61,10 +64,10 @@ export default function TopicManagementPage() {
         topicMode,
         topicList
       });
-      alert('Settings saved!');
+      alertAction('Settings saved!');
       await fetchProgrammes();
     } catch (e) {
-      alert(e.response?.data?.message || 'Failed to save settings');
+      alertAction(e.response?.data?.message || 'Failed to save settings');
     }
   };
 
@@ -78,7 +81,7 @@ export default function TopicManagementPage() {
       });
       if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id);
     } catch (e) {
-      alert(e.response?.data?.message || 'Failed to review topic');
+      alertAction(e.response?.data?.message || 'Failed to review topic');
     }
   };
 
@@ -93,7 +96,7 @@ export default function TopicManagementPage() {
       setEditingTopicId(null);
       if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id);
     } catch (e) {
-      alert(e.response?.data?.message || 'Failed to update topic');
+      alertAction(e.response?.data?.message || 'Failed to update topic');
     }
   };
 
@@ -103,7 +106,7 @@ export default function TopicManagementPage() {
       await api.delete(`/topic-registrations/${id}`);
       if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id);
     } catch (e) {
-      alert(e.response?.data?.message || 'Failed to delete topic');
+      alertAction(e.response?.data?.message || 'Failed to delete topic');
     }
   };
 
@@ -187,7 +190,7 @@ export default function TopicManagementPage() {
                                        fetchProgrammes();
                                        if (selectedProgramme?._id === prog._id) setSelectedProgramme(null);
                                    })
-                                   .catch(err => alert(err.response?.data?.message || 'Failed'));
+                                   .catch(err => alertAction(err.response?.data?.message || 'Failed'));
                             }
                         }}
                         className="text-[var(--color-text-muted)] hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"

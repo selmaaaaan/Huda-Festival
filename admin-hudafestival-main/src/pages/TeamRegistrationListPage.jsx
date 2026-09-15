@@ -1,3 +1,4 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Table2, CheckCircle, Clock, AlertTriangle, Users } from 'lucide-react';
 import api from '../services/api';
@@ -9,6 +10,8 @@ const CATEGORIES = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIY
 const STAGES = ['All Stages', 'Stage', 'Non-Stage'];
 
 export default function TeamRegistrationListPage() {
+  const alertAction = useAlert();
+
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
     const isAdmin = userInfo?.role === 'admin';
 
@@ -144,7 +147,7 @@ export default function TeamRegistrationListPage() {
             setConfirmDeleteModal({ isOpen: false, regId: null, progName: '' });
         } catch (err) {
             console.error('Failed to remove group registration', err);
-            alert(err.response?.data?.message || 'Removal failed');
+            alertAction(err.response?.data?.message || 'Removal failed');
         } finally {
             setGroupSaving(false);
         }
@@ -154,7 +157,7 @@ export default function TeamRegistrationListPage() {
         e.preventDefault();
         const { prog, selectedIds } = groupModal;
         if (selectedIds.length !== prog.groupSize) {
-            alert(`Please select exactly ${prog.groupSize} candidates.`);
+            alertAction(`Please select exactly ${prog.groupSize} candidates.`);
             return;
         }
 
@@ -169,7 +172,7 @@ export default function TeamRegistrationListPage() {
             setGroupModal({ isOpen: false, prog: null, candidate: null, selectedIds: [] });
         } catch (err) {
             console.error('Failed to create group registration', err);
-            alert(err.response?.data?.message || 'Failed to create group registration');
+            alertAction(err.response?.data?.message || 'Failed to create group registration');
         } finally {
             setGroupSaving(false);
         }

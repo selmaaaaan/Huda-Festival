@@ -1,3 +1,4 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect, useRef } from 'react';
 import { useConfirm } from '../context/ConfirmContext';
 import api from '../services/api';
@@ -6,6 +7,8 @@ import Button from '../components/Button';
 import EmptyState from '../components/EmptyState';
 
 const GalleryPage = () => {
+  const alertAction = useAlert();
+
   const confirmAction = useConfirm();
 
   const [images, setImages] = useState([]);
@@ -41,11 +44,11 @@ const GalleryPage = () => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
+        alertAction('Please select an image file');
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        alert('Image must be less than 5MB');
+        alertAction('Image must be less than 5MB');
         return;
       }
       setSelectedFile(file);

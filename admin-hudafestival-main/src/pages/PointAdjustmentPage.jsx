@@ -1,3 +1,4 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect } from 'react';
 import { useConfirm } from '../context/ConfirmContext';
 import api from '../services/api';
@@ -6,6 +7,8 @@ import Button from '../components/Button';
 import Modal from '../components/Modal';
 
 const PointAdjustmentPage = () => {
+  const alertAction = useAlert();
+
   const confirmAction = useConfirm();
 
     const [adjustments, setAdjustments] = useState([]);
@@ -65,7 +68,7 @@ const PointAdjustmentPage = () => {
             setFormData({ appliesTo: 'team', teamId: '', candidateId: '', type: 'add', points: '', reason: '', remarks: '' });
             fetchData();
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to save adjustment');
+            alertAction(err.response?.data?.message || 'Failed to save adjustment');
         } finally {
             setSubmitting(false);
         }
@@ -77,7 +80,7 @@ const PointAdjustmentPage = () => {
                 await api.delete(`/point-adjustments/${id}`);
                 fetchData();
             } catch (err) {
-                alert(err.response?.data?.message || 'Failed to delete adjustment');
+                alertAction(err.response?.data?.message || 'Failed to delete adjustment');
             }
         });
     };

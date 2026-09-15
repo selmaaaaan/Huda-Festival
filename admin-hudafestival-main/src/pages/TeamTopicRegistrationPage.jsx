@@ -1,3 +1,4 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
@@ -22,6 +23,8 @@ const StatCard = ({ label, value, accent }) => (
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function TeamTopicRegistrationPage() {
+  const alertAction = useAlert();
+
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const teamId = userInfo.team?._id || userInfo.team;
   const teamColor = 'var(--color-primary)';
@@ -253,7 +256,7 @@ export default function TeamTopicRegistrationPage() {
       await loadData();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || 'Failed to delete topic');
+      alertAction(err.response?.data?.message || 'Failed to delete topic');
     } finally {
       setSubmitting(false);
     }
@@ -809,7 +812,7 @@ export default function TeamTopicRegistrationPage() {
                                                try {
                                                   const res = await api.post('/topic-registrations/upload', fd);
                                                   setTopicForm(f => ({ ...f, groupAttachment: res.data.url }));
-                                               } catch(err) { alert('Upload failed'); }
+                                               } catch(err) { alertAction('Upload failed'); }
                                             }} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--color-primary)] file:text-white hover:file:bg-[var(--color-primary-dark)]" />
                                          )}
                                        </div>
@@ -880,7 +883,7 @@ export default function TeamTopicRegistrationPage() {
                                                      try {
                                                         const res = await api.post('/topic-registrations/upload', fd);
                                                         setTopicForm(f => ({ ...f, candidates: { ...f.candidates, [c._id]: { ...candData, attachment: res.data.url } } }));
-                                                     } catch(err) { alert('Upload failed'); }
+                                                     } catch(err) { alertAction('Upload failed'); }
                                                   }} className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[var(--color-primary)] file:text-white hover:file:bg-[var(--color-primary-dark)]" />
                                                )}
                                              </div>

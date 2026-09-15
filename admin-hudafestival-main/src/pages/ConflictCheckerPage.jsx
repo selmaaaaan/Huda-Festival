@@ -1,9 +1,12 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect } from 'react';
 import { Search, AlertTriangle, Users } from 'lucide-react';
 import api from '../services/api';
 import Button from '../components/Button';
 
 export default function ConflictCheckerPage() {
+  const alertAction = useAlert();
+
     const [programmes, setProgrammes] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
@@ -29,8 +32,8 @@ export default function ConflictCheckerPage() {
     const handleCheck = async () => {
         const p1 = programmes.find(p => p.code.toLowerCase() === prog1Code.trim().toLowerCase());
         const p2 = programmes.find(p => p.code.toLowerCase() === prog2Code.trim().toLowerCase());
-        if (!p1 || !p2) return alert("Please enter valid programme codes.");
-        if (p1._id === p2._id) return alert("Please enter different programmes.");
+        if (!p1 || !p2) return alertAction("Please enter valid programme codes.");
+        if (p1._id === p2._id) return alertAction("Please enter different programmes.");
         
         setLoading(true);
         try {
@@ -88,7 +91,7 @@ export default function ConflictCheckerPage() {
             });
         } catch (err) {
             console.error(err);
-            alert("Failed to fetch data.");
+            alertAction("Failed to fetch data.");
         } finally {
             setLoading(false);
         }

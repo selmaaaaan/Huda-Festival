@@ -1,3 +1,4 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../services/api';
 import StatusBadge from '../components/StatusBadge';
@@ -18,6 +19,8 @@ const StatCard = ({ label, value, accent }) => (
 );
 
 export default function RegistrationReviewPage() {
+  const alertAction = useAlert();
+
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const isAdminOrJudge = ['admin', 'judge'].includes(userInfo.role);
 
@@ -67,7 +70,7 @@ export default function RegistrationReviewPage() {
       setRegistrations(prev => prev.map(r => selectedIds.includes(r._id) ? { ...r, status: 'approved' } : r));
       setSelectedIds([]);
     } catch(e) {
-      alert('Error in bulk approval');
+      alertAction('Error in bulk approval');
     } finally {
       setBulkDialog({ open: false, action: null, reason: '' });
     }
@@ -80,7 +83,7 @@ export default function RegistrationReviewPage() {
       setRegistrations(prev => prev.map(r => selectedIds.includes(r._id) ? { ...r, status: 'rejected', rejectionReason: reason } : r));
       setSelectedIds([]);
     } catch(e) {
-      alert('Error in bulk rejection');
+      alertAction('Error in bulk rejection');
     } finally {
       setBulkDialog({ open: false, action: null, reason: '' });
     }
@@ -164,19 +167,19 @@ export default function RegistrationReviewPage() {
     try {
       await api.patch(`/registrations/${id}/approve`);
       setRegistrations(prev => prev.map(r => r._id === id ? {...r, status: 'approved'} : r));
-    } catch(e) { alert(e.response?.data?.message || 'Failed to approve'); }
+    } catch(e) { alertAction(e.response?.data?.message || 'Failed to approve'); }
     finally { setActionLoading(null); }
   };
 
   const handleReject = async () => {
-    if (!rejectReason.trim()) { alert('Rejection reason is required'); return; }
+    if (!rejectReason.trim()) { alertAction('Rejection reason is required'); return; }
     setActionLoading(rejectDialog.id);
     try {
       await api.patch(`/registrations/${rejectDialog.id}/reject`, { rejectionReason: rejectReason });
       setRegistrations(prev => prev.map(r => r._id === rejectDialog.id ? {...r, status: 'rejected', rejectionReason: rejectReason} : r));
       setRejectDialog({ open: false, id: null });
       setRejectReason('');
-    } catch(e) { alert(e.response?.data?.message || 'Failed to reject'); }
+    } catch(e) { alertAction(e.response?.data?.message || 'Failed to reject'); }
     finally { setActionLoading(null); }
   };
 
@@ -186,7 +189,7 @@ export default function RegistrationReviewPage() {
       await api.delete(`/registrations/${deleteDialog.id}`);
       setRegistrations(prev => prev.filter(r => r._id !== deleteDialog.id));
       setDeleteDialog({ open: false, id: null });
-    } catch(e) { alert(e.response?.data?.message || 'Failed to delete'); }
+    } catch(e) { alertAction(e.response?.data?.message || 'Failed to delete'); }
     finally { setActionLoading(null); }
   };
 

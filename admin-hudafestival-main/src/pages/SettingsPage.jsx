@@ -1,3 +1,4 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import api from '../services/api';
@@ -15,6 +16,8 @@ const THEME_COLORS = [
 ];
 
 const SettingsPage = () => {
+  const alertAction = useAlert();
+
   const [settings, setSettings] = useState({ 
     isRegistrationOpen: true, 
     topicRegistrationEnabled: true,
@@ -89,7 +92,7 @@ const SettingsPage = () => {
       setSettings(s => ({ ...s, topicRegistrationEnabled: newVal }));
       setShowConfirmToggleTopic(false);
     } catch (err) {
-      alert(err.response?.data?.message || 'Error updating settings');
+      alertAction(err.response?.data?.message || 'Error updating settings');
     }
   };
 

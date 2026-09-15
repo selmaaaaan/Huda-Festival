@@ -1,3 +1,4 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import Button from '../components/Button';
@@ -6,6 +7,8 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import { Edit2, Trash2, Plus } from 'lucide-react';
 
 const UsersPage = () => {
+  const alertAction = useAlert();
+
   const [teams, setTeams] = useState([]);
   const [teamLeaders, setTeamLeaders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +57,7 @@ const UsersPage = () => {
       await api.put(`/teams/${team._id}`, { isTopicRegistrationOpen: newVal });
       setTeams(teams.map(t => t._id === team._id ? { ...t, isTopicRegistrationOpen: newVal } : t));
     } catch (err) {
-      alert(err.response?.data?.message || 'Error updating team topic registration');
+      alertAction(err.response?.data?.message || 'Error updating team topic registration');
     }
   };
 
@@ -100,7 +103,7 @@ const UsersPage = () => {
       setShowConfirmDelete(false);
       fetchData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Error deleting team');
+      alertAction(err.response?.data?.message || 'Error deleting team');
     }
   };
 
@@ -155,7 +158,7 @@ const UsersPage = () => {
       setShowConfirmDeleteLeader(false);
       fetchData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Error deleting leader');
+      alertAction(err.response?.data?.message || 'Error deleting leader');
     }
   };
 

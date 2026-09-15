@@ -1,3 +1,4 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Trophy, Download, Calendar, MapPin, Users, CheckCircle, Save, XCircle, AlertTriangle, Edit2 } from 'lucide-react';
 import api from '../services/api';
@@ -7,6 +8,8 @@ const CATEGORIES = ['All', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', '
 const STAGES = ['All Stages', 'Stage', 'Non-Stage'];
 
 export default function ResultsPage() {
+  const alertAction = useAlert();
+
     // Left panel filters
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
@@ -64,7 +67,7 @@ export default function ResultsPage() {
             });
         } catch (err) {
             console.error('Failed to update code letter', err);
-            alert('Failed to update code letter');
+            alertAction('Failed to update code letter');
         }
     };
 
@@ -187,16 +190,16 @@ export default function ResultsPage() {
         }).filter(Boolean);
 
         if (resultsToSave.length === 0) {
-            alert("No results to save.");
+            alertAction("No results to save.");
             return;
         }
 
         try {
             await api.post(`/programmes/${selectedProg._id}/results/bulk`, { results: resultsToSave });
-            alert("Draft saved successfully!");
+            alertAction("Draft saved successfully!");
             loadProgrammeData(selectedProg); // refresh
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to save results');
+            alertAction(err.response?.data?.message || 'Failed to save results');
         }
     };
 
@@ -205,12 +208,12 @@ export default function ResultsPage() {
         
         try {
             await api.post(`/programmes/${selectedProg._id}/unpublish`);
-            alert("Results unpublished successfully! You can now edit them.");
+            alertAction("Results unpublished successfully! You can now edit them.");
             // Update programme status locally
             setProgrammes(prev => prev.map(p => p._id === selectedProg._id ? { ...p, isResultPublished: false } : p));
             loadProgrammeData(selectedProg);
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to unpublish results');
+            alertAction(err.response?.data?.message || 'Failed to unpublish results');
         }
     };
 
@@ -222,12 +225,12 @@ export default function ResultsPage() {
 
         try {
             await api.post(`/programmes/${selectedProg._id}/approve`);
-            alert("Results published successfully!");
+            alertAction("Results published successfully!");
             // Update programme status locally
             setProgrammes(prev => prev.map(p => p._id === selectedProg._id ? { ...p, isResultPublished: true } : p));
             loadProgrammeData(selectedProg);
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to publish results');
+            alertAction(err.response?.data?.message || 'Failed to publish results');
         }
     };
 

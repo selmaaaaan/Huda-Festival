@@ -1,3 +1,4 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect } from 'react';
 import { Printer, RefreshCw, AlertCircle, Search, Users, FileText, BarChart2, Info, Activity, Hash, Layers } from 'lucide-react';
 import api from '../services/api';
@@ -6,6 +7,8 @@ import Button from '../components/Button';
 import * as XLSX from 'xlsx';
 
 const JurySlipsPage = () => {
+  const alertAction = useAlert();
+
   const [programmes, setProgrammes] = useState([]);
   const [selectedProgramme, setSelectedProgramme] = useState(null);
   const [registrations, setRegistrations] = useState([]);
@@ -81,7 +84,7 @@ const JurySlipsPage = () => {
     try {
       const res = await api.get(`/registrations?status=approved&limit=100000`);
       const allRegs = res.data.registrations || res.data.data || [];
-      if (allRegs.length === 0) { alert('No approved registrations found.'); return; }
+      if (allRegs.length === 0) { alertAction('No approved registrations found.'); return; }
 
       const wb = XLSX.utils.book_new();
       const grouped = {};
@@ -131,7 +134,7 @@ const JurySlipsPage = () => {
       XLSX.writeFile(wb, "All_Programmes_Participants.xlsx");
     } catch (err) {
       console.error(err);
-      alert('Failed to export all programmes');
+      alertAction('Failed to export all programmes');
     } finally {
       setLoading(false);
     }

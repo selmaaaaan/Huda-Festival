@@ -1,3 +1,4 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Bell, Plus, Power, Clock, XCircle } from 'lucide-react';
@@ -5,6 +6,8 @@ import Button from '../components/Button';
 import EmptyState from '../components/EmptyState';
 
 const NotificationsPage = ({ inline = false }) => {
+  const alertAction = useAlert();
+
   const confirmAction = useConfirm();
 
   const [notifications, setNotifications] = useState([]);
@@ -58,7 +61,7 @@ const NotificationsPage = ({ inline = false }) => {
       // Update local state directly for snappy UI
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, isActive: !currentStatus } : n));
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to toggle notification status.');
+      alertAction(err.response?.data?.message || 'Failed to toggle notification status.');
     }
   };
 
@@ -68,7 +71,7 @@ const NotificationsPage = ({ inline = false }) => {
       await api.delete(`/notifications/${id}`);
       fetchNotifications();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete notification.');
+      alertAction(err.response?.data?.message || 'Failed to delete notification.');
     }
   };
 

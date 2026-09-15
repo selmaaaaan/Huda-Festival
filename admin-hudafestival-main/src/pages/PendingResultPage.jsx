@@ -1,3 +1,4 @@
+import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect } from 'react';
 import { useConfirm } from '../context/ConfirmContext';
 import api from '../services/api';
@@ -6,6 +7,8 @@ import Button from '../components/Button';
 import { Clock } from 'lucide-react';
 
 const PendingResultsPage = () => {
+  const alertAction = useAlert();
+
   const confirmAction = useConfirm();
 
   const [batches, setBatches] = useState([]);
@@ -51,10 +54,10 @@ const PendingResultsPage = () => {
     if (window.confirm('Approve and publish all results in this batch?')) {
       try { 
         await api.post('/results/batch-publish', { batchId: batch.batchId });
-        alert('Batch published successfully!'); 
+        alertAction('Batch published successfully!'); 
         fetchPendingData(); 
       }
-      catch (err) { alert('Error: ' + (err.response?.data?.message || 'Failed.')); }
+      catch (err) { alertAction('Error: ' + (err.response?.data?.message || 'Failed.')); }
     }
   };
 
@@ -62,9 +65,9 @@ const PendingResultsPage = () => {
     confirmAction('Delete all pending results in this batch?', async () => {
         try {
             await api.delete(`/results/batch/${batch.batchId}`);
-            alert('Batch deleted.');
+            alertAction('Batch deleted.');
             fetchPendingData();
-        } catch (err) { alert(err.response?.data?.message || 'Error deleting batch.'); }
+        } catch (err) { alertAction(err.response?.data?.message || 'Error deleting batch.'); }
     });
   };
 
