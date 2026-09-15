@@ -288,7 +288,7 @@ export default function TeamTopicRegistrationPage() {
   };
 
   const openNewRegistration = () => {
-    if (isTopicRegistrationEnabled === false) return;
+    
     setSuccess(false); setError('');
     setEditTopicId(null);
     setTopicForm({ programmeId: '', candidates: {}, groupTopic: '' });
@@ -297,7 +297,7 @@ export default function TeamTopicRegistrationPage() {
   };
 
   const openEditTopic = (t) => {
-    if (isTopicRegistrationEnabled === false) return;
+    
     setSuccess(false); setError('');
     setEditTopicId(t._id);
     setTopicCategory(t.programme?.category || '');
@@ -597,12 +597,12 @@ export default function TeamTopicRegistrationPage() {
                           <td className="px-6 py-4"><StatusBadge status={t.status} /></td>
                           <td className="px-6 py-4 text-xs text-[var(--color-text-muted)] max-w-xs truncate">{t.reviewNote || '—'}</td>
                           <td className="px-6 py-4 text-right flex justify-end gap-2">
-                            {isTopicRegistrationEnabled !== false && t.status !== 'approved' && (
+                            {t.status !== 'approved' && (
                               <button onClick={() => openEditTopic(t)} className="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors p-1" title="Edit Topic">
                                 <Edit3 size={16} />
                               </button>
                             )}
-                            {isTopicRegistrationEnabled !== false && (
+                            {true && (
                               <button onClick={() => handleDeleteTopic(t._id)} className="text-[var(--color-text-muted)] hover:text-red-500 transition-colors p-1" title="Delete Topic">
                                 <Trash2 size={16} />
                               </button>
@@ -713,7 +713,7 @@ export default function TeamTopicRegistrationPage() {
       ══════════════════════════════════════════════════════════════════════════ */}
       <Modal isOpen={showTopicForm} onClose={() => setShowTopicForm(false)} title={editTopicId ? "Edit Topic" : "Submit Topic"}>
         <AnimatePresence mode="wait">
-          {!isTopicRegistrationEnabled ? (
+          {!isTopicRegistrationEnabled && !editTopicId ? (
             <motion.div key="closed" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               className="py-12 flex flex-col items-center text-center space-y-4">
