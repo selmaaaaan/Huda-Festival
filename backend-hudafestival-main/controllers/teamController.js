@@ -171,8 +171,10 @@ const getRegistrationGrid = async (req, res) => {
             
             registrations.forEach(reg => {
                 if (reg.candidates && reg.candidates.map(c => c.toString()).includes(cand._id.toString())) {
-                    if (reg.programme && (reg.programme.stageType === 'stage' || reg.programme.type === 'Stage')) stageCount++;
-                    if (reg.programme && (reg.programme.stageType === 'non-stage' || reg.programme.type === 'Non-Stage')) nonStageCount++;
+                    if (reg.programme && reg.programme.format !== 'Group' && reg.programme.type !== 'Group' && reg.programme.category !== 'KULLIYYAH') {
+                        if (reg.programme.stageType === 'stage' || reg.programme.type === 'Stage') stageCount++;
+                        if (reg.programme.stageType === 'non-stage' || reg.programme.type === 'Non-Stage') nonStageCount++;
+                    }
                 }
             });
             
