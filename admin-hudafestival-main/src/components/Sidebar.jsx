@@ -18,6 +18,7 @@ const navItems = [
   { key: 'topic_management', label: 'Topic Management', icon: ClipboardList },
   { key: 'schedule', label: 'Schedule', icon: CalendarClock },
   { key: 'jury_slips', label: 'Participant List', icon: FileText },
+  { key: 'conflict_checker', label: 'Conflict Checker', icon: FileText },
   { key: 'users', label: 'Users & Teams', icon: UserPlus },
     { key: 'settings', label: 'Settings', icon: Settings },
 ];

@@ -12,6 +12,7 @@ import PointAdjustmentPage from './pages/PointAdjustmentPage';
 import Sidebar from './components/Sidebar';
 import Breadcrumbs from './components/Breadcrumbs';
 import SettingsPage from './pages/SettingsPage';
+import ConflictCheckerPage from './pages/ConflictCheckerPage';
 import UsersPage from './pages/UsersPage';
 import SchedulePage from './pages/SchedulePage';
 import JurySlipsPage from './pages/JurySlipsPage';
@@ -248,6 +249,9 @@ function App() {
         break;
       case 'jury_slips':
         pageContent = <JurySlipsPage />;
+        break;
+      case 'conflict_checker':
+        pageContent = <ConflictCheckerPage />;
         break;
       case 'schedule':
         pageContent = <SchedulePage />;
