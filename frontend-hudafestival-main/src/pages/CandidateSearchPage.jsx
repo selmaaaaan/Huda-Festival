@@ -29,7 +29,7 @@ const SearchPage = () => {
 
   if (!selectedCandidate) {
     return (
-      <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
+      <div className="min-h-dvh bg-[var(--festival-cream)] py-24 px-6 md:px-12">
         <div className="max-w-[1440px] mx-auto text-center">
           <SectionHeading subtitle="Find Your Festival Moment" align="center">
             Candidate <br/>
@@ -81,7 +81,7 @@ const SearchPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
+    <div className="min-h-dvh bg-[var(--festival-cream)] py-24 px-6 md:px-12">
       <div className="max-w-[1440px] mx-auto">
         <button onClick={() => setSelectedCandidate(null)} className="font-bold uppercase tracking-widest text-sm mb-12 flex items-center gap-2 hover:text-[var(--festival-yellow)] transition-colors">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>

@@ -26,13 +26,13 @@ const LeaderboardsPage = () => {
         fetchLeaderboards();
     }, []);
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center font-display text-2xl uppercase font-black">Loading...</div>;
+    if (loading) return <div className="min-h-dvh flex items-center justify-center font-display text-2xl uppercase font-black">Loading...</div>;
 
     const overallTop = (leaderboardData.overall || []).slice(0, 3);
     const overallRest = (leaderboardData.overall || []).slice(3);
 
     return (
-        <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
+        <div className="min-h-dvh bg-[var(--festival-cream)] pt-32 pb-16 md:pt-40 md:pb-24 px-6 md:px-12">
             <div className="max-w-[1440px] mx-auto">
                 
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 border-b-2 border-[var(--border)] pb-8">

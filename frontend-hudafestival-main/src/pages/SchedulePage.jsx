@@ -71,10 +71,10 @@ const SchedulePage = () => {
     return aTime - bTime;
   });
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-display text-2xl uppercase font-black">Loading...</div>;
+  if (loading) return <div className="min-h-dvh flex items-center justify-center font-display text-2xl uppercase font-black">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
+    <div className="min-h-dvh bg-[var(--festival-cream)] pt-32 pb-16 md:pt-40 md:pb-24 px-6 md:px-12">
       <div className="max-w-[1440px] mx-auto">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 gap-8">
           <SectionHeading subtitle="Different Voices. Same Tomorrow.">
@@ -100,7 +100,7 @@ const SchedulePage = () => {
                 <h3 className="text-2xl font-black font-display uppercase tracking-tight mb-8 border-b-2 border-[var(--border)] pb-4">Scheduled Events</h3>
                 <div className="relative border-l-4 border-[var(--border)] ml-4 md:ml-0 md:border-l-0 md:border-t-4 md:flex md:flex-row md:overflow-x-auto md:pb-12 md:pt-8 md:gap-8 no-scrollbar">
                   {scheduled.map((prog, i) => (
-                    <motion.div key={prog._id} initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }} whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }} whileHover={prefersReducedMotion ? {} : { y: -6, rotate: i % 2 === 0 ? 1 : -1, scale: 1.02 }}
+                    <motion.div key={prog._id} initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }} whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }} whileHover={prefersReducedMotion ? {} : { y: -6, rotate: i % 2 === 0 ? 1 : -1, scale: 1.02 }} whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                       viewport={{ once: true }}
                       transition={{ delay: (i % 5) * 0.1 }}
                       className="relative pl-8 md:pl-0 pt-8 md:pt-0 md:min-w-[300px] mb-12 md:mb-0"

@@ -95,7 +95,7 @@ const AddProgrammeForm = ({ onFormSubmit, onFormCancel, categoryName, categories
             onChange={handleChange} 
             required={!isCategoryDisabled}
             disabled={isCategoryDisabled}
-            className={`w-full px-4 py-2.5 border border-[var(--color-border)] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition ${isCategoryDisabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}>
+            className={`w-full px-4 py-2.5 border border-[var(--color-border)] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] transition ${isCategoryDisabled ? 'bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)] cursor-not-allowed' : ''}`}>
             <option value="">Select Category</option>
             {categories.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
@@ -154,7 +154,7 @@ const AddProgrammeForm = ({ onFormSubmit, onFormCancel, categoryName, categories
 
       <div className="flex justify-end gap-3 pt-2 border-t border-[var(--color-border)] mt-4">
         <button type="button" onClick={onFormCancel}
-          className="px-5 py-2.5 text-sm font-medium text-[var(--color-text-heading)] bg-gray-100 rounded-xl hover:bg-gray-200 transition">
+          className="px-5 py-2.5 text-sm font-medium text-[var(--color-text-heading)] bg-[var(--color-surface-elevated)] rounded-xl hover:bg-[var(--color-border)] transition">
           Cancel
         </button>
         <button type="submit" disabled={loading}

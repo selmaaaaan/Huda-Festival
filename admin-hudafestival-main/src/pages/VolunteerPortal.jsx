@@ -8,7 +8,7 @@ import DashboardHero from '../components/DashboardHero';
 const STATUS_OPTIONS = [
   { value: 'upcoming',  label: 'Upcoming',  color: 'bg-blue-100 text-blue-700' },
   { value: 'live',      label: 'LIVE',       color: 'bg-green-500 text-white' },
-  { value: 'completed', label: 'Completed',  color: 'bg-gray-200 text-gray-600' },
+  { value: 'completed', label: 'Completed',  color: 'bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)]' },
   { value: 'postponed', label: 'Postponed',  color: 'bg-red-100 text-red-700' },
 ];
 

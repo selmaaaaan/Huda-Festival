@@ -78,11 +78,11 @@ const ResultsPage = () => {
     return true;
   });
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-display text-2xl uppercase font-black">Loading Results...</div>;
-  if (error) return <div className="min-h-screen flex items-center justify-center font-display text-2xl uppercase font-black text-[var(--festival-red)]">{error}</div>;
+  if (loading) return <div className="min-h-dvh flex items-center justify-center font-display text-2xl uppercase font-black">Loading Results...</div>;
+  if (error) return <div className="min-h-dvh flex items-center justify-center font-display text-2xl uppercase font-black text-[var(--festival-red)]">{error}</div>;
 
   return (
-    <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
+    <div className="min-h-dvh bg-[var(--festival-cream)] pt-32 pb-16 md:pt-40 md:pb-24 px-6 md:px-12">
       <div className="max-w-[1440px] mx-auto">
         <Link to="/programmes" className="font-bold uppercase tracking-widest text-sm mb-12 flex items-center gap-2 hover:text-[var(--festival-red)] transition-colors">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>

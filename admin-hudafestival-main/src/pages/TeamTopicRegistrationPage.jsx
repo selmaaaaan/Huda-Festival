@@ -361,7 +361,7 @@ export default function TeamTopicRegistrationPage() {
 
   // ── Loading / No-team guard ────────────────────────────────────────────────────
   if (loading && !myRegistrations.length) return (
-    <div className="flex items-center justify-center h-full min-h-screen">
+    <div className="flex items-center justify-center h-full min-h-dvh">
       <div className="text-[var(--color-text-muted)] animate-pulse">Loading portal...</div>
     </div>
   );
@@ -369,7 +369,7 @@ export default function TeamTopicRegistrationPage() {
   // ═══════════════════════════════════════════════════════════════════════════════
   return (
     <div
-      className="min-h-screen pb-16 transition-colors duration-500"
+      className="min-h-dvh pb-16 transition-colors duration-500"
       style={{ background: 'var(--color-bg)' }}
     >
       <motion.div

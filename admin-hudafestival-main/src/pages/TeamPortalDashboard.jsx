@@ -70,9 +70,9 @@ export default function TeamPortalDashboard() {
   if (loading) return <div className="p-8">Loading dashboard...</div>;
 
   return (
-    <div className="w-full flex flex-col h-full bg-[var(--color-bg)]">
+    <div className="w-full flex flex-col bg-[var(--color-bg)]">
       {/* Scrollable Content Wrapper */}
-      <div className="flex-1 overflow-y-auto p-8 max-w-[1600px] mx-auto w-full space-y-8">
+      <div className="p-8 max-w-[1600px] mx-auto w-full space-y-8">
         <DashboardHero 
           userName={team?.name || userInfo.userName || 'Team Leader'} 
           roleName="Team Portal"

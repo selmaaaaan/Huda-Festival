@@ -105,7 +105,7 @@ const AddCandidateForm = ({ onFormSubmit, onFormCancel, teamId, categoryName, te
 
       <div className="flex justify-end gap-3 pt-2">
         <button type="button" onClick={onFormCancel}
-          className="px-5 py-2.5 text-sm font-medium text-[var(--color-text-heading)] bg-gray-100 rounded-xl hover:bg-gray-200 transition">
+          className="px-5 py-2.5 text-sm font-medium text-[var(--color-text-heading)] bg-[var(--color-surface-elevated)] rounded-xl hover:bg-[var(--color-border)] transition">
           Cancel
         </button>
         <button type="submit" disabled={loading}

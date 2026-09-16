@@ -35,7 +35,7 @@ const LoginPage = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg)] text-[var(--color-text-heading)]">
+    <div className="min-h-dvh flex items-center justify-center bg-[var(--color-bg)] text-[var(--color-text-heading)]">
       <div className="w-full max-w-md p-10 space-y-8 bg-[var(--color-surface)] rounded-2xl shadow-2xl border border-[var(--color-border)]">
         <div className="flex flex-col items-center">
           <Logo size="large" />

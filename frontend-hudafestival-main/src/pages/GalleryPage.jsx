@@ -32,7 +32,7 @@ const GalleryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
+    <div className="min-h-dvh bg-[var(--festival-cream)] pt-32 pb-16 md:pt-40 md:pb-24 px-6 md:px-12">
       <div className="max-w-[1440px] mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 border-b-2 border-[var(--border)] pb-8">
           <SectionHeading subtitle="Moments & Memories" align="left">

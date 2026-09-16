@@ -459,7 +459,7 @@ export default function ResultsPage() {
                                                                 </td>
                                                                 <td className="px-6 py-5">
                                                                     <div className="font-bold text-[var(--color-text-heading)] mb-1">{cand.name}</div>
-                                                                    <div className="text-xs font-semibold text-[var(--color-text-muted)] bg-gray-100 inline-block px-2 py-1 rounded-md">{cand.team?.name}</div>
+                                                                    <div className="text-xs font-semibold text-[var(--color-text-muted)] bg-[var(--color-surface-elevated)] inline-block px-2 py-1 rounded-md">{cand.team?.name}</div>
                                                                 </td>
                                                                 <td className="px-6 py-5">
                                                                     <div className="flex gap-4">

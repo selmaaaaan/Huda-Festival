@@ -9,6 +9,8 @@ const {
     addMinusPoints,
     searchCandidates,
     getCandidateResults,
+    lookupCandidates,
+    getCandidateRegistrations,
 } = require('../controllers/candidateController');
 
 const upload = require('../config/cloudinary');
@@ -20,6 +22,9 @@ router.route('/')
 
 router.route('/search').get(searchCandidates);
 
+router.route('/lookup').get(protect, authorize('admin', 'judge', 'team_leader'), lookupCandidates);
+
+
 router.route('/:id')
     .get(getCandidateById)
     .put(protect, authorize('admin'), upload.single('image'), updateCandidate)
@@ -28,6 +33,9 @@ router.route('/:id')
 router.route('/:id/minus-points').post(protect, addMinusPoints);
 
 router.route('/:id/results').get(getCandidateResults);
+
+router.route('/:id/registrations').get(protect, authorize('admin', 'judge', 'team_leader'), getCandidateRegistrations);
+
 
 module.exports = router;
 

@@ -76,7 +76,7 @@ const ProgrammesPage = () => {
               const totalCount = catProgs.length;
               return (
               <div key={cat} onClick={() => setSelectedCategory(cat)}
-                className="relative overflow-hidden p-6 bg-white dark:bg-[var(--color-surface-elevated)] rounded-2xl border border-[var(--color-border)] hover:border-[var(--color-primary)]/50 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--color-primary)]/10 group flex flex-col gap-4">
+                className="relative overflow-hidden p-6 bg-[var(--color-surface)] dark:bg-[var(--color-surface-elevated)] rounded-2xl border border-[var(--color-border)] hover:border-[var(--color-primary)]/50 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-[var(--color-primary)]/10 group flex flex-col gap-4">
                 
                 {/* Subtle gradient background effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-primary)]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>

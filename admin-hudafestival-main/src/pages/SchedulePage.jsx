@@ -234,9 +234,9 @@ const SchedulePage = () => {
                     <h3 className="font-semibold text-[var(--color-text-heading)] text-lg">{prog.name}</h3>
                     <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-[var(--color-text-muted)]">
                        <span className="flex items-center gap-1"><MapPin size={14} /> {prog.venue || 'No Venue'}</span>
-                       <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-medium">{prog.code}</span>
-                       <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-medium">{prog.category}</span>
-                       <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-medium">{prog.type}</span>
+                       <span className="px-2 py-0.5 bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)] rounded text-xs font-medium">{prog.code}</span>
+                       <span className="px-2 py-0.5 bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)] rounded text-xs font-medium">{prog.category}</span>
+                       <span className="px-2 py-0.5 bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)] rounded text-xs font-medium">{prog.type}</span>
                     </div>
                   </div>
                 </div>

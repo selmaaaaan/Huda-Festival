@@ -272,13 +272,13 @@ export default function RegistrationReviewPage() {
   };
 
   if (loading) return (
-    <div className="flex items-center justify-center h-full min-h-screen">
+    <div className="flex items-center justify-center h-full min-h-dvh">
       <div className="text-[var(--color-text-muted)] animate-pulse">Loading registrations...</div>
     </div>
   );
 
   return (
-    <div className="min-h-screen pb-16 bg-[var(--color-bg)] transition-colors duration-500">
+    <div className="min-h-dvh pb-16 bg-[var(--color-bg)] transition-colors duration-500">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
         {/* Header */}
         <div className="relative overflow-hidden border-b border-[var(--color-border)] bg-[var(--color-surface)]">

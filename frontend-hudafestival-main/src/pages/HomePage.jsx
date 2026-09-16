@@ -71,7 +71,7 @@ const HomePage = () => {
   const TAGLINES = ["A festival of ideas", "Culture Connects Us", "Voices of the Future", "Creativity Unleashed", "Inspiring Generations"];
 
   return (
-    <div className="min-h-screen bg-[var(--festival-cream)] text-[var(--festival-black)] pt-24 overflow-hidden relative">
+    <div className="min-h-dvh bg-[var(--festival-cream)] text-[var(--festival-black)] pt-24 overflow-hidden relative">
       
       {/* Background oversized L'INTERVENTION */}
       <div className="absolute top-0 left-0 w-full overflow-hidden pointer-events-none select-none z-0 opacity-5">
@@ -88,17 +88,17 @@ const HomePage = () => {
             <motion.div 
               animate={{ y: [0, -30, 0], rotate: [0, 45, 0] }} 
               transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-              className="absolute top-10 left-10 w-32 h-32 bg-[var(--festival-yellow)] rounded-full mix-blend-multiply filter blur-2xl opacity-40" 
+              className="absolute -top-10 -left-10 w-48 h-48 md:top-10 md:left-10 md:w-32 md:h-32 bg-[var(--festival-yellow)] rounded-full mix-blend-multiply filter blur-2xl opacity-60 md:opacity-40" 
             />
             <motion.div 
               animate={{ y: [0, 50, 0], x: [0, 30, 0] }} 
               transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-              className="absolute top-40 right-10 w-48 h-48 bg-[var(--festival-teal)] rounded-full mix-blend-multiply filter blur-2xl opacity-30" 
+              className="absolute top-1/3 -right-20 w-64 h-64 md:top-40 md:right-10 md:w-48 md:h-48 bg-[var(--festival-teal)] rounded-full mix-blend-multiply filter blur-2xl opacity-50 md:opacity-30" 
             />
             <motion.div 
               animate={{ scale: [1, 1.2, 1], rotate: [0, -45, 0] }} 
               transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-              className="absolute bottom-10 left-1/4 w-40 h-40 bg-[var(--festival-purple)] rounded-full mix-blend-multiply filter blur-2xl opacity-20" 
+              className="absolute -bottom-10 -left-10 w-56 h-56 md:bottom-10 md:left-1/4 md:w-40 md:h-40 bg-[var(--festival-purple)] rounded-full mix-blend-multiply filter blur-2xl opacity-40 md:opacity-20" 
             />
             
             {/* Floating Geometry */}
@@ -201,15 +201,17 @@ const HomePage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4"
-          >
-            <Link to="/programmes" className="px-8 py-4 bg-[var(--festival-red)] text-[var(--festival-cream)] font-bold uppercase tracking-wider text-lg hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(17,17,17,1)] transition-all border-2 border-[var(--border)]">
-              Explore Programmes →
-            </Link>
-            <Link to="/schedule" className="px-8 py-4 bg-[var(--festival-cream)] text-[var(--festival-black)] font-bold uppercase tracking-wider text-lg hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(17,17,17,1)] transition-all border-2 border-[var(--border)]">
-              View Schedule
-            </Link>
-          </motion.div>
+            className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto px-4 sm:px-0"
+            >
+              <Link to="/programmes" className="px-8 py-4 bg-[var(--festival-red)] text-[var(--festival-cream)] font-bold uppercase tracking-wider text-lg hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(17,17,17,1)] transition-all border-2 border-[var(--border)] w-full sm:w-auto text-center">
+                Explore Programmes →
+            
+              </Link>
+              <Link to="/schedule" className="px-8 py-4 bg-[var(--festival-cream)] text-[var(--festival-black)] font-bold uppercase tracking-wider text-lg hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(17,17,17,1)] transition-all border-2 border-[var(--border)] w-full sm:w-auto text-center">
+                View Schedule
+            
+              </Link>
+            </motion.div>
         </motion.div>
       </section>
 
@@ -265,7 +267,7 @@ const HomePage = () => {
       </section>
 
       {/* Featured Programmes */}
-      <section className="py-24 container mx-auto px-6 lg:px-12">
+      <section className="py-16 md:py-24 container mx-auto px-6 lg:px-12">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 border-b-4 border-[var(--border)] pb-8">
           <h2 className="text-5xl md:text-7xl font-black font-display uppercase tracking-tighter">Featured<br/>Programmes</h2>
           <Link to="/programmes" className="mt-6 md:mt-0 font-bold uppercase tracking-widest hover:text-[var(--festival-red)] transition-colors">
@@ -311,7 +313,7 @@ const HomePage = () => {
 
       {/* The Teams */}
       {stats.teamsList.length > 0 && (
-        <section className="py-24 bg-[var(--festival-black)] text-[var(--festival-cream)] border-y-4 border-[var(--border)]">
+        <section className="py-16 md:py-24 bg-[var(--festival-black)] text-[var(--festival-cream)] border-y-4 border-[var(--border)]">
           <div className="container mx-auto px-6 lg:px-12">
             <h2 className="text-5xl md:text-7xl font-black font-display uppercase tracking-tighter mb-16 text-center">The Teams</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -339,7 +341,7 @@ const HomePage = () => {
       )}
 
       {/* Testimonial & Gallery Preview */}
-      <section className="py-24 container mx-auto px-6 lg:px-12">
+      <section className="py-16 md:py-24 container mx-auto px-6 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
             <div className="text-[var(--festival-orange)] text-8xl font-serif leading-none mb-4">"</div>

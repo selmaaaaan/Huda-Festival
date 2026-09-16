@@ -175,7 +175,7 @@ function App() {
   return (
     <>
       {!bootComplete && <LoadingScreen isReady={settingsLoaded} onComplete={() => setBootComplete(true)} />}
-      <div className="flex h-screen bg-[var(--color-bg)] text-[var(--color-text-heading)]">
+      <div className="flex h-dvh bg-[var(--color-bg)] text-[var(--color-text-heading)]">
         <Sidebar
           onLogout={handleLogout}
           userInfo={userInfo}

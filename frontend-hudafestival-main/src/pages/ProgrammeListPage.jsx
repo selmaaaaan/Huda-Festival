@@ -23,6 +23,7 @@ const ProgrammeCard = ({ programme, index }) => {
       whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       whileHover={prefersReducedMotion ? {} : { y: -8, rotate: index % 2 === 0 ? 1.5 : -1.5, scale: 1.02, boxShadow: '16px 16px 0px 0px rgba(23,23,23,1)' }}
+        whileTap={prefersReducedMotion ? {} : { scale: 0.98, boxShadow: '4px 4px 0px 0px rgba(23,23,23,1)' }}
       transition={{ duration: 0.4, delay: prefersReducedMotion ? 0 : (index % 10) * 0.05, ease: "easeOut" }}
       className="group relative bg-[var(--festival-cream)] border-2 border-[var(--border)] transition-colors duration-300 flex flex-col"
     >
@@ -41,7 +42,7 @@ const ProgrammeCard = ({ programme, index }) => {
           </span>
         </div>
         
-        <h3 className="text-2xl md:text-3xl font-black font-display uppercase tracking-tight leading-none mb-4 group-hover:text-[var(--festival-red)] transition-colors">
+        <h3 className="text-2xl md:text-3xl font-black font-display uppercase tracking-tight leading-none mb-4 group-hover:text-[var(--festival-red)] group-active:text-[var(--festival-red)] transition-colors">
           {programme.name}
         </h3>
         
@@ -105,11 +106,11 @@ const ProgrammesPage = () => {
     ? (programmes || []) 
     : (programmes || []).filter(p => p.category === activeCategory);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-display text-2xl uppercase font-black">Loading...</div>;
-  if (error) return <div className="min-h-screen flex items-center justify-center font-display text-2xl uppercase font-black text-[var(--festival-red)]">{error}</div>;
+  if (loading) return <div className="min-h-dvh flex items-center justify-center font-display text-2xl uppercase font-black">Loading...</div>;
+  if (error) return <div className="min-h-dvh flex items-center justify-center font-display text-2xl uppercase font-black text-[var(--festival-red)]">{error}</div>;
 
   return (
-    <div className="min-h-screen bg-[var(--festival-cream)] py-24 px-6 md:px-12">
+    <div className="min-h-dvh bg-[var(--festival-cream)] pt-32 pb-16 md:pt-40 md:pb-24 px-6 md:px-12">
       <div className="max-w-[1440px] mx-auto">
         <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-8">
           <SectionHeading subtitle="Talents Take Centre Stage">

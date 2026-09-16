@@ -71,7 +71,7 @@ const DashboardPage = () => {
                   <Trophy size={18} className="text-[var(--color-primary)]" /> Team Scoreboard
                 </h3>
                 {leaderboard?.teamLeaderboard?.length > 0 ? (
-                  <div className="space-y-3 flex-1 overflow-auto pr-2">
+                  <div className="space-y-3 pr-2">
                     {leaderboard.teamLeaderboard.map((team, index) => (
                       <div key={team._id} className="flex items-center justify-between p-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)]">
                         <div className="flex items-center gap-3">

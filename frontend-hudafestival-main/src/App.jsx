@@ -50,7 +50,7 @@ function App() {
       )}
       
       {!settingsLoading && !isMaintenance && (
-        <div className={`font-sans min-h-screen flex flex-col ${!loadingComplete ? 'hidden' : ''}`}>
+        <div className={`font-sans min-h-dvh flex flex-col ${!loadingComplete ? 'hidden' : ''}`}>
           <Navbar />
           <NotificationBanner />
           <main className="flex-1 relative">
@@ -63,7 +63,7 @@ function App() {
               <Route path="/programmes/:programmeId/results/:resultId/certificate" element={<PageTransition><CertificatePage /></PageTransition>} />
               <Route path="/schedule" element={<PageTransition><SchedulePage /></PageTransition>} />
               <Route path="/gallery" element={<PageTransition><GalleryPage /></PageTransition>} />
-              <Route path="*" element={<PageTransition><div className="min-h-screen flex items-center justify-center font-display text-4xl uppercase font-black">Page Not Found</div></PageTransition>} />
+              <Route path="*" element={<PageTransition><div className="min-h-dvh flex items-center justify-center font-display text-4xl uppercase font-black">Page Not Found</div></PageTransition>} />
             </Routes>
           </main>
           <Footer />

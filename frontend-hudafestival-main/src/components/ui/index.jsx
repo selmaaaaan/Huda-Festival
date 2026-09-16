@@ -17,7 +17,7 @@ export const SectionHeading = ({ children, subtitle, align = 'left' }) => {
           {subtitle}
         </p>
       )}
-      <h2 className="text-4xl md:text-5xl lg:text-6xl font-black font-display uppercase tracking-tighter leading-none">
+      <h2 className="text-[2.75rem] leading-[0.9] md:text-5xl lg:text-6xl font-black font-display uppercase tracking-tighter leading-none">
         {children}
       </h2>
     </motion.div>
