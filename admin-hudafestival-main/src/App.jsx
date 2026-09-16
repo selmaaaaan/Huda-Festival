@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import GlobalSearch from './components/GlobalSearch';
 import { motion, AnimatePresence } from 'framer-motion';
 import LoginPage from './pages/LoginPage';
@@ -31,31 +32,7 @@ import GalleryPage from './pages/GalleryPage';
 import NotificationsPage from './pages/NotificationsPage';
 import TopicManagementPage from './pages/TopicManagementPage';
 import TeamPortalDashboard from './pages/TeamPortalDashboard';
-
-const Preloader = () => {
-  const text = "HUDA FESTIVAL".split('');
-  return (
-    <motion.div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[var(--color-surface)]"
-      initial={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5, ease: 'easeInOut' }}
-    >
-      <div className="flex font-bold text-2xl md:text-4xl tracking-widest overflow-hidden text-[var(--color-primary)]">
-        {text.map((letter, i) => (
-          <motion.span key={i}
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.5, delay: i * 0.05, ease: [0.2, 0.65, 0.3, 0.9] }}
-            className="inline-block"
-          >
-            {letter === ' ' ? '\u00A0' : letter}
-          </motion.span>
-        ))}
-      </div>
-    </motion.div>
-  );
-};
+import LoadingScreen from './components/LoadingScreen';
 
 function App() {
   const savedInfo = localStorage.getItem('userInfo');
@@ -71,7 +48,8 @@ function App() {
 
   const [isAuthenticated, setIsAuthenticated] = useState(!!initialInfo);
   const [userInfo, setUserInfo] = useState(initialInfo);
-  const [activePage, setActivePage] = useState(getInitialPage(initialInfo));
+  const navigate = useNavigate();
+  const location = useLocation();
   const [appSettings, setAppSettings] = useState({ maintenanceMode: false, maintenanceMessage: '' });
   const [isDark, setIsDark] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -105,22 +83,20 @@ function App() {
       setIsDark(true);
     }
   };
-  const [showPreloader, setShowPreloader] = useState(true);
+  const [bootComplete, setBootComplete] = useState(false);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [activeNotifications, setActiveNotifications] = useState([]);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowPreloader(false), 2000);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    // Poll settings every 30s
     const fetchSettings = async () => {
       try {
         const { data } = await api.get('/settings');
         if (data) setAppSettings({ maintenanceMode: data.maintenanceMode, maintenanceMessage: data.maintenanceMessage });
-      } catch (e) {}
+      } catch (e) {
+      } finally {
+        setSettingsLoaded(true);
+      }
     };
     fetchSettings();
     const int = setInterval(fetchSettings, 30000);
@@ -145,7 +121,7 @@ function App() {
     fetchNotifications();
     const int = setInterval(fetchNotifications, 60000);
     return () => clearInterval(int);
-  }, [isAuthenticated, activePage]);
+  }, [isAuthenticated, location.pathname]);
 
   const handleNotificationClick = () => {
     if (activeNotifications.length > 0) {
@@ -154,19 +130,22 @@ function App() {
       localStorage.setItem('huda_read_notifications', JSON.stringify(newReadIds));
       setUnreadNotifications(0);
     }
-    setActivePage('notifications');
+    navigate('/notifications');
   };
 
   const handleLoginSuccess = () => {
-    setShowPreloader(true);
-    setTimeout(() => setShowPreloader(false), 2000);
+    setBootComplete(false);
+    setSettingsLoaded(false);
+    setTimeout(() => setSettingsLoaded(true), 10);
     
     setIsAuthenticated(true);
     const saved = localStorage.getItem('userInfo');
     if (saved) {
       const parsed = JSON.parse(saved);
       setUserInfo(parsed);
-      setActivePage(getInitialPage(parsed));
+      const initPage = getInitialPage(parsed);
+      const path = { dashboard: '/dashboard', judge_panel: '/judge-panel', team_dashboard: '/team-dashboard', volunteer_portal: '/volunteer-portal' }[initPage] || '/dashboard';
+      navigate(path);
     }
   };
 
@@ -175,116 +154,18 @@ function App() {
     setIsAuthenticated(false);
   };
 
-  const renderPage = () => {
-    let pageContent = null;
-    let pageKey = activePage;
-
-    const role = userInfo?.role;
-    const isAdmin = role === 'admin';
-    const isTeamLeader = role === 'team_leader';
-    const isJudge = role === 'judge';
-    const isVolunteer = role === 'volunteer';
-
-    // Route Guards
-    if (activePage === 'judge_panel' && !isJudge && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
-    if (activePage === 'volunteer_portal' && !isVolunteer && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
-    if (activePage.startsWith('team_') && !isTeamLeader && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
-    if (activePage === 'candidates' && !isTeamLeader && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
-    if (!['judge_panel', 'volunteer_portal', 'settings', 'notifications', 'candidates'].includes(activePage) && !activePage.startsWith('team_') && !isAdmin) return <div className="p-8 text-red-500">Unauthorized</div>;
-
-    switch (activePage) {
-      case 'judge_panel':
-        pageContent = <JudgePanel />;
-        break;
-      case 'team_dashboard':
-        pageContent = <TeamPortalDashboard />;
-        break;
-      case 'team_programme_registration':
-        pageContent = <TeamLeaderDashboard />;
-        break;
-      case 'team_registration_list':
-        pageContent = <TeamRegistrationListPage />;
-        break;
-      case 'team_topic_registration':
-        pageContent = <TeamTopicRegistrationPage />;
-        break;
-      case 'gallery':
-        pageContent = <GalleryPage />;
-        break;
-      case 'notifications':
-        pageContent = <NotificationsPage />;
-        break;
-      case 'users':
-        pageContent = <UsersPage />;
-        break;
-      case 'settings':
-        pageContent = <SettingsPage />;
-        break;
-      case 'candidates':
-        pageContent = <CandidatePage />;
-        break;
-      case 'programmes':
-        pageContent = <ProgrammesPage />;
-        break;
-      case 'registration_review':
-        pageContent = <RegistrationReviewPage />;
-        break;
-      case 'results':
-        pageContent = <ResultsPage />;
-        break;
-      case 'pending results':
-        pageContent = <PendingResultsPage />;
-        break;
-      case 'adjustments':
-        pageContent = <PointAdjustmentPage />;
-        break;
-            case 'judgment_feedback':
-        pageContent = <JudgmentFeedbackPage />;
-        break;
-      case 'logs':
-        pageContent = <ActivityLogsPage />;
-        break;
-      case 'topic_management':
-        pageContent = <TopicManagementPage />;
-        break;
-      case 'jury_slips':
-        pageContent = <JurySlipsPage />;
-        break;
-      case 'conflict_checker':
-        pageContent = <ConflictCheckerPage />;
-        break;
-      case 'schedule':
-        pageContent = <SchedulePage />;
-        break;
-      case 'volunteer_portal':
-        pageContent = <VolunteerPortal />;
-        break;
-      case 'dashboard':
-      default:
-        pageContent = <DashboardPage />;
-        break;
+  const ProtectedRoute = ({ children, allowedRoles }) => {
+    if (!userInfo) return <Navigate to="/" replace />;
+    if (allowedRoles && !allowedRoles.includes(userInfo.role)) {
+      return <div className="p-8 text-red-500">Unauthorized</div>;
     }
-
-    return (
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={pageKey}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-          className="h-full"
-        >
-          {pageContent}
-        </motion.div>
-      </AnimatePresence>
-    );
+    return children;
   };
 
   if (!isAuthenticated) {
     return (
       <>
-        <AnimatePresence>{showPreloader && <Preloader />}</AnimatePresence>
+        {!bootComplete && <LoadingScreen isReady={settingsLoaded} onComplete={() => setBootComplete(true)} />}
         <LoginPage onLoginSuccess={handleLoginSuccess} />
 
         
@@ -297,11 +178,9 @@ function App() {
 
   return (
     <>
-      <AnimatePresence>{showPreloader && <Preloader />}</AnimatePresence>
+      {!bootComplete && <LoadingScreen isReady={settingsLoaded} onComplete={() => setBootComplete(true)} />}
       <div className="flex h-screen bg-[var(--color-bg)] text-[var(--color-text-heading)]">
         <Sidebar
-          activePage={activePage}
-          setActivePage={setActivePage}
           onLogout={handleLogout}
           userInfo={userInfo}
         />
@@ -318,7 +197,13 @@ function App() {
             
             {/* Left Side: Search */}
             <div className="flex-1 flex items-center gap-4">
-              <GlobalSearch onNavigate={(type) => { if (type === 'teams') setActivePage('dashboard'); else setActivePage(type); }} />
+              <GlobalSearch onNavigate={(type) => {
+                if (type === 'teams') navigate('/dashboard');
+                else {
+                  const pathMap = { candidates: '/candidates', programmes: '/programmes', registration_review: '/registrations', team_registration_list: '/registration-list', results: '/results', 'pending results': '/pending-results', judgment_feedback: '/judgment-feedback', adjustments: '/point-adjustments', logs: '/activity-logs', gallery: '/gallery', notifications: '/notifications', topic_management: '/topic-management', schedule: '/schedule', jury_slips: '/jury-slips', conflict_checker: '/conflict-checker', users: '/users', settings: '/settings' };
+                  navigate(pathMap[type] || '/dashboard');
+                }
+              }} />
             </div>
 
             {/* Right Side: Theme, Notifications, Logout */}
@@ -346,8 +231,38 @@ function App() {
             </div>
           </div>
 
-          <main className="flex-1 overflow-y-auto bg-[var(--color-bg)]">
-            {renderPage()}
+                    <main className="flex-1 overflow-y-auto bg-[var(--color-bg)]">
+            <AnimatePresence mode="wait">
+              <Routes location={location} key={location.pathname}>
+                <Route path="/judge-panel" element={<ProtectedRoute allowedRoles={['admin', 'judge']}><JudgePanel /></ProtectedRoute>} />
+                <Route path="/team-dashboard" element={<ProtectedRoute allowedRoles={['admin', 'team_leader']}><TeamPortalDashboard /></ProtectedRoute>} />
+                <Route path="/team-programme-registration" element={<ProtectedRoute allowedRoles={['admin', 'team_leader']}><TeamLeaderDashboard /></ProtectedRoute>} />
+                <Route path="/registration-list" element={<ProtectedRoute allowedRoles={['admin', 'team_leader']}><TeamRegistrationListPage /></ProtectedRoute>} />
+                <Route path="/team-topic-registration" element={<ProtectedRoute allowedRoles={['admin', 'team_leader']}><TeamTopicRegistrationPage /></ProtectedRoute>} />
+                <Route path="/candidates" element={<ProtectedRoute allowedRoles={['admin', 'team_leader']}><CandidatePage /></ProtectedRoute>} />
+                <Route path="/volunteer-portal" element={<ProtectedRoute allowedRoles={['admin', 'volunteer']}><VolunteerPortal /></ProtectedRoute>} />
+                
+                <Route path="/gallery" element={<ProtectedRoute allowedRoles={['admin']}><GalleryPage /></ProtectedRoute>} />
+                <Route path="/notifications" element={<ProtectedRoute allowedRoles={['admin', 'team_leader', 'judge']}><NotificationsPage /></ProtectedRoute>} />
+                <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UsersPage /></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute allowedRoles={['admin', 'team_leader', 'judge', 'volunteer']}><SettingsPage /></ProtectedRoute>} />
+                <Route path="/programmes" element={<ProtectedRoute allowedRoles={['admin']}><ProgrammesPage /></ProtectedRoute>} />
+                <Route path="/registrations" element={<ProtectedRoute allowedRoles={['admin']}><RegistrationReviewPage /></ProtectedRoute>} />
+                <Route path="/results" element={<ProtectedRoute allowedRoles={['admin']}><ResultsPage /></ProtectedRoute>} />
+                <Route path="/pending-results" element={<ProtectedRoute allowedRoles={['admin']}><PendingResultsPage /></ProtectedRoute>} />
+                <Route path="/point-adjustments" element={<ProtectedRoute allowedRoles={['admin']}><PointAdjustmentPage /></ProtectedRoute>} />
+                <Route path="/judgment-feedback" element={<ProtectedRoute allowedRoles={['admin']}><JudgmentFeedbackPage /></ProtectedRoute>} />
+                <Route path="/activity-logs" element={<ProtectedRoute allowedRoles={['admin']}><ActivityLogsPage /></ProtectedRoute>} />
+                <Route path="/topic-management" element={<ProtectedRoute allowedRoles={['admin']}><TopicManagementPage /></ProtectedRoute>} />
+                <Route path="/jury-slips" element={<ProtectedRoute allowedRoles={['admin']}><JurySlipsPage /></ProtectedRoute>} />
+                <Route path="/conflict-checker" element={<ProtectedRoute allowedRoles={['admin']}><ConflictCheckerPage /></ProtectedRoute>} />
+                <Route path="/schedule" element={<ProtectedRoute allowedRoles={['admin']}><SchedulePage /></ProtectedRoute>} />
+                <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><DashboardPage /></ProtectedRoute>} />
+                
+                <Route path="/" element={<Navigate to={userInfo?.role === 'team_leader' ? '/team-dashboard' : userInfo?.role === 'judge' ? '/judge-panel' : userInfo?.role === 'volunteer' ? '/volunteer-portal' : '/dashboard'} replace />} />
+                <Route path="*" element={<Navigate to={userInfo?.role === 'team_leader' ? '/team-dashboard' : userInfo?.role === 'judge' ? '/judge-panel' : userInfo?.role === 'volunteer' ? '/volunteer-portal' : '/dashboard'} replace />} />
+              </Routes>
+            </AnimatePresence>
           </main>
         </div>
       </div>

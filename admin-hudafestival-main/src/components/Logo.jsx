@@ -1,25 +1,35 @@
 import React from 'react';
 
-const Logo = ({ size = 'default' }) => {
-  const sizes = {
-    small: { grid: 'w-6 h-6', square: 'w-[11px] h-[11px]', text: 'text-base' },
-    default: { grid: 'w-8 h-8', square: 'w-[15px] h-[15px]', text: 'text-xl' },
-    large: { grid: 'w-10 h-10', square: 'w-[19px] h-[19px]', text: 'text-2xl' },
+const Logo = ({ size = 'default', short = false }) => {
+  // If it's the collapsed sidebar version, make it a fixed small box that doesn't overflow.
+  // Using object-contain ensures the entire badge is visible within a small icon-sized square.
+  if (short) {
+    return (
+      <div className="flex items-center justify-center shrink-0 w-14 h-14 overflow-hidden">
+        <img 
+          src="/logo-badge.png" 
+          alt="L'intervention" 
+          className="w-full h-full object-contain"
+        />
+      </div>
+    );
+  }
+
+  const sizeClasses = {
+    small: 'h-8',
+    default: 'h-20', // Larger for normal sidebar
+    large: 'h-28 max-w-full', // For login page
   };
 
-  const s = sizes[size] || sizes.default;
+  const hClass = sizeClasses[size] || sizeClasses.default;
 
   return (
-    <div className="flex items-center gap-2.5">
-      <div className={`${s.grid} grid grid-cols-2 gap-[3px]`}>
-        <div className={`${s.square} rounded-sm bg-[#3B82F6]`} />
-        <div className={`${s.square} rounded-sm bg-[#E44E49]`} />
-        <div className={`${s.square} rounded-sm bg-[#FFCF28]`} />
-        <div className={`${s.square} rounded-sm bg-[#22C55E]`} />
-      </div>
-      <span className={`${s.text} font-extrabold tracking-tight text-[var(--color-text-heading)]`}>
-        HUDA
-      </span>
+    <div className={`flex items-center justify-center ${size === 'large' ? 'w-full mb-2' : ''}`}>
+      <img 
+        src="/logo-badge.png" 
+        alt="L'intervention Logo" 
+        className={`${hClass} w-auto object-contain drop-shadow-sm`}
+      />
     </div>
   );
 };

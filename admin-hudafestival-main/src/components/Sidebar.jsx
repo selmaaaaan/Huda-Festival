@@ -23,9 +23,11 @@ const navItems = [
     { key: 'settings', label: 'Settings', icon: Settings },
 ];
 
+import { Link, useLocation } from 'react-router-dom';
 import api from '../services/api';
 
-const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
+const Sidebar = ({ onLogout, userInfo }) => {
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [teamColor, setTeamColor] = useState('var(--color-primary)');
 
@@ -69,18 +71,43 @@ const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
   return (
     <aside className={`${collapsed ? 'w-20' : 'w-64'} flex flex-col bg-[var(--color-surface)] border-r border-[var(--color-border)] transition-all duration-300`}>
       {/* Logo */}
-      <div className="px-6 py-5 h-16 flex items-center justify-center overflow-hidden">
-        {collapsed ? <Logo short /> : <Logo />}
+      <div className="px-4 h-24 flex items-center justify-center overflow-hidden">
+        {collapsed ? <Logo short /> : <Logo size="default" />}
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-2 space-y-1 overflow-hidden">
         {visibleNavItems.map(({ key, label, icon: Icon }) => {
-          const isActive = activePage === key;
+          const path = {
+            dashboard: '/dashboard',
+            candidates: '/candidates',
+            programmes: '/programmes',
+            registration_review: '/registrations',
+            team_registration_list: '/registration-list',
+            results: '/results',
+            'pending results': '/pending-results',
+            judgment_feedback: '/judgment-feedback',
+            adjustments: '/point-adjustments',
+            logs: '/activity-logs',
+            gallery: '/gallery',
+            notifications: '/notifications',
+            topic_management: '/topic-management',
+            schedule: '/schedule',
+            jury_slips: '/jury-slips',
+            conflict_checker: '/conflict-checker',
+            users: '/users',
+            settings: '/settings',
+            judge_panel: '/judge-panel',
+            team_dashboard: '/team-dashboard',
+            team_programme_registration: '/team-programme-registration',
+            team_topic_registration: '/team-topic-registration',
+            volunteer_portal: '/volunteer-portal',
+          }[key] || '/';
+          const isActive = location.pathname === path;
           return (
-            <button
+            <Link
               key={key}
-              onClick={() => setActivePage(key)}
+              to={path}
               title={collapsed ? label : undefined}
               className={`w-full flex items-center ${collapsed ? 'justify-center' : 'gap-3 px-4'} py-2.5 rounded-xl text-sm font-medium transition-colors duration-150 ${
                 isActive
@@ -90,14 +117,14 @@ const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
             >
               <Icon size={18} className="shrink-0" />
               {!collapsed && <span className="truncate">{label}</span>}
-            </button>
+            </Link>
           );
         })}
       </nav>
 
       {/* User Profile & Controls */}
       <div className="p-3 border-t border-[var(--color-border)] space-y-2">
-        <button onClick={() => setActivePage('settings')} className={`w-full flex items-center ${collapsed ? 'justify-center' : 'gap-3 px-3'} py-2 rounded-xl text-sm transition-colors hover:bg-[var(--color-surface-elevated)] cursor-pointer`} title="Settings">
+        <Link to="/settings" className={`w-full flex items-center ${collapsed ? 'justify-center' : 'gap-3 px-3'} py-2 rounded-xl text-sm transition-colors hover:bg-[var(--color-surface-elevated)] cursor-pointer`} title="Settings">
           <div className="w-9 h-9 rounded-full text-white flex items-center justify-center font-bold shrink-0" style={{ backgroundColor: teamColor }}>
             {userInfo?.userName?.charAt(0)?.toUpperCase() || 'U'}
           </div>
@@ -107,7 +134,7 @@ const Sidebar = ({ activePage, setActivePage, onLogout, userInfo }) => {
               <div className="text-[10px] text-[var(--color-text-muted)] capitalize truncate mt-0.5">{userInfo?.role?.replace('_', ' ') || 'Admin'}</div>
             </div>
           )}
-        </button>
+        </Link>
         
         <button
           onClick={() => setCollapsed(!collapsed)}
