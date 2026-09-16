@@ -99,8 +99,6 @@ function App() {
       }
     };
     fetchSettings();
-    const int = setInterval(fetchSettings, 30000);
-    return () => clearInterval(int);
   }, []);
 
   useEffect(() => {
@@ -119,8 +117,6 @@ function App() {
       } catch (e) {}
     };
     fetchNotifications();
-    const int = setInterval(fetchNotifications, 60000);
-    return () => clearInterval(int);
   }, [isAuthenticated, location.pathname]);
 
   const handleNotificationClick = () => {

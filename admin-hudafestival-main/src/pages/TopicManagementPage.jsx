@@ -15,6 +15,7 @@ export default function TopicManagementPage() {
   const alertAction = useAlert();
 
   const [programmes, setProgrammes] = useState([]);
+  const [allTopics, setAllTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -31,6 +32,8 @@ export default function TopicManagementPage() {
   const [modalRegistrations, setModalRegistrations] = useState([]);
   const [newTopicForm, setNewTopicForm] = useState({ candidateId: '', teamId: '', topic: '', attachment: '' });
 
+  const fetchAllTopics = async () => { try { const { data } = await api.get("/topic-registrations"); setAllTopics(data); } catch(e) {} };
+
   const fetchProgrammes = async () => {
     try {
       const { data } = await api.get('/programmes');
@@ -41,6 +44,7 @@ export default function TopicManagementPage() {
   useEffect(() => {
     const load = async () => {
       await fetchProgrammes();
+      await fetchAllTopics();
       setLoading(false);
     };
     load();
@@ -116,7 +120,7 @@ export default function TopicManagementPage() {
         status,
         reviewNote: reason
       });
-      if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id);
+      if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id); fetchAllTopics();
     } catch (e) {
       alertAction(e.response?.data?.message || 'Failed to review topic');
     }
@@ -132,7 +136,7 @@ export default function TopicManagementPage() {
     try {
       await api.patch(`/topic-registrations/${id}`, { topic: editTopicText, attachment: editTopicAttachment });
       setEditingTopicId(null);
-      if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id);
+      if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id); fetchAllTopics();
     } catch (e) {
       alertAction(e.response?.data?.message || 'Failed to update topic');
     }
@@ -143,7 +147,7 @@ export default function TopicManagementPage() {
       if (!confirmed) return;
     try {
       await api.delete(`/topic-registrations/${id}`);
-      if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id);
+      if (selectedProgramme) fetchProgrammeTopics(selectedProgramme._id); fetchAllTopics();
     } catch (e) {
       alertAction(e.response?.data?.message || 'Failed to delete topic');
     }
@@ -239,10 +243,23 @@ export default function TopicManagementPage() {
                         <Trash2 size={14} />
                     </button>
                 </div>
-                <div className="text-xs text-[var(--color-text-muted)] mt-1 flex justify-between">
-                  <span>{prog.category}</span>
-                  <span className="font-semibold uppercase">{prog.topicMode || 'none'}</span>
-                </div>
+                <div className="text-xs text-[var(--color-text-muted)] mt-1 flex justify-between items-center">
+                    <div className="flex gap-2 items-center">
+                      <span>{prog.category}</span>
+                      {(() => {
+                        const progTopics = allTopics.filter(t => t.programme?._id === prog._id);
+                        const pending = progTopics.filter(t => t.status === 'pending').length;
+                        const approved = progTopics.filter(t => t.status === 'approved').length;
+                        return (pending > 0 || approved > 0) ? (
+                          <div className="flex gap-1 ml-1">
+                            {pending > 0 && <span className="text-[9px] bg-amber-100 text-amber-700 px-1 py-0.5 rounded font-bold">{pending} PEND</span>}
+                            {approved > 0 && <span className="text-[9px] bg-green-100 text-green-700 px-1 py-0.5 rounded font-bold">{approved} APPR</span>}
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
+                    <span className="font-semibold uppercase opacity-60">{prog.topicMode || 'none'}</span>
+                  </div>
               </div>
             ))}
           </div>

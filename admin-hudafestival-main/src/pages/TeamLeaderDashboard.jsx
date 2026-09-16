@@ -110,9 +110,9 @@ export default function TeamLeaderDashboard() {
 
   // Polling every 30s
   useEffect(() => {
-    const dataInterval = setInterval(() => { if (teamId) loadData(true); }, 30000);
+    
     const timeInterval = setInterval(() => setLastUpdated(p => p + 1), 1000);
-    return () => { clearInterval(dataInterval); clearInterval(timeInterval); };
+    return () => { clearInterval(timeInterval); };
   }, [teamId]);
 
   const loadOtherTopics = async (progId) => {
