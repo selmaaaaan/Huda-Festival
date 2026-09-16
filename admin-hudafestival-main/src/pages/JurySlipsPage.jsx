@@ -376,34 +376,8 @@ const JurySlipsPage = () => {
                         </div>
                         
                         {/* Building Illustration Placeholder */}
-                        <div className="w-48 h-20 relative flex justify-end shrink-0">
-                          <svg viewBox="0 0 200 100" className="w-full h-full">
-                            {/* Clouds */}
-                            <circle cx="130" cy="20" r="15" fill="#e5e7eb" />
-                            <circle cx="150" cy="15" r="20" fill="#f3f4f6" />
-                            <circle cx="170" cy="25" r="12" fill="#e5e7eb" />
-                            {/* Birds */}
-                            <path d="M120 15 Q 123 10 126 15 Q 123 12 120 15" stroke="black" fill="none" strokeWidth="0.5"/>
-                            <path d="M160 8 Q 163 3 166 8 Q 163 5 160 8" stroke="black" fill="none" strokeWidth="0.5"/>
-                            <path d="M110 30 Q 113 25 116 30 Q 113 27 110 30" stroke="black" fill="none" strokeWidth="0.5"/>
-                            {/* Trees bg */}
-                            <circle cx="20" cy="80" r="18" fill="#9ca3af" />
-                            <circle cx="45" cy="70" r="22" fill="#d1d5db" />
-                            <circle cx="70" cy="75" r="15" fill="#9ca3af" />
-                            <circle cx="170" cy="75" r="20" fill="#d1d5db" />
-                            <circle cx="190" cy="85" r="14" fill="#9ca3af" />
-                            {/* Building */}
-                            <rect x="50" y="45" width="100" height="55" fill="#f3f4f6" stroke="black" strokeWidth="1" />
-                            <polygon points="40,45 160,45 100,15" fill="#e5e7eb" stroke="black" strokeWidth="1" />
-                            {/* Columns */}
-                            <rect x="65" y="65" width="8" height="35" fill="white" stroke="black" strokeWidth="0.5" />
-                            <rect x="96" y="65" width="8" height="35" fill="white" stroke="black" strokeWidth="0.5" />
-                            <rect x="127" y="65" width="8" height="35" fill="white" stroke="black" strokeWidth="0.5" />
-                            {/* Signboard */}
-                            <rect x="110" y="28" width="75" height="15" fill="white" stroke="black" strokeWidth="0.5" />
-                            <text x="147.5" y="35" fontSize="4.5" fontWeight="bold" textAnchor="middle" fill="black">SHAMSUL HUDA ISLAMIC ACADEMY</text>
-                            <text x="147.5" y="40" fontSize="3.5" fontWeight="bold" textAnchor="middle" fill="black">KUTTIKKATTUR</text>
-                          </svg>
+                        <div className="w-64 h-24 -mt-2 -mr-2 relative flex justify-end shrink-0 overflow-hidden">
+                          <img src="/academy-building.jpg" alt="Academy Building" className="w-full h-full object-cover object-center mix-blend-multiply" style={{ filter: 'grayscale(100%)' }} />
                         </div>
                       </div>
               
