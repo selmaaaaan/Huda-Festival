@@ -337,201 +337,148 @@ const JurySlipsPage = () => {
 
 {/* Printable Area */}
       {mode === 'programme' && shuffledList.length > 0 && selectedProgramme && (
-        <div className="print:absolute print:inset-0 print:z-[9999] print:block rounded-xl border border-blue-100 overflow-hidden text-[var(--color-text-heading)] font-sans shadow-lg mx-auto max-w-[210mm] print:w-[210mm] print:min-h-[297mm] print:m-0 print:p-0 print:bg-white bg-[var(--color-surface)]" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}>
+        <div className="print:absolute print:inset-0 print:z-[9999] print:block hidden-on-screen print:bg-white text-black font-sans mx-auto print:m-0 print:p-0 w-full max-w-[297mm] print:w-auto overflow-visible space-y-8 print:space-y-0" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}>
           
-          {/* Header Area */}
-          <div className="relative overflow-hidden bg-gradient-to-b from-blue-50 to-[#eef4fd] px-8 pt-8 pb-10 text-center border-b border-blue-200">
-             {/* Decorative curves could go here via SVG if needed, keeping it clean for now */}
-             
-             <h1 className="text-4xl font-black text-[#1e3a8a] tracking-tight uppercase mb-4 mt-4">HUDA FESTIVAL {new Date().getFullYear()}</h1>
-             
-             <div className="inline-block bg-[#3b82f6] text-white font-bold text-2xl px-12 py-3 rounded-full shadow-md">
-               Participants List
-             </div>
-             
-             <div className="text-sm font-bold tracking-widest text-blue-600/80 mt-6 uppercase">ART BUILDS A BETTER TOMORROW</div>
-          </div>
-
-          <div className="px-8 -mt-8 relative z-10 space-y-6 pb-12">
+          {(() => {
+            const rows = [];
+            shuffledList.forEach((reg) => {
+              const cands = reg.candidates?.length ? reg.candidates : [{}];
+              cands.forEach((c) => rows.push({ c, reg }));
+            });
             
-            {/* Programme Details Card */}
-            <div className="bg-[var(--color-surface)] rounded-xl shadow-sm border border-blue-100 p-4 flex gap-4">
-                 <div className="flex-1 flex items-center bg-[var(--color-surface-elevated)] rounded-lg p-3 border border-[var(--color-border-subtle)]">
-                    <div className="bg-blue-100 text-blue-600 p-2 rounded-md mr-3 shrink-0">
-                       <Activity size={18} />
+            const ROWS_PER_PAGE = 8;
+            const pages = [];
+            const totalPages = Math.max(1, Math.ceil(rows.length / ROWS_PER_PAGE));
+            
+            for (let p = 0; p < totalPages; p++) {
+              const pageRows = rows.slice(p * ROWS_PER_PAGE, (p + 1) * ROWS_PER_PAGE);
+              const paddedRows = [];
+              for (let i = 0; i < ROWS_PER_PAGE; i++) {
+                paddedRows.push(pageRows[i] || null);
+              }
+              
+              pages.push(
+                <div key={p} className="w-full h-[210mm] print:w-[297mm] print:h-[210mm] print:break-after-page box-border p-[10mm] bg-white relative shadow-lg print:shadow-none mb-8 print:mb-0">
+                  <div className="w-full h-full border-[2px] border-black p-[2mm] rounded-[4mm] box-border flex flex-col relative bg-white">
+                    <div className="w-full h-full border-[1.5px] border-black rounded-[2mm] box-border p-2 flex flex-col">
+                      
+                      {/* Header */}
+                      <div className="flex justify-between items-start mb-2 px-2 pt-1">
+                        {/* Logo */}
+                        <div className="w-48 h-20 flex items-center justify-start shrink-0">
+                          <img src="/logo-badge.png" alt="L'intervention" className="w-full h-full object-contain mix-blend-multiply" style={{ filter: 'grayscale(100%) brightness(0.7) contrast(1.5)' }} />
+                        </div>
+                        
+                        {/* Title */}
+                        <div className="flex flex-col items-center justify-center mt-3 flex-1 px-4">
+                          <h1 className="text-2xl font-black uppercase tracking-tight text-black border-b-[2px] border-black pb-1 mb-1 px-8 text-center leading-none whitespace-nowrap">Shamsul Huda Arts Fest 2026</h1>
+                          <h2 className="text-[10px] font-bold tracking-[0.2em] uppercase text-black whitespace-nowrap">Art Builds A Better Tomorrow</h2>
+                        </div>
+                        
+                        {/* Building Illustration Placeholder */}
+                        <div className="w-48 h-20 relative flex justify-end shrink-0">
+                          <svg viewBox="0 0 200 100" className="w-full h-full">
+                            {/* Clouds */}
+                            <circle cx="130" cy="20" r="15" fill="#e5e7eb" />
+                            <circle cx="150" cy="15" r="20" fill="#f3f4f6" />
+                            <circle cx="170" cy="25" r="12" fill="#e5e7eb" />
+                            {/* Birds */}
+                            <path d="M120 15 Q 123 10 126 15 Q 123 12 120 15" stroke="black" fill="none" strokeWidth="0.5"/>
+                            <path d="M160 8 Q 163 3 166 8 Q 163 5 160 8" stroke="black" fill="none" strokeWidth="0.5"/>
+                            <path d="M110 30 Q 113 25 116 30 Q 113 27 110 30" stroke="black" fill="none" strokeWidth="0.5"/>
+                            {/* Trees bg */}
+                            <circle cx="20" cy="80" r="18" fill="#9ca3af" />
+                            <circle cx="45" cy="70" r="22" fill="#d1d5db" />
+                            <circle cx="70" cy="75" r="15" fill="#9ca3af" />
+                            <circle cx="170" cy="75" r="20" fill="#d1d5db" />
+                            <circle cx="190" cy="85" r="14" fill="#9ca3af" />
+                            {/* Building */}
+                            <rect x="50" y="45" width="100" height="55" fill="#f3f4f6" stroke="black" strokeWidth="1" />
+                            <polygon points="40,45 160,45 100,15" fill="#e5e7eb" stroke="black" strokeWidth="1" />
+                            {/* Columns */}
+                            <rect x="65" y="65" width="8" height="35" fill="white" stroke="black" strokeWidth="0.5" />
+                            <rect x="96" y="65" width="8" height="35" fill="white" stroke="black" strokeWidth="0.5" />
+                            <rect x="127" y="65" width="8" height="35" fill="white" stroke="black" strokeWidth="0.5" />
+                            {/* Signboard */}
+                            <rect x="110" y="28" width="75" height="15" fill="white" stroke="black" strokeWidth="0.5" />
+                            <text x="147.5" y="35" fontSize="4.5" fontWeight="bold" textAnchor="middle" fill="black">SHAMSUL HUDA ISLAMIC ACADEMY</text>
+                            <text x="147.5" y="40" fontSize="3.5" fontWeight="bold" textAnchor="middle" fill="black">KUTTIKKATTUR</text>
+                          </svg>
+                        </div>
+                      </div>
+              
+                      {/* Info Grid */}
+                      <div className="px-2 mb-2 mt-1">
+                        <div className="flex gap-2 mb-3">
+                          <div className="flex-[2] relative border-[1.5px] border-black h-8 px-2 flex items-center">
+                            <div className="absolute -top-[6px] left-2 bg-white px-1 text-[9px] font-black uppercase leading-none tracking-tight">PROGRAMME</div>
+                            <div className="text-[11px] font-bold uppercase truncate w-full pt-1">{selectedProgramme.name}</div>
+                          </div>
+                          <div className="flex-[1] relative border-[1.5px] border-black h-8 px-2 flex items-center">
+                            <div className="absolute -top-[6px] left-2 bg-white px-1 text-[9px] font-black uppercase leading-none tracking-tight">PROGRAMME CODE</div>
+                            <div className="text-[11px] font-bold uppercase truncate w-full pt-1">{selectedProgramme.code}</div>
+                          </div>
+                          <div className="flex-[1] relative border-[1.5px] border-black h-8 px-2 flex items-center">
+                            <div className="absolute -top-[6px] left-2 bg-white px-1 text-[9px] font-black uppercase leading-none tracking-tight">CATEGORY</div>
+                            <div className="text-[11px] font-bold uppercase truncate w-full pt-1">{selectedProgramme.category}</div>
+                          </div>
+                          <div className="flex-[1.2] relative border-[1.5px] border-black h-8 px-2 flex items-center">
+                            <div className="absolute -top-[6px] left-2 bg-white px-1 text-[9px] font-black uppercase leading-none tracking-tight">JUDGE NAME</div>
+                            <div className="text-[11px] font-bold uppercase truncate w-full pt-1"></div>
+                          </div>
+                          <div className="flex-[0.8] relative border-[1.5px] border-black h-8 px-2 flex items-center">
+                            <div className="absolute -top-[6px] left-2 bg-white px-1 text-[9px] font-black uppercase leading-none tracking-tight">DATE</div>
+                            <div className="text-[11px] font-bold uppercase truncate w-full pt-1"></div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex h-8">
+                          <div className="bg-[#e5e7eb] border-[1.5px] border-black border-r-0 w-28 flex items-center justify-center font-black text-sm tracking-widest uppercase">TOPIC</div>
+                          <div className="flex-1 border-[1.5px] border-black px-2 flex items-center text-xs font-bold bg-white"></div>
+                        </div>
+                      </div>
+              
+                      {/* Table */}
+                      <div className="px-2 mt-2 flex-1 flex flex-col min-h-0">
+                        <table className="w-full border-collapse border-[1.5px] border-black h-full bg-white table-fixed">
+                          <thead>
+                            <tr className="bg-[#e5e7eb] border-b-[1.5px] border-black h-10">
+                              <th className="border-r-[1.5px] border-black px-1 text-[11px] font-black text-center w-12 leading-tight">SL.<br/>NO.</th>
+                              <th className="border-r-[1.5px] border-black px-1 text-[11px] font-black text-center w-20 leading-tight">CODE<br/>LETTER</th>
+                              <th className="border-r-[1.5px] border-black px-1 text-[11px] font-black text-center w-24">AD No.</th>
+                              <th className="border-r-[1.5px] border-black px-2 text-[11px] font-black text-center">NAME</th>
+                              <th className="border-r-[1.5px] border-black px-2 text-[11px] font-black text-center w-32">TEAM</th>
+                              <th className="border-r-[1.5px] border-black px-2 text-[11px] font-black text-center w-28">POSITION</th>
+                              <th className="border-r-[1.5px] border-black px-2 text-[11px] font-black text-center w-20">GRADE</th>
+                              <th className="px-2 text-[11px] font-black text-center w-36">REMARKS</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {paddedRows.map((data, i) => (
+                              <tr key={i} className="border-b-[1.5px] border-black last:border-b-0 h-[12.5%]">
+                                <td className="border-r-[1.5px] border-black text-center font-black text-[16px]">{p * ROWS_PER_PAGE + i + 1}</td>
+                                <td className="border-r-[1.5px] border-black"></td>
+                                <td className="border-r-[1.5px] border-black text-center font-bold text-[12px]">{data?.c?.admissionNo || ''}</td>
+                                <td className="border-r-[1.5px] border-black px-3 font-bold text-[12px] uppercase truncate overflow-hidden max-w-[200px]">{data?.c?.name || ''}</td>
+                                <td className="border-r-[1.5px] border-black px-2 font-bold text-[11px] text-center uppercase truncate overflow-hidden max-w-[100px]">{data?.reg?.team?.name || ''}</td>
+                                <td className="border-r-[1.5px] border-black"></td>
+                                <td className="border-r-[1.5px] border-black"></td>
+                                <td className=""></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+              
                     </div>
-                    <div className="flex flex-col justify-center">
-                      <div className="text-[var(--color-text-muted)] font-semibold text-[10px] uppercase tracking-wider">Programme</div>
-                      <div className="font-bold text-[#1e3a8a] text-sm">{selectedProgramme.name}</div>
-                    </div>
-                 </div>
-                 <div className="flex-1 flex items-center bg-[var(--color-surface-elevated)] rounded-lg p-3 border border-[var(--color-border-subtle)]">
-                    <div className="bg-blue-100 text-blue-600 p-2 rounded-md mr-3 shrink-0">
-                       <Hash size={18} />
-                    </div>
-                    <div className="flex flex-col justify-center">
-                      <div className="text-[var(--color-text-muted)] font-semibold text-[10px] uppercase tracking-wider">Programme Code</div>
-                      <div className="font-bold text-[#1e3a8a] text-sm">{selectedProgramme.code}</div>
-                    </div>
-                 </div>
-                 <div className="flex-1 flex items-center bg-[var(--color-surface-elevated)] rounded-lg p-3 border border-[var(--color-border-subtle)]">
-                    <div className="bg-blue-100 text-blue-600 p-2 rounded-md mr-3 shrink-0">
-                       <Layers size={18} />
-                    </div>
-                    <div className="flex flex-col justify-center">
-                      <div className="text-[var(--color-text-muted)] font-semibold text-[10px] uppercase tracking-wider">Category</div>
-                      <div className="font-bold text-[#1e3a8a] text-sm uppercase">{selectedProgramme.category}</div>
-                    </div>
-                 </div>
-            </div>
-
-            {/* Blank Space Box */}
-            <div className="bg-[var(--color-surface)] rounded-xl shadow-sm border border-blue-100 h-16 w-full"></div>
-
-            {/* Participants Table Card */}
-            <div className="bg-[var(--color-surface)] rounded-xl shadow-sm border border-blue-100 overflow-hidden p-4">
-               <div className="flex justify-between items-center mb-4">
-                   <div className="flex items-center gap-3 text-blue-600">
-                     <Users size={24} className="text-blue-500" />
-                     <h2 className="text-lg font-bold text-[#1e3a8a]">Participants</h2>
-                   </div>
-                 <div className="bg-blue-50 rounded-lg p-3 border border-blue-100 flex items-center gap-4">
-                   <div className="bg-blue-100 text-blue-600 p-2 rounded-md"><Users size={20}/></div>
-                   <div>
-                     <div className="text-xs font-semibold text-blue-600 uppercase">Total Participants</div>
-                     <div className="font-bold text-xl text-[#1e3a8a] leading-none mt-1">{shuffledList.reduce((s, r) => s + (r.candidates?.length || 0), 0)}</div>
-                   </div>
-                 </div>
-               </div>
-
-               <div className="overflow-x-auto rounded-lg border border-[#2563eb]">
-                 <table className="w-full text-left text-xs md:text-sm border-collapse">
-                   <thead>
-                     <tr className="bg-[#2563eb] text-white text-center font-bold">
-                       <th className="py-3 px-2 border border-blue-400/30 w-12">SL.No</th>
-                       <th className="py-3 px-2 border border-blue-400/30 w-16 text-center">CODE<br/>LETTER</th>
-                       <th className="py-3 px-3 border border-blue-400/30 w-16 text-left">AD NO</th>
-                       <th className="py-3 px-4 border border-blue-400/30 text-left">NAME</th>
-                       <th className="py-3 px-2 border border-blue-400/30 w-24 text-left">TEAM</th>
-                       <th className="py-3 px-1 border border-blue-400/30 w-16">POSITION</th>
-                       <th className="py-3 px-1 border border-blue-400/30 w-12">GRADE</th>
-                       <th className="py-3 px-2 border border-blue-400/30 w-48">REMARKS</th>
-                     </tr>
-                   </thead>
-                   <tbody>
-                      {(() => {
-                        // Flatten: one row per candidate
-                        const rows = [];
-                        shuffledList.forEach((reg) => {
-                          const cands = reg.candidates?.length ? reg.candidates : [{}];
-                          cands.forEach((c) => rows.push({ c, reg }));
-                        });
-                        return rows.map(({ c, reg }, idx) => (
-                          <tr key={(c._id || reg._id) + '-' + idx} className={idx % 2 === 0 ? 'bg-[var(--color-surface)]' : 'bg-[var(--color-surface-elevated)]'}>
-                            <td className="py-3 px-2 border border-[var(--color-border)] text-center font-semibold text-[var(--color-text-body)] align-middle">{idx + 1}</td>
-                            <td className="py-3 px-1 border border-[var(--color-border)] align-middle"></td>
-                            <td className="py-3 px-3 border border-[var(--color-border)] text-[var(--color-text-heading)] text-[12px] font-bold align-middle text-left">{c.admissionNo || '-'}</td>
-                            <td className="py-3 px-3 border border-[var(--color-border)] font-bold text-[var(--color-text-heading)] text-[12px] align-middle leading-tight">{c.name || '-'}</td>
-                            <td className="py-3 px-2 border border-[var(--color-border)] text-[var(--color-text-body)] font-bold text-[12px] align-middle">{reg.team?.name || '-'}</td>
-                            <td className="py-3 px-1 border border-[var(--color-border)] align-middle"></td>
-                            <td className="py-3 px-1 border border-[var(--color-border)] align-middle"></td>
-                            <td className="py-3 px-2 border border-[var(--color-border)] align-middle"></td>
-                          </tr>
-                        ));
-                      })()}
-
-                      {/* Filler rows based on total candidate count */}
-                      {(() => {
-                        const totalCands = shuffledList.reduce((s, r) => s + (r.candidates?.length || 0), 0);
-                        return Array.from({ length: Math.max(0, 8 - totalCands) }).map((_, i) => (
-                          <tr key={`empty-${i}`} className={(totalCands + i) % 2 === 0 ? 'bg-[var(--color-surface)]' : 'bg-[var(--color-surface-elevated)]'}>
-                            <td className="py-4 px-2 border border-[var(--color-border)] text-center font-semibold text-[var(--color-text-muted)]">{totalCands + i + 1}</td>
-                            <td className="border border-[var(--color-border)]"></td>
-                            <td className="border border-[var(--color-border)]"></td>
-                            <td className="border border-[var(--color-border)]"></td>
-                            <td className="border border-[var(--color-border)]"></td>
-                            <td className="border border-[var(--color-border)]"></td>
-                            <td className="border border-[var(--color-border)]"></td>
-                            <td className="border border-[var(--color-border)]"></td>
-                          </tr>
-                        ));
-                      })()}
-                    </tbody>
-                 </table>
-               </div>
-            </div>
-
-          </div>
-          
-          
-      {mode === 'participant' && selectedCandidate && (
-         <div className="bg-[var(--color-surface)] rounded-xl shadow-sm border border-[var(--color-border)] overflow-hidden text-[var(--color-text-heading)] p-6 space-y-6">
-            <div className="flex items-start justify-between border-b border-[var(--color-border-subtle)] pb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-[#1e3a8a]">{selectedCandidate.name}</h2>
-                <div className="text-sm text-[var(--color-text-muted)] mt-1">Ad No: {selectedCandidate.admissionNo} &bull; Class: {selectedCandidate.classLevel}</div>
-              </div>
-              <div className="text-right">
-                <div className="font-bold text-[var(--color-text-body)] uppercase tracking-wider">{selectedCandidate.category}</div>
-                <div className="text-sm font-semibold text-blue-600 mt-1">{selectedCandidate.team?.name}</div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold text-[var(--color-text-heading)] mb-4 flex items-center gap-2"><Layers size={20} className="text-blue-500"/> Registered Programmes</h3>
-              {loading ? (
-                <div className="py-8 text-center text-[var(--color-text-muted)] flex flex-col items-center gap-2">
-                  <RefreshCw className="animate-spin" size={24} />
-                  Loading programmes...
+                  </div>
                 </div>
-              ) : candidateRegistrations.length === 0 ? (
-                <div className="py-8 text-center text-[var(--color-text-muted)] bg-[var(--color-surface-elevated)] rounded-lg border border-[var(--color-border-subtle)]">
-                  This participant is not registered for any programmes.
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {candidateRegistrations.map(reg => (
-                    <div key={reg._id} className="bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-lg p-4 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                       <div>
-                         <div className="flex items-center gap-2 mb-1">
-                           <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded uppercase">{reg.category}</span>
-                           <span className="text-[10px] font-semibold bg-[var(--color-border)] text-[var(--color-text-body)] px-2 py-0.5 rounded">{reg.type}</span>
-                         </div>
-                         <div className="font-bold text-[var(--color-text-heading)]">{reg.programmeCode} - {reg.programmeName}</div>
-                         {reg.topic && (
-                           <div className="text-sm text-[var(--color-text-body)] mt-2 bg-[var(--color-surface)] px-3 py-2 border border-[var(--color-border-subtle)] rounded">
-                             <span className="font-semibold text-[var(--color-text-muted)] text-xs uppercase tracking-wider mr-2">Topic:</span>
-                             {reg.topic}
-                             {reg.topicStatus && (
-                               <span className={`ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${reg.topicStatus === 'approved' ? 'bg-green-100 text-green-700' : reg.topicStatus === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{reg.topicStatus}</span>
-                             )}
-                           </div>
-                         )}
-                       </div>
-                       <div>
-                         <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider ${reg.status === 'approved' ? 'bg-green-100 text-green-700' : reg.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{reg.status}</span>
-                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-         </div>
-      )}
-
-          {/* Footer Text */}
-          <div className="text-center pb-8 pt-4">
-             <div className="text-sm font-bold tracking-[0.2em] text-[#1e3a8a] uppercase mb-1">HUDA FESTIVAL {new Date().getFullYear()}</div>
-             <div className="flex items-center justify-center gap-4 text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
-               <div className="h-px bg-[var(--color-border)] w-12"></div>
-               More than art
-               <div className="h-px bg-[var(--color-border)] w-12"></div>
-             </div>
-          </div>
-          
+              );
+            }
+            return pages;
+          })()}
         </div>
       )}
-
       {/* Warning Popup */}
       {showWarning && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[99999] flex items-center justify-center p-4">
