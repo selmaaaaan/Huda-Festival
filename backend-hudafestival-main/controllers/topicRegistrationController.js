@@ -153,15 +153,6 @@ const reviewTopic = async (req, res) => {
         if (!registration) {
             return res.status(404).json({ message: 'Topic registration not found' });
         }
-
-        if (settings && req.user.role !== 'admin') {
-            if (settings.topicRegistrationEnabled === false) {
-                return res.status(403).json({ message: 'Topic Registration is closed globally by Fest Admins' });
-            }
-            if (registration.programme && settings.categoryTopicRegistrationStatus && settings.categoryTopicRegistrationStatus.get(registration.programme.category) === false) {
-                return res.status(403).json({ message: `Topic Registration is closed for category ${registration.programme.category}` });
-            }
-        }
         
         registration.status = status;
         registration.reviewNote = reviewNote;
