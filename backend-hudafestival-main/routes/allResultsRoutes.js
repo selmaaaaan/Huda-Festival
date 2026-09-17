@@ -8,6 +8,16 @@ const { protect } = require('../middlewares/authMiddleware.js');
 // @access  Private/Admin
 router.get('/', protect, async (req, res) => {
     try {
+        if (req.query.page || req.query.limit) {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 25;
+            const skip = (page - 1) * limit;
+            const [data, totalCount] = await Promise.all([
+                Result.find({}).skip(skip).limit(limit),
+                Result.countDocuments({})
+            ]);
+            return res.json({ data, totalCount, totalPages: Math.ceil(totalCount / limit), currentPage: page });
+        }
         const results = await Result.find({});
         res.json(results);
     } catch (error) {
@@ -29,6 +39,16 @@ router.get('/judgment-feedback', protect, authorize('admin'), getJudgmentFeedbac
 // @access  Public
 router.get('/published', async (req, res) => {
     try {
+        if (req.query.page || req.query.limit) {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 25;
+            const skip = (page - 1) * limit;
+            const [data, totalCount] = await Promise.all([
+                Result.find({ status: 'approved' }).populate('programme').populate({ path: 'candidate', populate: { path: 'team' } }).skip(skip).limit(limit),
+                Result.countDocuments({ status: 'approved' })
+            ]);
+            return res.json({ data, totalCount, totalPages: Math.ceil(totalCount / limit), currentPage: page });
+        }
         const results = await Result.find({ status: 'approved' })
             .populate('programme')
             .populate({
@@ -52,6 +72,16 @@ router.post('/batch-publish', protect, authorize('admin'), publishBatch);
 // @access  Private/Judge
 router.get('/my-submissions', protect, async (req, res) => {
     try {
+        if (req.query.page || req.query.limit) {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 25;
+            const skip = (page - 1) * limit;
+            const [data, totalCount] = await Promise.all([
+                Result.find({ submittedBy: req.user._id }).populate('programme', 'name code').populate({ path: 'candidate', populate: { path: 'team', select: 'name' } }).sort({ updatedAt: -1 }).skip(skip).limit(limit),
+                Result.countDocuments({ submittedBy: req.user._id })
+            ]);
+            return res.json({ data, totalCount, totalPages: Math.ceil(totalCount / limit), currentPage: page });
+        }
         const results = await Result.find({ submittedBy: req.user._id })
             .populate('programme', 'name code')
             .populate({

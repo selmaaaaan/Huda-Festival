@@ -316,7 +316,7 @@ const getCandidateRegistrations = async (req, res) => {
         }
 
         const registrations = await Registration.find({ candidates: candidateId })
-            .populate('programme', 'code name category stageType');
+            .populate('programme', 'code name category stageType isResultPublished');
 
         const programmeIds = registrations.map(r => r.programme._id);
         const teamTopicRegistrations = await TopicRegistration.find({
@@ -338,6 +338,7 @@ const getCandidateRegistrations = async (req, res) => {
                 programmeName: prog.name,
                 category: prog.category,
                 type: prog.stageType === 'stage' ? 'Stage' : 'Non-Stage',
+                isResultPublished: prog.isResultPublished,
                 status: reg.status,
                 topic: topicReg ? topicReg.topic : null,
                 topicStatus: topicReg ? topicReg.status : null

@@ -11,6 +11,6 @@ const registrationSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // A team can't register the same candidate for the same programme twice
-registrationSchema.index({ team: 1, programme: 1, candidates: 1 });
+registrationSchema.index({ team: 1, programme: 1, candidates: 1 }, { unique: true });
 
 module.exports = mongoose.model('Registration', registrationSchema);

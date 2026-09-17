@@ -284,7 +284,27 @@ const getBylawRules = (req, res) => {
     res.status(200).json({ POSITION_POINTS, GRADE_POINTS, CATEGORIES });
 };
 
+
+const getPublicSettingsStatus = async (req, res) => {
+    try {
+        const settings = await Settings.findOne();
+        if (!settings) {
+            return res.json({ isRegistrationOpen: true, topicRegistrationEnabled: true, maintenanceMode: false });
+        }
+        res.json({
+            isRegistrationOpen: settings.isRegistrationOpen,
+            topicRegistrationEnabled: settings.topicRegistrationEnabled,
+            categoryTopicRegistrationStatus: settings.categoryTopicRegistrationStatus,
+            maintenanceMode: settings.maintenanceMode,
+            maintenanceMessage: settings.maintenanceMessage
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching status' });
+    }
+};
+
 module.exports = {
+    getPublicSettingsStatus,
     getSettings,
     updateSettings,
     getBylawRules,

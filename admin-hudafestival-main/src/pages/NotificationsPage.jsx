@@ -1,4 +1,5 @@
 import { useAlert } from '../context/AlertContext';
+import Pagination from '../components/Pagination';
 import React, { useState, useEffect } from 'react';
 import { useConfirm } from '../context/ConfirmContext';
 import api from '../services/api';
@@ -13,6 +14,8 @@ const NotificationsPage = ({ inline = false }) => {
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 

@@ -4,6 +4,7 @@ const {
     getSettings,
     updateSettings,
     getBylawRules, getDashboardProgress,
+    getPublicSettingsStatus,
 } = require('../controllers/settingsController')
 
 const { protect, authorize } = require('../middlewares/authMiddleware');
@@ -11,8 +12,10 @@ const { protect, authorize } = require('../middlewares/authMiddleware');
 router.get('/bylaw-rules', getBylawRules);
 router.get('/dashboard-progress', getDashboardProgress);
 
+router.get('/status', getPublicSettingsStatus);
+
 router.route('/')
-    .get(getSettings)
-    .patch(protect, authorize('admin', 'judge'), updateSettings);
+    .get(protect, authorize('admin'), getSettings)
+    .patch(protect, authorize('admin'), updateSettings);
 
 module.exports = router;

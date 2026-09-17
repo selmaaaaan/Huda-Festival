@@ -40,6 +40,7 @@ const createRegistration = async (req, res) => {
             status: { $in: ['pending', 'approved'] }
         });
 
+        console.log(`Checking existingCount=${existingCount} vs max=${programme.maxParticipants} for prog=${programmeId} and team=${teamId}`);
         if (existingCount >= programme.maxParticipants) {
             return res.status(400).json({ message: 'Team has reached maximum participants for this programme' });
         }
@@ -105,6 +106,19 @@ const createRegistration = async (req, res) => {
         });
 
         const saved = await newRegistration.save();
+
+        // Post-insert anti-race-condition quota check
+        const postInsertCount = await Registration.countDocuments({
+            programme: programmeId,
+            team: teamId,
+            status: { $in: ['pending', 'approved'] }
+        });
+
+        if (postInsertCount > programme.maxParticipants) {
+            // Rollback this specific concurrent insert
+            await Registration.findByIdAndDelete(saved._id);
+            return res.status(400).json({ message: 'Team has reached maximum participants for this programme (concurrent request blocked)' });
+        }
         await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'REGISTRATION_SUBMITTED', entityType: 'Registration', entityId: saved._id, details: { programmeId, teamId }, req });
 
         res.status(201).json(saved);
@@ -239,6 +253,38 @@ const updateRegistration = async (req, res) => {
     }
 };
 
+
+const removeCandidateFromRegistration = async (req, res) => {
+    try {
+        const Settings = require('../models/Settings');
+        const settings = await Settings.findOne();
+        if (settings && settings.isRegistrationOpen === false && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+            return res.status(403).json({ message: 'Registration is currently closed by Fest Admins.' });
+        }
+
+        const registration = await Registration.findById(req.params.id);
+        if (!registration) return res.status(404).json({ message: 'Registration not found' });
+
+        if (req.user.role === 'team_leader' && req.user.team.toString() !== registration.team.toString()) { 
+            return res.status(403).json({ message: 'Access denied: You can only modify your own team registrations.' }); 
+        }
+
+        const candId = req.params.candidateId;
+        registration.candidates = registration.candidates.filter(c => c.toString() !== candId);
+
+        if (registration.candidates.length === 0) {
+            await Registration.findByIdAndDelete(req.params.id);
+            return res.status(200).json({ message: 'Registration deleted completely (no candidates remaining)' });
+        } else {
+            await registration.save();
+            return res.status(200).json({ message: 'Candidate removed from registration', registration });
+        }
+    } catch (error) {
+        console.error('Error removing candidate:', error);
+        res.status(500).json({ message: 'Failed to removeCandidateFromRegistration', error: error.message || 'Unknown error' });
+    }
+};
+
 const deleteRegistration = async (req, res) => {
     try {
         const Settings = require('../models/Settings');
@@ -327,6 +373,7 @@ const getParticipantReport = async (req, res) => {
 };
 
 module.exports = {
+    removeCandidateFromRegistration,
     createRegistration,
     getRegistrations,
     getParticipantReport,

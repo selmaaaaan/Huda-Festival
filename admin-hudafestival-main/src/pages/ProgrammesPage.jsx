@@ -1,3 +1,4 @@
+import Pagination from '../components/Pagination';
 import React, { useEffect, useState } from 'react';
 import { useConfirm } from '../context/ConfirmContext';
 import api from '../services/api';
@@ -15,12 +16,14 @@ const ProgrammesPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [stageFilter, setStageFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProgramme, setEditingProgramme] = useState(null);
   const categories = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
-  const fetchProgrammes = async () => { try { setLoading(true); const { data } = await api.get('/programmes'); setProgrammes(data); } catch { setError('Failed to fetch programmes.'); } finally { setLoading(false); } };
+  const fetchProgrammes = async () => { try { setLoading(true); const { data } = await api.get(`/programmes?page=${currentPage}`); setProgrammes(data.data || data); if (data.totalPages) setTotalPages(data.totalPages); } catch { setError('Failed to fetch programmes.'); } finally { setLoading(false); } };
   useEffect(() => { fetchProgrammes(); }, []);
   const handleFormSubmit = () => { setIsModalOpen(false); setEditingProgramme(null); fetchProgrammes(); };
   

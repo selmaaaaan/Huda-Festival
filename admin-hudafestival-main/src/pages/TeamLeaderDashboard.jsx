@@ -80,7 +80,7 @@ export default function TeamLeaderDashboard() {
         api.get('/programmes'),
         api.get('/candidates'),
         api.get('/registrations?limit=500'),
-        api.get('/settings').catch(() => ({ data: {} })),
+        api.get('/settings/status').catch(() => ({ data: {} })),
         api.get('/topic-registrations/enabled-programmes'),
         api.get('/topic-registrations/my-submissions'),
         api.get('/settings/dashboard-progress').catch(() => ({ data: {} })),
@@ -177,6 +177,7 @@ export default function TeamLeaderDashboard() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return;
     setError(''); setSuccess(false);
     if (!form.programmeId) { setError('Select a programme'); return; }
     if (form.candidateIds.length !== requiredCandidates) {
@@ -950,4 +951,5 @@ export default function TeamLeaderDashboard() {
     </div>
   );
 }
+
 

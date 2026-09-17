@@ -1,3 +1,4 @@
+import Pagination from '../components/Pagination';
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import api from '../services/api';
@@ -8,6 +9,8 @@ import Button from '../components/Button';
 const JudgmentFeedbackPage = () => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState(null);
 
   useEffect(() => {

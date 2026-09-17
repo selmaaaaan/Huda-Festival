@@ -13,6 +13,8 @@ import PointAdjustmentPage from './pages/PointAdjustmentPage';
 import Sidebar from './components/Sidebar';
 import Breadcrumbs from './components/Breadcrumbs';
 import SettingsPage from './pages/SettingsPage';
+import ProgrammeParticipantSearchPage from './pages/ProgrammeParticipantSearchPage';
+import CandidateProgrammeStatusPage from './pages/CandidateProgrammeStatusPage';
 import ConflictCheckerPage from './pages/ConflictCheckerPage';
 import UsersPage from './pages/UsersPage';
 import SchedulePage from './pages/SchedulePage';
@@ -32,6 +34,7 @@ import GalleryPage from './pages/GalleryPage';
 import NotificationsPage from './pages/NotificationsPage';
 import TopicManagementPage from './pages/TopicManagementPage';
 import TeamPortalDashboard from './pages/TeamPortalDashboard';
+import TeamParticipantDirectoryPage from './pages/TeamParticipantDirectoryPage';
 import LoadingScreen from './components/LoadingScreen';
 
 function App() {
@@ -91,7 +94,7 @@ function App() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const { data } = await api.get('/settings');
+        const { data } = await api.get('/settings/status');
         if (data) setAppSettings({ maintenanceMode: data.maintenanceMode, maintenanceMessage: data.maintenanceMessage });
       } catch (e) {
       } finally {
@@ -196,7 +199,7 @@ function App() {
               <GlobalSearch onNavigate={(type) => {
                 if (type === 'teams') navigate('/dashboard');
                 else {
-                  const pathMap = { candidates: '/candidates', programmes: '/programmes', registration_review: '/registrations', team_registration_list: '/registration-list', results: '/results', 'pending results': '/pending-results', judgment_feedback: '/judgment-feedback', adjustments: '/point-adjustments', logs: '/activity-logs', gallery: '/gallery', notifications: '/notifications', topic_management: '/topic-management', schedule: '/schedule', jury_slips: '/jury-slips', conflict_checker: '/conflict-checker', users: '/users', settings: '/settings' };
+                  const pathMap = { search: '/search', candidates: '/candidates', programmes: '/programmes', registration_review: '/registrations', team_registration_list: '/registration-list', results: '/results', 'pending results': '/pending-results', judgment_feedback: '/judgment-feedback', adjustments: '/point-adjustments', logs: '/activity-logs', gallery: '/gallery', notifications: '/notifications', topic_management: '/topic-management', schedule: '/schedule', jury_slips: '/jury-slips', conflict_checker: '/conflict-checker', users: '/users', settings: '/settings' };
                   navigate(pathMap[type] || '/dashboard');
                 }
               }} />
@@ -242,6 +245,8 @@ function App() {
                 <Route path="/notifications" element={<ProtectedRoute allowedRoles={['admin', 'team_leader', 'judge']}><NotificationsPage /></ProtectedRoute>} />
                 <Route path="/users" element={<ProtectedRoute allowedRoles={['admin']}><UsersPage /></ProtectedRoute>} />
                 <Route path="/settings" element={<ProtectedRoute allowedRoles={['admin', 'team_leader', 'judge', 'volunteer']}><SettingsPage /></ProtectedRoute>} />
+                  <Route path="/search" element={<ProtectedRoute allowedRoles={['admin', 'team_leader']}><ProgrammeParticipantSearchPage /></ProtectedRoute>} />
+                  <Route path="/candidate-status/:id" element={<ProtectedRoute allowedRoles={['admin', 'team_leader']}><CandidateProgrammeStatusPage /></ProtectedRoute>} />
                 <Route path="/programmes" element={<ProtectedRoute allowedRoles={['admin']}><ProgrammesPage /></ProtectedRoute>} />
                 <Route path="/registrations" element={<ProtectedRoute allowedRoles={['admin']}><RegistrationReviewPage /></ProtectedRoute>} />
                 <Route path="/results" element={<ProtectedRoute allowedRoles={['admin']}><ResultsPage /></ProtectedRoute>} />

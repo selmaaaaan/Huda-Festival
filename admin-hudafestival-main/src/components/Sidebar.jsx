@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, UserPlus, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight, Settings, Sun, Moon, Image as ImageIcon, Bell, ClipboardList, FileText, CalendarClock, Radio, FileSpreadsheet, BookOpen, Table2 } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight, Settings, Sun, Moon, Image as ImageIcon, Bell, ClipboardList, FileText, CalendarClock, Radio, FileSpreadsheet, BookOpen, Table2, Search } from 'lucide-react';
 import Logo from './Logo';
 
 const navItems = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { key: 'candidates', label: 'Candidates', icon: Users },
   { key: 'programmes', label: 'Programmes', icon: Calendar },
+    { key: 'search', label: 'Search', icon: Search },
   { key: 'registration_review', label: 'Registrations', icon: Clock },
   { key: 'team_registration_list', label: 'Registration List', icon: Table2 },
   { key: 'results', label: 'Results', icon: Trophy },
@@ -57,6 +58,7 @@ const Sidebar = ({ onLogout, userInfo }) => {
     ? [
         { key: 'team_dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { key: 'candidates', label: 'My Team', icon: Users },
+        { key: 'search', label: 'Search', icon: Search },
         { key: 'team_programme_registration', label: 'Programme Registration', icon: Calendar },
         { key: 'team_registration_list', label: 'Registration List', icon: Table2 },
         { key: 'team_topic_registration', label: 'Topic Registration', icon: BookOpen },
@@ -76,7 +78,7 @@ const Sidebar = ({ onLogout, userInfo }) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-2 space-y-1 overflow-hidden">
+      <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto no-scrollbar">
         {visibleNavItems.map(({ key, label, icon: Icon }) => {
           const path = {
             dashboard: '/dashboard',

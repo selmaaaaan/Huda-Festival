@@ -39,6 +39,8 @@ const SettingsPage = () => {
     });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    const isAdmin = userInfo?.role === 'admin';
 
   const [showConfirmToggleReg, setShowConfirmToggleReg] = useState(false);
   const [showConfirmToggleTopic, setShowConfirmToggleTopic] = useState(false);
@@ -195,6 +197,9 @@ const SettingsPage = () => {
         </div>
       ) : (
         <>
+          </>
+          )}
+
           {/* Theme Preferences */}
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6">
             <h2 className="text-lg font-semibold text-[var(--color-text-heading)] mb-4">Theme Preferences</h2>
@@ -418,9 +423,7 @@ const SettingsPage = () => {
             onCancel={() => setShowConfirmToggleTopic(false)}
             confirmText={settings.topicRegistrationEnabled ? "Close Topic Registration" : "Open Topic Registration"}
           />
-        </>
-      )}
-    </div>
+        </div>
   );
 };
 

@@ -1,4 +1,5 @@
 import { useAlert } from '../context/AlertContext';
+import Pagination from '../components/Pagination';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Trophy, Download, Calendar, MapPin, Users, CheckCircle, Save, XCircle, AlertTriangle, Edit2 } from 'lucide-react';
 import api from '../services/api';
@@ -19,6 +20,8 @@ export default function ResultsPage() {
     const [programmes, setProgrammes] = useState([]);
     const [bylawRules, setBylawRules] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     // Right panel state
     const [selectedProg, setSelectedProg] = useState(null);

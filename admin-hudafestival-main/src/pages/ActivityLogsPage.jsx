@@ -1,3 +1,4 @@
+import Pagination from '../components/Pagination';
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import SearchInput from '../components/SearchInput';
@@ -18,6 +19,8 @@ export default function ActivityLogsPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
   const [filters, setFilters] = useState({ action: '', entityType: '', from: '', to: '' });
 
   const fetchLogs = async () => {
@@ -25,8 +28,8 @@ export default function ActivityLogsPage() {
     try {
       const params = new URLSearchParams({ page, limit: 50, ...Object.fromEntries(Object.entries(filters).filter(([,v]) => v)) });
       const { data } = await api.get(`/audit-logs?${params}`);
-      setLogs(data.logs || []);
-      setTotal(data.total || 0);
+      setLogs(data.data || data.logs || []);
+      setTotal(data.totalCount || data.total || 0);
     } catch (e) {
       console.error(e);
     } finally {

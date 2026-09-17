@@ -53,7 +53,7 @@ const SchedulePage = () => {
     setLoading(true);
     try {
       const [settingsRes, programmesRes] = await Promise.all([
-        api.get('/settings'),
+        api.get('/settings/status'),
         api.get('/programmes')
       ]);
       setVenuesList(settingsRes.data?.venues || []);
@@ -294,3 +294,4 @@ const SchedulePage = () => {
 };
 
 export default SchedulePage;
+

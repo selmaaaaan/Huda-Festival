@@ -18,7 +18,7 @@ const PendingResultsPage = () => {
   const fetchPendingData = async () => {
     try {
       setLoading(true);
-      const [progRes, resultsRes] = await Promise.all([api.get('/programmes'), api.get('/results')]);
+      const [progRes, resultsRes] = await Promise.all([api.get('/programmes'), api.get(`/results?page=${currentPage}`)]);
       const allProgrammes = progRes.data;
       const pendingResults = resultsRes.data.filter(r => r.status === 'pending');
       

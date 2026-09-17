@@ -1,3 +1,4 @@
+import Pagination from '../components/Pagination';
 import { useAlert } from '../context/AlertContext';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Table2, CheckCircle, Clock, AlertTriangle, Users } from 'lucide-react';
@@ -26,6 +27,8 @@ export default function TeamRegistrationListPage() {
     // Data state
     const [teams, setTeams] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     
     // Grid Data
     const [candidates, setCandidates] = useState([]);
@@ -35,7 +38,7 @@ export default function TeamRegistrationListPage() {
     const [pendingChanges, setPendingChanges] = useState({});
     const [saving, setSaving] = useState(false);
     const [groupModal, setGroupModal] = useState({ isOpen: false, prog: null, candidate: null, selectedIds: [], editRegId: null });
-    const [confirmDeleteModal, setConfirmDeleteModal] = useState({ isOpen: false, regId: null, progName: '' });
+    const [confirmDeleteModal, setConfirmDeleteModal] = useState({ isOpen: false, regId: null, progName: '', candId: null, candName: '' });
     const [groupSaving, setGroupSaving] = useState(false);
     const [saveError, setSaveError] = useState('');
     const [saveErrorsList, setSaveErrorsList] = useState([]);
@@ -67,9 +70,10 @@ export default function TeamRegistrationListPage() {
         setLoading(true);
         try {
             const res = await api.get(`/teams/${selectedTeam}/registration-grid`, {
-                params: { category: selectedCategory, stageType: selectedStage }
+                params: { category: selectedCategory, stageType: selectedStage, page: currentPage }
             });
             setCandidates(res.data.candidates || []);
+            if (res.data.totalPages) setTotalPages(res.data.totalPages);
             setProgrammes(res.data.programmes || []);
             setRegistrations(res.data.registrations || []);
         } catch (err) {
@@ -79,26 +83,37 @@ export default function TeamRegistrationListPage() {
         }
     };
 
+    
     const handleCellClick = (cand, prog) => {
         const cellId = `${cand._id}-${prog._id}`;
         const isCurrentlySavedLocal = registrations.some(r => r.programme?._id === prog._id && r.candidates?.includes(cand._id));
-        if (prog.format === 'Group' || prog.type === 'Group') {
-            if (isCurrentlySavedLocal) {
-                const reg = registrations.find(r => r.programme?._id === prog._id && r.candidates?.includes(cand._id));
-                if (reg) {
-                    setConfirmDeleteModal({ isOpen: true, regId: reg._id, progName: prog.name });
-                }
-            } else {
-                setGroupModal({ isOpen: true, prog, candidate: cand, selectedIds: [cand._id] });
+        
+        // If it's already saved in the database (group or individual), pop the removal confirmation
+        if (isCurrentlySavedLocal) {
+            const reg = registrations.find(r => r.programme?._id === prog._id && r.candidates?.includes(cand._id));
+            if (reg) {
+                setConfirmDeleteModal({ 
+                    isOpen: true, 
+                    regId: reg._id, 
+                    progName: prog.name, 
+                    candId: cand._id, 
+                    candName: cand.name 
+                });
             }
             return;
         }
 
-        const isCurrentlySaved = registrations.some(r => r.programme?._id === prog._id && r.candidates?.includes(cand._id));
+        // If it's a Group programme and they are adding, show the Group selection modal
+        if (prog.format === 'Group' || prog.type === 'Group') {
+            setGroupModal({ isOpen: true, prog, candidate: cand, selectedIds: [cand._id] });
+            return;
+        }
+
         const isCurrentlyDraft = cellId in pendingChanges;
-        const willBeAdded = !isCurrentlySaved && !isCurrentlyDraft;
+        const willBeAdded = !isCurrentlySavedLocal && !isCurrentlyDraft;
 
         if (willBeAdded) {
+
             // Check Quota before allowing the tick
             const savedCount = registrations.filter(r => r.programme?._id === prog._id).reduce((acc, r) => acc + (r.candidates?.length || 0), 0);
             const draftAddCount = Object.keys(pendingChanges).filter(k => k.endsWith(`-${prog._id}`) && pendingChanges[k] === true).length;
@@ -156,6 +171,7 @@ export default function TeamRegistrationListPage() {
 
     const handleGroupSave = async (e) => {
         e.preventDefault();
+        if (groupSaving) return;
         const { prog, selectedIds } = groupModal;
         if (selectedIds.length !== prog.groupSize) {
             alertAction(`Please select exactly ${prog.groupSize} candidates.`);
@@ -180,6 +196,7 @@ export default function TeamRegistrationListPage() {
     };
 
     const handleSave = async () => {
+        if (saving) return;
         setSaving(true);
         setSaveError('');
         setSaveErrorsList([]);
@@ -535,15 +552,15 @@ export default function TeamRegistrationListPage() {
 
             <Modal 
                 isOpen={confirmDeleteModal.isOpen} 
-                onClose={() => setConfirmDeleteModal({ isOpen: false, regId: null, progName: '' })} 
-                title="Remove Group Registration"
+                onClose={() => setConfirmDeleteModal({ isOpen: false, regId: null, progName: '', candId: null, candName: '' })} 
+                title="Remove Registration"
             >
                 <div className="space-y-6">
                     <p className="text-[var(--color-text-body)]">
-                        Are you sure you want to remove the entire group registration for <strong className="text-[var(--color-text-heading)]">{confirmDeleteModal.progName}</strong>?
+                        Are you sure you want to remove <strong className="text-[var(--color-text-heading)]">{confirmDeleteModal.candName || 'this candidate'}</strong> from <strong className="text-[var(--color-text-heading)]">{confirmDeleteModal.progName}</strong>?
                     </p>
                     <div className="flex justify-end gap-3 pt-4 border-t border-[var(--color-border)]">
-                        <Button type="button" variant="ghost" onClick={() => setConfirmDeleteModal({ isOpen: false, regId: null, progName: '' })}>
+                        <Button type="button" variant="ghost" onClick={() => setConfirmDeleteModal({ isOpen: false, regId: null, progName: '', candId: null, candName: '' })}>
                             Cancel
                         </Button>
                         <Button type="button" variant="danger" loading={groupSaving} onClick={confirmDeleteGroup}>

@@ -1,4 +1,5 @@
 import { useAlert } from '../context/AlertContext';
+import Pagination from '../components/Pagination';
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../services/api';
 import StatusBadge from '../components/StatusBadge';
@@ -28,6 +29,8 @@ export default function RegistrationReviewPage() {
   const [programmes, setProgrammes] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
   
   // Table Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,11 +98,12 @@ export default function RegistrationReviewPage() {
       const [progRes, teamRes, regRes] = await Promise.all([
         api.get('/programmes'),
         api.get('/teams'),
-        api.get('/registrations?limit=10000')
+        api.get(`/registrations?page=${currentPage}`)
       ]);
       setProgrammes(progRes.data);
       setTeams(teamRes.data);
-      setRegistrations(regRes.data?.registrations || regRes.data || []);
+      setRegistrations(regRes.data?.data || regRes.data?.registrations || regRes.data || []);
+        if (regRes.data?.totalPages) setTotalPages(regRes.data.totalPages);
     } catch (e) {
       console.error(e);
     } finally {
@@ -219,6 +223,7 @@ export default function RegistrationReviewPage() {
 
   const handleAssignSubmit = async (e) => {
     e.preventDefault();
+    if (assignSubmitting) return;
     setAssignError('');
     if (!assignForm.teamId) { setAssignError('Select a team'); return; }
     if (!assignForm.programmeId) { setAssignError('Select a programme'); return; }

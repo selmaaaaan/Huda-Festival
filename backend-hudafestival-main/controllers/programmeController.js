@@ -63,7 +63,26 @@ const getAllProgrammes = async (req, res) => {
                 ]
             };
         }
-        const programmes = await Programme.find(filter).lean();
+        
+        let isPaginated = req.query.page || req.query.limit;
+        let totalCount = 0;
+        let currentPage = parseInt(req.query.page) || 1;
+        let limit = parseInt(req.query.limit) || 25;
+        let totalPages = 1;
+        
+        let programmes;
+        if (isPaginated) {
+            const skip = (currentPage - 1) * limit;
+            const [data, count] = await Promise.all([
+                Programme.find(filter).skip(skip).limit(limit).lean(),
+                Programme.countDocuments(filter)
+            ]);
+            programmes = data;
+            totalCount = count;
+            totalPages = Math.ceil(count / limit);
+        } else {
+            programmes = await Programme.find(filter).lean();
+        }
         
         // Fetch all registrations to calculate participant count
         const registrations = await Registration.find({}, 'programme candidates');
@@ -82,6 +101,9 @@ const getAllProgrammes = async (req, res) => {
             participantCount: countMap[prog._id.toString()] || 0
         }));
 
+        if (isPaginated) {
+            return res.status(200).json({ data: enrichedProgrammes, totalCount, totalPages, currentPage });
+        }
         res.status(200).json(enrichedProgrammes);
     }
     catch (error) {

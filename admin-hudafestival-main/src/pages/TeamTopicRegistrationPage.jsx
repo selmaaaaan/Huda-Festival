@@ -77,7 +77,7 @@ export default function TeamTopicRegistrationPage() {
         api.get('/programmes'),
         api.get('/candidates'),
         api.get('/registrations?limit=500'),
-        api.get('/settings').catch(() => ({ data: {} })),
+        api.get('/settings/status').catch(() => ({ data: {} })),
         api.get('/topic-registrations/enabled-programmes'),
         api.get('/topic-registrations/my-submissions'),
       ]);
@@ -1028,4 +1028,5 @@ export default function TeamTopicRegistrationPage() {
     </div>
   );
 }
+
 

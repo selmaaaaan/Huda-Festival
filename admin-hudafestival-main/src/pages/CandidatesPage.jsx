@@ -1,3 +1,4 @@
+import Pagination from '../components/Pagination';
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import DataTable from '../components/DataTable';
@@ -13,6 +14,8 @@ const CandidatesPage = () => {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,7 +50,10 @@ const CandidatesPage = () => {
   const handleFormSubmit = () => { 
     setIsModalOpen(false); 
     setEditingCandidate(null);
-    api.get('/candidates').then(res => setCandidates(res.data)); 
+    api.get(`/candidates?page=${currentPage}`).then(res => {
+          setCandidates(res.data.data || res.data);
+          if (res.data.totalPages) setTotalPages(res.data.totalPages);
+        }); 
   };
   
   const handleEdit = (candidate) => {
@@ -63,7 +69,10 @@ const CandidatesPage = () => {
     if (!confirmDeleteId) return;
     try { 
         await api.delete(`/candidates/${confirmDeleteId}`); 
-        api.get('/candidates').then(res => setCandidates(res.data)); 
+        api.get(`/candidates?page=${currentPage}`).then(res => {
+          setCandidates(res.data.data || res.data);
+          if (res.data.totalPages) setTotalPages(res.data.totalPages);
+        }); 
     } catch (err) { 
         setError(err.response?.data?.message || 'Failed to delete candidate.'); 
     }

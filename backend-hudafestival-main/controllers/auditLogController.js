@@ -16,7 +16,7 @@ const getAuditLogs = async (req, res) => {
     AuditLog.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).populate('actor', 'userName role'),
     AuditLog.countDocuments(filter),
   ]);
-  res.status(200).json({ logs, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });
+  res.status(200).json({ data: logs, totalCount: total, totalPages: Math.ceil(total / Number(limit)), currentPage: Number(page) });
 };
 
 module.exports = { getAuditLogs };
