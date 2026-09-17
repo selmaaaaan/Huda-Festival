@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import GlobalSearch from './components/GlobalSearch';
 import { motion, AnimatePresence } from 'framer-motion';
+import PageTransition from './components/PageTransition';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import CandidatePage from './pages/CandidatesPage';
@@ -156,9 +157,9 @@ function App() {
   const ProtectedRoute = ({ children, allowedRoles }) => {
     if (!userInfo) return <Navigate to="/" replace />;
     if (allowedRoles && !allowedRoles.includes(userInfo.role)) {
-      return <div className="p-8 text-red-500">Unauthorized</div>;
+      return <PageTransition><div className="p-8 text-red-500">Unauthorized</div></PageTransition>;
     }
-    return children;
+    return <PageTransition className="h-full">{children}</PageTransition>;
   };
 
   if (!isAuthenticated) {

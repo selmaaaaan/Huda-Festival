@@ -3,6 +3,7 @@ import Pagination from '../components/Pagination';
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import Button from '../components/Button';
+import { AnimatedInput } from '@/components/smoothui/animated-input';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { Edit2, Trash2, Plus } from 'lucide-react';
@@ -175,7 +176,7 @@ const UsersPage = () => {
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary)]"></div>
+          <GridLoader size="lg" color="#ea580c" mode="pulse" />
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -256,6 +257,26 @@ const UsersPage = () => {
           </div>
         </div>
       )}
+
+      
+      {/* Password Reset Modal */}
+      <Modal isOpen={resetModalOpen} onClose={() => setResetModalOpen(false)} title="Reset User Password">
+        <form onSubmit={handleResetPassword} className="space-y-4">
+          <p className="text-sm text-[var(--color-text-muted)] mb-4">Reset password for any Admin, Judge, or Volunteer account by entering their exact username.</p>
+          <div>
+            <AnimatedInput label="Username" type="text" required value={resetForm.userName} onChange={val => setResetForm({...resetForm, userName: val})} placeholder="e.g. judge_admin" />
+          </div>
+          <div>
+            <AnimatedInput label="New Password" type="password" required value={resetForm.newPassword} onChange={val => setResetForm({...resetForm, newPassword: val})} placeholder="Enter new password" />
+          </div>
+          <div className="flex justify-end gap-3 mt-6">
+            <Button type="button" variant="ghost" onClick={() => setResetModalOpen(false)}>Cancel</Button>
+            <Button type="submit" variant="primary" disabled={resetLoading}>
+              {resetLoading ? 'Resetting...' : 'Reset Password'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Team Modal */}
       <Modal isOpen={showTeamModal} onClose={() => setShowTeamModal(false)} title={editingTeam ? 'Edit Team' : 'Add Team'}>

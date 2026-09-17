@@ -366,7 +366,7 @@ const JurySlipsPage = () => {
                       <div className="flex justify-between items-start mb-2 px-2 pt-1">
                         {/* Logo */}
                         <div className="w-48 h-20 flex items-center justify-start shrink-0">
-                          <img src="/logo-badge.png" alt="L'intervention" className="w-full h-full object-contain mix-blend-multiply" style={{ filter: 'grayscale(100%) brightness(0.7) contrast(1.5)' }} />
+                          <img src="https://i.ibb.co/HTNc8VJN/lintervention-logo-badge-1.png" alt="L'intervention" className="w-full h-full object-contain mix-blend-multiply" style={{ filter: 'grayscale(100%) brightness(0.7) contrast(1.5)' }} />
                         </div>
                         
                         {/* Title */}
@@ -432,8 +432,8 @@ const JurySlipsPage = () => {
                               <tr key={i} className="border-b-[1.5px] border-black last:border-b-0 h-[12.5%]">
                                 <td className="border-r-[1.5px] border-black text-center font-black text-[16px]">{p * ROWS_PER_PAGE + i + 1}</td>
                                 <td className="border-r-[1.5px] border-black"></td>
-                                <td className="border-r-[1.5px] border-black text-center font-bold text-[12px]">{data?.c?.admissionNo || ''}</td>
-                                <td className="border-r-[1.5px] border-black px-3 font-bold text-[12px] uppercase truncate overflow-hidden max-w-[200px]">{data?.c?.name || ''}</td>
+                                <td className="border-r-[1.5px] border-black text-center font-bold text-[10px] leading-tight px-1 break-all">{data?.admissionNo || ''}</td>
+                                  <td className="border-r-[1.5px] border-black px-3 font-bold text-[10px] uppercase truncate overflow-hidden max-w-[200px] leading-tight whitespace-pre-wrap">{data?.name || ''}</td>
                                 <td className="border-r-[1.5px] border-black px-2 font-bold text-[11px] text-center uppercase truncate overflow-hidden max-w-[100px]">{data?.reg?.team?.name || ''}</td>
                                 <td className="border-r-[1.5px] border-black"></td>
                                 <td className="border-r-[1.5px] border-black"></td>

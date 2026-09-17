@@ -95,11 +95,11 @@ const LeaderboardsPage = () => {
                 </div>
 
                 {/* Category Leaderboards (Optional display, keeping it minimal) */}
-                {Object.keys(leaderboardData.categories).length > 0 && (
+                {Object.keys(leaderboardData?.categories || {}).length > 0 && (
                     <div className="mt-32">
                         <h2 className="text-4xl font-black font-display uppercase tracking-tight mb-12">Category Standings</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {Object.entries(leaderboardData.categories).map(([category, teams], index) => (
+                            {Object.entries(leaderboardData?.categories || {}).map(([category, teams], index) => (
                                 <motion.div key={category} initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }} whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }} viewport={{ once: true }} whileHover={prefersReducedMotion ? {} : { y: -6, rotate: index % 2 === 0 ? 1 : -1, scale: 1.02 }}
                                     className="border-2 border-[var(--border)] bg-white p-6 shadow-[6px_6px_0px_0px_rgba(23,23,23,1)]"
                                 >

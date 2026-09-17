@@ -90,31 +90,44 @@ export default function ResultsPage() {
                 api.get(`/programmes/${prog._id}/code-letters`).catch(() => ({ data: [] }))
             ]);
 
-            // Map approved registrations to flat participants list
+                        // Map approved registrations to groups
             let uniqueTeams = new Set();
-            let allCandidates = [];
+            let groupedParticipants = [];
             const regs = regsRes.data.registrations || regsRes.data || [];
             regs.forEach(reg => {
                 uniqueTeams.add(reg.team?._id || reg.team);
-                if (reg.candidates) {
-                    reg.candidates.forEach(c => {
-                        allCandidates.push({ ...c, team: reg.team });
+                if (reg.candidates && reg.candidates.length > 0) {
+                    groupedParticipants.push({
+                        _id: reg._id,
+                        candidates: reg.candidates,
+                        team: reg.team,
+                        name: reg.candidates.map(c => c.name).join(', '),
+                        admissionNo: reg.candidates.map(c => c.admissionNo).join(', ')
                     });
                 }
             });
-            setParticipants(allCandidates);
+            setParticipants(groupedParticipants);
             setTeamsCount(uniqueTeams.size);
             setCodeLetters(codesRes.data);
 
-            // Populate resultsMap
+            // Populate resultsMap keyed by registration ID
             const initMap = {};
+            const dbResultsByCandidate = {};
             resultsRes.data.forEach(res => {
-                initMap[res.candidate] = {
+                dbResultsByCandidate[res.candidate] = {
                     rank: res.rank || '',
                     grade: res.grade || '',
                     remarks: res.remarks || '',
-                    status: res.status || 'pending'
+                    _dbId: res._id
                 };
+            });
+            
+            groupedParticipants.forEach(group => {
+                const firstCandId = group.candidates[0]?._id;
+                const r = dbResultsByCandidate[firstCandId];
+                if (r) {
+                    initMap[group._id] = { ...r };
+                }
             });
             setResultsMap(initMap);
         } catch (err) {
@@ -179,18 +192,22 @@ export default function ResultsPage() {
     };
 
     const handleSaveDraft = async () => {
-        // Collect dirty rows
-        const resultsToSave = participants.map(c => {
-            const res = resultsMap[c._id];
-            if (!res) return null;
-            if (!res.rank && !res.grade && !res.remarks) return null; // empty
-            return {
-                candidateId: c._id,
-                rank: res.rank || null,
-                grade: res.grade || null,
-                remarks: res.remarks || ''
-            };
-        }).filter(Boolean);
+                // Collect dirty rows
+        const resultsToSave = [];
+        participants.forEach(group => {
+            const res = resultsMap[group._id];
+            if (!res) return;
+            if (!res.rank && !res.grade && !res.remarks) return; // empty
+            
+            group.candidates.forEach(c => {
+                resultsToSave.push({
+                    candidateId: c._id,
+                    rank: res.rank || null,
+                    grade: res.grade || null,
+                    remarks: res.remarks || ''
+                });
+            });
+        });
 
         if (resultsToSave.length === 0) {
             alertAction("No results to save.");

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import AnimatedProgressBar from '@/components/smoothui/animated-progress-bar';
 
 const GettingStartedCard = ({ progressData, title = "Festival Progress" }) => {
   const [showCategories, setShowCategories] = useState(false);
@@ -40,12 +41,7 @@ const GettingStartedCard = ({ progressData, title = "Festival Progress" }) => {
               <span className="font-medium text-[var(--color-text-heading)]">{item.label}</span>
               <span className="text-[var(--color-text-muted)]">{item.pct}% ({Math.round(item.completed)}/{Math.round(item.total)})</span>
             </div>
-            <div className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-full h-3 overflow-hidden">
-                <div
-                  className="bg-[var(--color-primary)] h-full rounded-full transition-all duration-1000"
-                style={{ width: `${item.pct}%` }}
-              />
-            </div>
+            <AnimatedProgressBar value={item.pct} color="var(--color-primary)" className="h-3 rounded-full overflow-hidden" />
           </div>
         ))}
       </div>
@@ -67,18 +63,14 @@ const GettingStartedCard = ({ progressData, title = "Festival Progress" }) => {
                                       <span className="text-[var(--color-text-muted)]">Registrations</span>
                                       <span className="font-medium">{Math.round(cat.registration.completed)}/{Math.round(cat.registration.total)}</span>
                                   </div>
-                                  <div className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-full h-2.5 overflow-hidden">
-                                        <div className="bg-[var(--color-primary)] h-full rounded-full" style={{ width: `${cat.registration.percentage}%` }} />
-                                  </div>
+                                  <AnimatedProgressBar value={cat.registration.percentage} color="var(--color-primary)" className="h-2.5 rounded-full overflow-hidden" />
                               </div>
                               <div>
                                   <div className="flex justify-between text-xs mb-1">
                                       <span className="text-[var(--color-text-muted)]">Topics</span>
                                       <span className="font-medium">{Math.round(cat.topic.completed)}/{Math.round(cat.topic.total)}</span>
                                   </div>
-                                  <div className="w-full bg-[var(--color-bg)] border border-[var(--color-border)] rounded-full h-2.5 overflow-hidden">
-                                        <div className="bg-purple-500 h-full rounded-full" style={{ width: `${cat.topic.percentage}%` }} />
-                                  </div>
+                                  <AnimatedProgressBar value={cat.topic.percentage} color="#a855f7" className="h-2.5 rounded-full overflow-hidden" />
                               </div>
                           </div>
                       </div>

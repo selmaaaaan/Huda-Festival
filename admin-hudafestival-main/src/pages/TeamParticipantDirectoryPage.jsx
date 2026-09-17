@@ -366,7 +366,7 @@ const TeamParticipantDirectoryPage = () => {
                       <div className="flex justify-between items-start mb-2 px-2 pt-1">
                         {/* Logo */}
                         <div className="w-48 h-20 flex items-center justify-start shrink-0">
-                          <img src="/logo-badge.png" alt="L'intervention" className="w-full h-full object-contain mix-blend-multiply" style={{ filter: 'grayscale(100%) brightness(0.7) contrast(1.5)' }} />
+                          <img src="https://i.ibb.co/HTNc8VJN/lintervention-logo-badge-1.png" alt="L'intervention" className="w-full h-full object-contain mix-blend-multiply" style={{ filter: 'grayscale(100%) brightness(0.7) contrast(1.5)' }} />
                         </div>
                         
                         {/* Title */}

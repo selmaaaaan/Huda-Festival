@@ -138,7 +138,7 @@ const LoadingScreen = ({ onComplete, isReady = true }) => {
           {/* Logo Container */}
           <div className="relative z-10 w-48 h-48 md:w-64 md:h-64 flex items-center justify-center mb-12">
             <motion.img
-              src="/logo-mark.png"
+              src="https://i.ibb.co/HTNc8VJN/lintervention-logo-badge-1.png"
               alt="L'intervention Logo"
               className="w-full h-full object-contain"
               initial={{ scale: 0.4, opacity: 0 }}

@@ -36,7 +36,7 @@ export default function CandidateProgrammeStatusPage() {
         fetchAll();
     }, [id]);
 
-    if (loading) return <div className="p-12 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary)]"></div></div>;
+    if (loading) return <div className="p-12 flex justify-center"><GridLoader size="lg" color="#ea580c" mode="pulse" /></div>;
     if (error) return <div className="p-12 text-center text-red-500">{error}</div>;
     if (!candidate) return <div className="p-12 text-center">Candidate not found.</div>;
 

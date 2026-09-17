@@ -6,6 +6,8 @@ import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import AddProgrammeForm from '../components/AddProgrammeForm';
 import Button from '../components/Button';
+import { AnimatedTabs } from '@/components/smoothui/animated-tabs';
+import { AnimatedInput } from '@/components/smoothui/animated-input';
 import StatusBadge from '../components/StatusBadge';
 import { ChevronLeft, BarChart2 } from 'lucide-react';
 
@@ -13,17 +15,30 @@ const ProgrammesPage = () => {
   const confirmAction = useConfirm();
 
   const [programmes, setProgrammes] = useState([]);
+  const [totalProgrammesCount, setTotalProgrammesCount] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [stageFilter, setStageFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProgramme, setEditingProgramme] = useState(null);
   const categories = ['BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
-  const fetchProgrammes = async () => { try { setLoading(true); const { data } = await api.get(`/programmes?page=${currentPage}`); setProgrammes(data.data || data); if (data.totalPages) setTotalPages(data.totalPages); } catch { setError('Failed to fetch programmes.'); } finally { setLoading(false); } };
+  // Fetch ALL programmes without pagination so category cards show correct totals
+  const fetchProgrammes = async () => {
+    try {
+      setLoading(true);
+      const { data } = await api.get('/programmes');
+      // Backend returns flat array when no page param is provided
+      const list = Array.isArray(data) ? data : (data.data || []);
+      setProgrammes(list);
+      setTotalProgrammesCount(list.length);
+    } catch {
+      setError('Failed to fetch programmes.');
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => { fetchProgrammes(); }, []);
   const handleFormSubmit = () => { setIsModalOpen(false); setEditingProgramme(null); fetchProgrammes(); };
   

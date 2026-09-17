@@ -9,6 +9,8 @@ import { Users, Plus, Search, CheckCircle, XCircle, Edit3, Trash2, Shield, Alert
 import { motion } from 'framer-motion';
 import ProgrammeCodePicker from '../components/ProgrammeCodePicker';
 import Button from '../components/Button';
+import AnimatedProgressBar from '@/components/smoothui/animated-progress-bar';
+import { AnimatedTabs } from '@/components/smoothui/animated-tabs';
 
 const CATEGORIES = ['All', 'BIDĀYAH', 'ʾŪLĀ', 'THĀNIYAH', 'THĀNAWIYYAH', 'ʿĀLIYAH', 'KULLIYYAH'];
 
@@ -29,9 +31,11 @@ export default function RegistrationReviewPage() {
   const [programmes, setProgrammes] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-  
+  // DB-level totals from backend countDocuments � NOT derived from page slice
+  const [dbTotalCount, setDbTotalCount] = useState(0);
+  const [dbApprovedCount, setDbApprovedCount] = useState(0);
+  const [dbPendingCount, setDbPendingCount] = useState(0);
+  const [dbRejectedCount, setDbRejectedCount] = useState(0);
   // Table Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -98,12 +102,11 @@ export default function RegistrationReviewPage() {
       const [progRes, teamRes, regRes] = await Promise.all([
         api.get('/programmes'),
         api.get('/teams'),
-        api.get(`/registrations?page=${currentPage}`)
+        api.get('/registrations?limit=9999&page=1')
       ]);
       setProgrammes(progRes.data);
       setTeams(teamRes.data);
       setRegistrations(regRes.data?.data || regRes.data?.registrations || regRes.data || []);
-        if (regRes.data?.totalPages) setTotalPages(regRes.data.totalPages);
     } catch (e) {
       console.error(e);
     } finally {
@@ -144,28 +147,13 @@ export default function RegistrationReviewPage() {
     });
   }, [registrations, searchQuery, statusFilter, categoryFilter, teamFilter]);
 
-  // Derived Stats (Respects Team, Category, and Search, but ignores Status so the counts remain stable)
-  const statsRegistrations = useMemo(() => {
-    return registrations.filter(r => {
-      const q = searchQuery.toLowerCase();
-      const matchSearch = !q || 
-        r.programme?.name?.toLowerCase().includes(q) || 
-        r.programme?.code?.toLowerCase().includes(q) ||
-        r.team?.name?.toLowerCase().includes(q);
-      
-      const matchCat = categoryFilter === 'All' || r.programme?.category === categoryFilter;
-      const matchTeam = teamFilter === 'all' || r.team?._id === teamFilter || r.team === teamFilter;
+  // Use DB-level counts for accurate stat cards
+  const totalCount = dbTotalCount;
+  const approvedCount = dbApprovedCount;
+  const pendingCount = dbPendingCount;
+  const rejectedCount = dbRejectedCount;
 
-      return matchSearch && matchCat && matchTeam;
-    });
-  }, [registrations, searchQuery, categoryFilter, teamFilter]);
-
-  const totalCount = statsRegistrations.length;
-  const approvedCount = statsRegistrations.filter(r => r.status === 'approved').length;
-  const pendingCount = statsRegistrations.filter(r => r.status === 'pending').length;
-  const rejectedCount = statsRegistrations.filter(r => r.status === 'rejected').length;
-
-  // Handlers
+    // Handlers
   const handleApprove = async (id) => {
     setActionLoading(id);
     try {
@@ -319,9 +307,9 @@ export default function RegistrationReviewPage() {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard label="Total Submitted" value={totalCount} />
-            <StatCard label="Approved" value={approvedCount} accent="#10b981" />
-            <StatCard label="Pending Review" value={pendingCount} accent="#f59e0b" />
-            <StatCard label="Rejected" value={rejectedCount} accent="#ef4444" />
+            <StatCard label="Approved" value={approvedCount} max={totalCount} accent="#10b981" />
+            <StatCard label="Pending Review" value={pendingCount} max={totalCount} accent="#f59e0b" />
+            <StatCard label="Rejected" value={rejectedCount} max={totalCount} accent="#ef4444" />
           </div>
 
           {/* Table Header & Filters */}
@@ -350,32 +338,28 @@ export default function RegistrationReviewPage() {
 
                 <div className="h-6 w-px bg-[var(--color-border)] mx-1" />
 
-                {['all', 'pending', 'approved', 'rejected'].map(status => (
-                  <button key={status} onClick={() => setStatusFilter(status)}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-full capitalize transition-colors ${
-                      statusFilter === status 
-                        ? 'bg-[var(--color-primary)] text-white shadow-md'
-                        : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface)]'
-                    }`}
-                  >
-                    {status}
-                  </button>
-                ))}
+                <AnimatedTabs
+                  activeTab={statusFilter}
+                  onChange={setStatusFilter}
+                  tabs={[
+                    { id: 'all', label: 'All' },
+                    { id: 'pending', label: 'Pending' },
+                    { id: 'approved', label: 'Approved' },
+                    { id: 'rejected', label: 'Rejected' }
+                  ]}
+                  variant="pill"
+                />
               </div>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map(cat => (
-                <button key={cat} onClick={() => setCategoryFilter(cat)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${
-                    categoryFilter === cat 
-                      ? 'border-transparent bg-[var(--color-primary)] text-white shadow-md'
-                      : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-muted)] hover:border-[var(--color-primary)]'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
+              <AnimatedTabs
+                  activeTab={categoryFilter}
+                  onChange={setCategoryFilter}
+                  tabs={CATEGORIES.map(cat => ({ id: cat, label: cat }))}
+                  variant="pill"
+                  className="flex-wrap"
+                />
             </div>
           </div>
 

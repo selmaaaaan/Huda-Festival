@@ -1,3 +1,6 @@
+const fs = require('fs');
+
+const alertContextCode = `
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import BasicToast from '../components/smoothui/basic-toast';
 
@@ -39,3 +42,7 @@ export const AlertProvider = ({ children }) => {
         </AlertContext.Provider>
     );
 };
+`;
+
+fs.writeFileSync('src/context/AlertContext.jsx', alertContextCode.trim());
+console.log('AlertContext smart toast patched');

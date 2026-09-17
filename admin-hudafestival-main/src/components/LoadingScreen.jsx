@@ -40,7 +40,7 @@ const LoadingScreen = ({ isReady = true, onComplete }) => {
             {/* Logo Stamp Container */}
             <div className="relative w-56 md:w-72 h-56 md:h-72 flex items-center justify-center z-10">
               <motion.img
-                src="/logo-badge.png"
+                src="https://i.ibb.co/HTNc8VJN/lintervention-logo-badge-1.png"
                 alt="L'intervention Loading"
                 className="w-full h-full object-contain relative z-10"
                 initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 1.4, rotate: -6 }}

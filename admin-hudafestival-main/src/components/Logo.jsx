@@ -7,7 +7,7 @@ const Logo = ({ size = 'default', short = false }) => {
     return (
       <div className="flex items-center justify-center shrink-0 w-14 h-14 overflow-hidden">
         <img 
-          src="/logo-badge.png" 
+          src="https://i.ibb.co/HTNc8VJN/lintervention-logo-badge-1.png" 
           alt="L'intervention" 
           className="w-full h-full object-contain"
         />
@@ -26,7 +26,7 @@ const Logo = ({ size = 'default', short = false }) => {
   return (
     <div className={`flex items-center justify-center ${size === 'large' ? 'w-full mb-2' : ''}`}>
       <img 
-        src="/logo-badge.png" 
+        src="https://i.ibb.co/HTNc8VJN/lintervention-logo-badge-1.png" 
         alt="L'intervention Logo" 
         className={`${hClass} w-auto object-contain drop-shadow-sm`}
       />

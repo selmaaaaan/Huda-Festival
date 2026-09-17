@@ -174,7 +174,29 @@ const deleteTeamLeader = async (req, res) => {
     }
 };
 
+
+const resetPassword = async (req, res) => {
+    try {
+        const { userName, newPassword } = req.body;
+        if (!userName || !newPassword) return res.status(400).json({ message: 'Username and new password required' });
+        
+        const user = await User.findOne({ userName });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        
+        user.password = newPassword;
+        await user.save();
+        
+        await logAction({ actor: req.user._id, actorRole: req.user.role, action: 'UPDATE', entityType: 'User', entityId: user._id, details: { action: 'password_reset', targetUser: userName }, req });
+        
+        res.status(200).json({ message: 'Password reset successfully' });
+    } catch (error) {
+        console.error('Error resetting password: ' + error.message);
+        res.status(500).json({ message: 'Failed to reset password', error: error.message });
+    }
+};
+
 module.exports = {
+    resetPassword,
     updateTeamLeader,
     deleteTeamLeader,
     loginAdmin,

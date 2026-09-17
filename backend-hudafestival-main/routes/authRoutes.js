@@ -7,7 +7,8 @@ const {
     createTeamLeader,
     getAllTeamLeaders,
     updateTeamLeader,
-    deleteTeamLeader
+    deleteTeamLeader,
+    resetPassword
 } = require('../controllers/authController')
 
 const { protect, authorize } = require('../middlewares/authMiddleware');
@@ -30,3 +31,4 @@ router.route('/team-leaders/:id')
     .delete(protect, authorize('admin'), deleteTeamLeader);
 
 module.exports = router;
+router.patch('/reset-password', protect, authorize('admin'), resetPassword);

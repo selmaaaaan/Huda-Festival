@@ -25,7 +25,25 @@ const app = express();
 const PORT = process.env.PORT
 
 // middleware
-app.use(cors());
+const allowedOrigins = [
+    'http://localhost:4000',
+    'http://localhost:5174',
+    'http://localhost:5173',
+    'https://hudafestival.online',
+    'https://www.hudafestival.online',
+    'https://admin.hudafestival.online'
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -47,7 +47,7 @@ const DashboardPage = () => {
       />
 
       {loading ? (
-        <p className="text-[var(--color-text-body)]">Loading metrics...</p>
+        <div className="flex justify-center p-12"><GridLoader size="lg" color="#ea580c" mode="pulse" pattern="solo-center" /></div>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

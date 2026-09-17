@@ -36,16 +36,20 @@ export default function ProgrammeParticipantSearchPage() {
             // res.data could be { registrations } or just array depending on backwards compat
             const list = res.data.registrations || res.data || [];
             
-            // Extract candidates and flatten
-            let allCands = [];
+            // Group participants by registration so group programmes are shown in one cell
+            let groups = [];
             list.forEach(reg => {
-                if (reg.candidates && Array.isArray(reg.candidates)) {
-                    reg.candidates.forEach(c => {
-                        allCands.push({ ...c, team: reg.team });
+                if (reg.candidates && Array.isArray(reg.candidates) && reg.candidates.length > 0) {
+                    groups.push({
+                        _id: reg._id,
+                        admissionNo: reg.candidates.map(c => c.admissionNo).join(', '),
+                        name: reg.candidates.map(c => c.name).join(', '),
+                        team: reg.team,
+                        count: reg.candidates.length
                     });
                 }
             });
-            setProgrammeCandidates(allCands);
+            setProgrammeCandidates(groups);
         } catch (err) {
             console.error(err);
         } finally {
@@ -56,11 +60,15 @@ export default function ProgrammeParticipantSearchPage() {
     const handleCandidateSearch = async () => {
         if (!searchQuery.trim()) return;
         setLoadingCand(true);
+        setCandidateResults([]); // reset before each new search
         try {
             const res = await api.get(`/candidates/lookup?search=${encodeURIComponent(searchQuery)}`);
-            setCandidateResults(res.data);
+            // Guard: ensure we always set an array, never undefined/null
+            const results = Array.isArray(res.data) ? res.data : [];
+            setCandidateResults(results);
         } catch (err) {
             console.error(err);
+            setCandidateResults([]);
         } finally {
             setLoadingCand(false);
         }
@@ -104,7 +112,7 @@ export default function ProgrammeParticipantSearchPage() {
                     </div>
 
                     {loadingProg ? (
-                        <div className="flex justify-center p-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary)]"></div></div>
+                        <div className="flex justify-center p-12"><GridLoader size="lg" color="#ea580c" mode="pulse" /></div>
                     ) : selectedProgramme && (
                         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl overflow-hidden shadow-sm">
                             <div className="p-4 border-b border-[var(--color-border)] flex justify-between items-center bg-[var(--color-surface-elevated)]">
@@ -161,13 +169,13 @@ export default function ProgrammeParticipantSearchPage() {
                     </div>
 
                     {loadingCand ? (
-                        <div className="flex justify-center p-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary)]"></div></div>
-                    ) : candidateResults.length > 0 && (
+                        <div className="flex justify-center p-12"><GridLoader size="lg" color="#ea580c" mode="pulse" /></div>
+                    ) : candidateResults.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {candidateResults.map(c => (
                                 <div 
-                                    key={c._id} 
-                                    onClick={() => navigate(`/candidate-status/${c._id}`)}
+                                    key={c?._id || Math.random()} 
+                                    onClick={() => c?._id && navigate(`/candidate-status/${c._id}`)}
                                     className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-5 hover:shadow-md hover:border-[var(--color-primary)] transition-all cursor-pointer group"
                                 >
                                     <div className="flex items-center gap-3 mb-3">
@@ -175,18 +183,25 @@ export default function ProgrammeParticipantSearchPage() {
                                             <User size={20} />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-[var(--color-text-heading)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-1">{c.name}</h3>
-                                            <p className="text-xs text-[var(--color-text-muted)] font-medium">AD: {c.admissionNo}</p>
+                                            <h3 className="font-bold text-[var(--color-text-heading)] group-hover:text-[var(--color-primary)] transition-colors line-clamp-1">{c?.name || '—'}</h3>
+                                            <p className="text-xs text-[var(--color-text-muted)] font-medium">AD: {c?.admissionNo || '—'}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2 mt-4 text-xs font-medium text-[var(--color-text-muted)]">
-                                        <span className="px-2 py-1 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-md">{c.category}</span>
-                                        <span className="px-2 py-1 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-md">{c.team?.name || 'Unknown Team'}</span>
+                                        <span className="px-2 py-1 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-md">{c?.category || '—'}</span>
+                                        <span className="px-2 py-1 bg-[var(--color-surface-elevated)] border border-[var(--color-border)] rounded-md">{c?.team?.name || 'Unknown Team'}</span>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    )}
+                    ) : searchQuery && !loadingCand ? (
+                        <div className="p-12 text-center text-[var(--color-text-muted)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl">
+                            <Search size={40} className="mx-auto mb-3 opacity-20" />
+                            <p className="font-semibold text-[var(--color-text-heading)]">No candidates found</p>
+                            <p className="text-sm mt-1">Try a different name or admission number.</p>
+                        </div>
+                    ) : null}
+
                 </div>
             )}
         </div>

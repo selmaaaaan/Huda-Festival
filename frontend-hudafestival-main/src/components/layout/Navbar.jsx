@@ -23,7 +23,7 @@ const Navbar = () => {
                 {/* Logo Area */}
                 <div className="flex items-center gap-3">
                     <Link to="/" className="flex items-center gap-2 group">
-                        <img src="/logo-mark.png" alt="L'intervention Logo" className="w-8 h-8 object-contain group-hover:rotate-12 transition-transform" />
+                        <img src="https://i.ibb.co/HTNc8VJN/lintervention-logo-badge-1.png" alt="L'intervention Logo" className="w-12 h-12 md:w-16 md:h-16 object-contain group-hover:rotate-12 transition-transform" />
                         <span className="font-black font-display text-xl uppercase tracking-tighter">L'intervention</span>
                     </Link>
                 </div>

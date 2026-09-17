@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, Users, UserPlus, Calendar, Trophy, Clock, LogOut, Sliders, Activity, ChevronLeft, ChevronRight, Settings, Sun, Moon, Image as ImageIcon, Bell, ClipboardList, FileText, CalendarClock, Radio, FileSpreadsheet, BookOpen, Table2, Search } from 'lucide-react';
 import Logo from './Logo';
+import { Link, useLocation } from 'react-router-dom';
+import api from '../services/api';
 
 const navItems = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { key: 'candidates', label: 'Candidates', icon: Users },
   { key: 'programmes', label: 'Programmes', icon: Calendar },
-    { key: 'search', label: 'Search', icon: Search },
+  { key: 'search', label: 'Search', icon: Search },
   { key: 'registration_review', label: 'Registrations', icon: Clock },
   { key: 'team_registration_list', label: 'Registration List', icon: Table2 },
   { key: 'results', label: 'Results', icon: Trophy },
@@ -21,11 +23,8 @@ const navItems = [
   { key: 'jury_slips', label: 'Participant List', icon: FileText },
   { key: 'conflict_checker', label: 'Conflict Checker', icon: FileText },
   { key: 'users', label: 'Users & Teams', icon: UserPlus },
-    { key: 'settings', label: 'Settings', icon: Settings },
+  { key: 'settings', label: 'Settings', icon: Settings },
 ];
-
-import { Link, useLocation } from 'react-router-dom';
-import api from '../services/api';
 
 const Sidebar = ({ onLogout, userInfo }) => {
   const location = useLocation();
@@ -84,6 +83,7 @@ const Sidebar = ({ onLogout, userInfo }) => {
             dashboard: '/dashboard',
             candidates: '/candidates',
             programmes: '/programmes',
+            search: '/search',
             registration_review: '/registrations',
             team_registration_list: '/registration-list',
             results: '/results',
@@ -126,17 +126,28 @@ const Sidebar = ({ onLogout, userInfo }) => {
 
       {/* User Profile & Controls */}
       <div className="p-3 border-t border-[var(--color-border)] space-y-2">
-        <Link to="/settings" className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors hover:bg-[var(--color-surface-elevated)] cursor-pointer`} title="Settings">
-          <div className="w-9 h-9 rounded-full text-white flex items-center justify-center font-bold shrink-0" style={{ backgroundColor: teamColor }}>
-            {userInfo?.userName?.charAt(0)?.toUpperCase() || 'U'}
+        {/* Profile link — only admin/judge go to /settings; team leaders are NOT allowed */}
+        {isTeamLeader ? (
+          <div className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm cursor-default">
+            <div className="w-9 h-9 rounded-full text-white flex items-center justify-center font-bold shrink-0" style={{ backgroundColor: teamColor }}>
+              {userInfo?.userName?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
+            <div className="flex-1 overflow-hidden text-left">
+              <div className="font-semibold text-[var(--color-text-heading)] truncate leading-tight">{userInfo?.userName || 'User'}</div>
+              <div className="text-[10px] text-[var(--color-text-muted)] capitalize truncate mt-0.5">{userInfo?.role?.replace('_', ' ') || 'Team Leader'}</div>
+            </div>
           </div>
-          <div className="flex-1 overflow-hidden text-left">
+        ) : (
+          <Link to="/settings" className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors hover:bg-[var(--color-surface-elevated)] cursor-pointer" title="Settings">
+            <div className="w-9 h-9 rounded-full text-white flex items-center justify-center font-bold shrink-0" style={{ backgroundColor: teamColor }}>
+              {userInfo?.userName?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
+            <div className="flex-1 overflow-hidden text-left">
               <div className="font-semibold text-[var(--color-text-heading)] truncate leading-tight">{userInfo?.userName || 'User'}</div>
               <div className="text-[10px] text-[var(--color-text-muted)] capitalize truncate mt-0.5">{userInfo?.role?.replace('_', ' ') || 'Admin'}</div>
             </div>
-        </Link>
-        
-        
+          </Link>
+        )}
       </div>
     </aside>
   );
